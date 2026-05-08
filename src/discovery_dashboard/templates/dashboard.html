@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Telegram Discovery Dashboard</title>
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #111111;
+      --muted: #5b6470;
+      --line: #e2e5ea;
+      --accent: #0f766e;
+      --accent-soft: #d8f3ee;
+      --error-soft: #fff4f4;
+      --error-ink: #8b1d1d;
+    }
+
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: radial-gradient(circle at top right, #edf9f7 0%, var(--bg) 45%);
+    }
+
+    .page {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .title {
+      margin: 0 0 8px;
+      font-size: 26px;
+      letter-spacing: 0.01em;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 16px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      margin: 0 0 4px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    input,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 9px 12px;
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 120ms ease, filter 120ms ease;
+    }
+
+    button:hover {
+      filter: brightness(0.96);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button.secondary {
+      background: #334155;
+    }
+
+    button.light {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 3fr 1fr 1fr;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .probe-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .empty {
+      padding: 10px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tip {
+      margin-top: 8px;
+      background: var(--accent-soft);
+      border: 1px solid #b5e9df;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #14564f;
+    }
+
+    .code {
+      font-family: "IBM Plex Mono", "Menlo", monospace;
+      font-size: 12px;
+      background: #f3f4f6;
+      border-radius: 6px;
+      padding: 2px 6px;
+      word-break: break-word;
+    }
+
+    .steps {
+      margin: 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 6px;
+      color: #253243;
+      font-size: 13px;
+    }
+
+    .loading {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .htmx-indicator {
+      display: none;
+    }
+
+    .htmx-request .htmx-indicator,
+    .htmx-request.htmx-indicator {
+      display: inline-block;
+    }
+
+    .error {
+      border: 1px solid #f2c7c7;
+      background: var(--error-soft);
+      color: var(--error-ink);
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .split-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 1080px) {
+      .top-grid,
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .row,
+      .probe-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="panel">
+      <h1 class="title">Telegram Channel Discovery</h1>
+      <p class="subtitle">Search public channels, preview recent posts, expand similar channels, and seed your watchlist with trust + notes. This page is optimized for fast manual triage.</p>
+    </section>
+
+    <section class="top-grid">
+      <section class="panel">
+        <div class="split-head">
+          <h2>Search</h2>
+        </div>
+
+        <form
+          hx-post="ui/search"
+          hx-target="#search-results"
+          hx-swap="innerHTML"
+          hx-indicator="#search-loading"
+          hx-disabled-elt="#search-submit"
+        >
+          <div class="row">
+            <div>
+              <label for="query">Search Query</label>
+              <input id="query" name="query" required placeholder="Example: لبنان, צה״ל, Israel Lebanon strike">
+            </div>
+            <div>
+              <label for="limit">Result Limit</label>
+              <input id="limit" name="limit" type="number" min="1" max="50" value="{{ default_search_limit }}">
+            </div>
+            <div>
+              <button id="search-submit" type="submit">Search Channels</button>
+            </div>
+          </div>
+          <div id="search-loading" class="loading htmx-indicator">Searching public Telegram channels...</div>
+        </form>
+
+        <div class="tip">
+          Tip: Start broad, then use <strong>Expand Similar</strong> on the best channel to grow a focused graph.
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="split-head">
+          <h2>System Status</h2>
+          <button class="light" hx-get="ui/health" hx-target="#health-panel" hx-swap="innerHTML">Refresh</button>
+        </div>
+        <div
+          id="health-panel"
+          class="empty"
+          hx-get="ui/health"
+          hx-trigger="load"
+          hx-swap="innerHTML"
+        >Loading system status...</div>
+      </section>
+    </section>
+
+    <section class="panel">
+      <div class="split-head">
+        <h2>Read-Only Probe</h2>
+      </div>
+
+      <form
+        hx-get="ui/probe"
+        hx-target="#probe-panel"
+        hx-swap="innerHTML"
+        hx-indicator="#probe-loading"
+      >
+        <div class="probe-row">
+          <div>
+            <label for="probe-query">Probe Query</label>
+            <input id="probe-query" name="query" required placeholder="Example: israel lebanon">
+          </div>
+          <div>
+            <label for="probe-limit">Search Limit</label>
+            <input id="probe-limit" name="limit" type="number" min="1" max="50" value="5">
+          </div>
+          <div>
+            <label for="probe-messages-limit">Messages</label>
+            <input id="probe-messages-limit" name="messages_limit" type="number" min="1" max="30" value="5">
+          </div>
+          <div>
+            <label for="probe-similar-limit">Similar</label>
+            <input id="probe-similar-limit" name="similar_limit" type="number" min="1" max="20" value="10">
+          </div>
+          <div>
+            <button type="submit">Run Probe</button>
+          </div>
+        </div>
+      </form>
+      <div id="probe-loading" class="loading htmx-indicator">Running read-only probe...</div>
+      <div class="tip">
+        Probe only executes read operations: search, history preview, and similar channels.
+      </div>
+      <div id="probe-panel" class="empty">Run a probe to inspect read-only discovery output visually.</div>
+    </section>
+
+    <section class="main-grid">
+      <div class="stack">
+        <section class="panel">
+          <h2>Search Results</h2>
+          <div id="search-results" class="empty">Run a search to load candidate channels.</div>
+        </section>
+
+        <section class="panel">
+          <h2>Recent Messages</h2>
+          <div id="preview-panel" class="empty">Select a channel and load recent posts.</div>
+        </section>
+
+        <section class="panel">
+          <h2>Similar Channel Expansion</h2>
+          <div class="muted">Depth: {{ default_depth }} | Per-node: {{ default_per_node }} | Max nodes: {{ default_max_nodes }}</div>
+          <div id="similar-panel" class="empty">Expand similar channels from a selected channel.</div>
+        </section>
+      </div>
+
+      <div class="stack">
+        <section class="panel">
+          <h2>Watchlist Editor</h2>
+          <div id="watchlist-editor" class="empty">Choose a channel from results to seed trust/tags/notes.</div>
+        </section>
+
+        <section class="panel">
+          <h2>Watchlist</h2>
+          <div
+            id="watchlist-panel"
+            class="empty"
+            hx-get="ui/watchlist"
+            hx-trigger="load"
+            hx-swap="innerHTML"
+          >Loading watchlist...</div>
+        </section>
+      </div>
+    </section>
+  </main>
+  <script>
+    function selectChannel(chatId) {
+      if (!window.htmx || !chatId) {
+        return;
+      }
+
+      const preview = document.getElementById("preview-panel");
+      const similar = document.getElementById("similar-panel");
+      const watchlist = document.getElementById("watchlist-editor");
+      if (preview) {
+        preview.innerHTML = '<div class="empty">Loading recent posts...</div>';
+      }
+      if (similar) {
+        similar.innerHTML = '<div class="empty">Loading similar channels...</div>';
+      }
+      if (watchlist) {
+        watchlist.innerHTML = '<div class="empty">Loading watchlist editor...</div>';
+      }
+
+      window.htmx.ajax("GET", "ui/channels/" + chatId + "/messages", "#preview-panel");
+      window.htmx.ajax("POST", "ui/channels/" + chatId + "/expand-similar", "#similar-panel");
+      window.htmx.ajax("GET", "ui/channels/" + chatId + "/watchlist-form", "#watchlist-editor");
+    }
+  </script>
+</body>
+</html>

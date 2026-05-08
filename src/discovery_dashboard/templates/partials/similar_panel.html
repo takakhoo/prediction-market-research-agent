@@ -1,0 +1,17 @@
+<div style="margin-bottom:8px;">
+  <strong>Expansion run {{ similar.run_id }}</strong>
+  <div class="muted">root: {{ similar.root_chat_id }} | depth: {{ similar.depth }} | nodes: {{ similar.node_count }} | edges: {{ similar.edges|length }}</div>
+</div>
+
+{% if not similar.channels %}
+<div class="empty">No similar channels found.</div>
+{% else %}
+<div style="display:grid;gap:8px;max-height:280px;overflow:auto;">
+  {% for channel in similar.channels %}
+  <article style="border:1px solid #e2e5ea;border-radius:8px;padding:8px;">
+    <div style="font-weight:600;">{{ channel.title }}</div>
+    <div class="muted">ID: {{ channel.chat_id }}{% if channel.username %} | @{{ channel.username }}{% endif %}{% if channel.member_count %} | members: {{ channel.member_count }}{% endif %}</div>
+  </article>
+  {% endfor %}
+</div>
+{% endif %}

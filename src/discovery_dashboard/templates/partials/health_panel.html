@@ -1,0 +1,27 @@
+<div style="display:grid;gap:10px;">
+  <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap;">
+    <div>
+      <div style="font-weight:700;">Backend: {{ health.status }}</div>
+      <div class="muted">DB: <span class="code">{{ health.db_path }}</span></div>
+    </div>
+    <div>
+      <div class="muted">TDLib started: <strong>{{ "yes" if health.tdlib_started else "no" }}</strong></div>
+      <div class="muted">Session marker: <strong>{{ "yes" if health.session_marker_exists else "no" }}</strong></div>
+      <div class="muted">Auth state: <strong>{{ health.auth_state }}</strong></div>
+      <div class="muted">Read-only mode: <strong>{{ "on" if health.read_only_mode else "off" }}</strong></div>
+    </div>
+  </div>
+
+  {% if health.auth_state != "ready" %}
+  <div class="error">
+    <div style="font-weight:700;margin-bottom:6px;">Session not ready</div>
+    <ol class="steps" style="margin:0;padding-left:18px;">
+      <li>Run <span class="code">bash scripts/telegram_preflight.sh tdlib_discovery_only</span></li>
+      <li>Run <span class="code">python3 scripts/telegram_session_bootstrap.py --env-file configs/sources/telegram_runtime.template.env</span></li>
+      <li>Refresh this status panel</li>
+    </ol>
+  </div>
+  {% else %}
+  <div class="tip" style="margin-top:0;">TDLib session is ready. You can search channels now.</div>
+  {% endif %}
+</div>

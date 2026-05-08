@@ -1,0 +1,12 @@
+Review this channel for market relevance.
+
+Requirements:
+- Keep or drop this channel for this market.
+- Return a strict yes/no relevance decision.
+- Use recent messages as primary evidence, metadata as supporting context.
+- Mention if the channel appears off-topic, generic, spammy, or not aligned with market rules.
+- or is it actually giving news, beware that sometimes alert are also a good sign. 
+- also the name should also be relevant, if its a journalist then its also great. 
+
+INPUT_JSON:
+{{INPUT_JSON}}

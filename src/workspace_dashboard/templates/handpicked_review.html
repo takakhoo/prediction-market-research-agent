@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Handpicked Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #071117;
+      --panel: rgba(10, 19, 28, 0.9);
+      --panel-2: rgba(14, 25, 36, 0.94);
+      --line: rgba(148, 163, 184, 0.16);
+      --line-strong: rgba(148, 163, 184, 0.32);
+      --ink: #ebf2f8;
+      --muted: #91a4b7;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.16);
+      --good: #34d399;
+      --warn: #f59e0b;
+      --bad: #fb7185;
+      --review: #f97316;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --shadow: 0 24px 64px rgba(0, 0, 0, 0.34);
+      --font: "IBM Plex Sans", "Segoe UI", sans-serif;
+      --display: "Space Grotesk", "IBM Plex Sans", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(900px 480px at 105% 5%, rgba(56, 189, 248, 0.14), transparent 52%),
+        radial-gradient(820px 460px at -10% 100%, rgba(249, 115, 22, 0.12), transparent 44%),
+        var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button,
+    .button-link {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--ink);
+      padding: 9px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+    }
+
+    button:hover,
+    .button-link:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    button.primary {
+      border-color: rgba(56, 189, 248, 0.46);
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.22), rgba(14, 165, 233, 0.08));
+    }
+
+    button.warn {
+      border-color: rgba(249, 115, 22, 0.4);
+      background: rgba(249, 115, 22, 0.12);
+    }
+
+    button.ghost {
+      background: transparent;
+    }
+
+    .shell {
+      max-width: 1880px;
+      margin: 0 auto;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .header {
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .kicker {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+
+    .title {
+      margin: 0;
+      font-family: var(--display);
+      font-size: 1.78rem;
+      line-height: 1.02;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      max-width: 920px;
+      color: var(--muted);
+      line-height: 1.56;
+      font-size: 0.92rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .meta {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .summary-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .summary-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-2);
+      padding: 12px;
+      min-height: 108px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .summary-card .label {
+      color: var(--muted);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .summary-card .value {
+      font-family: var(--display);
+      font-size: 1.68rem;
+      line-height: 1;
+    }
+
+    .summary-card .hint {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .summary-card.review .value { color: var(--review); }
+    .summary-card.good .value { color: var(--good); }
+    .summary-card.bad .value { color: var(--bad); }
+
+    .toolbar {
+      padding: 14px 18px 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .filter-row {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1.2fr 0.8fr auto;
+      align-items: center;
+    }
+
+    input[type="search"],
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.22);
+      color: var(--ink);
+      padding: 10px 12px;
+    }
+
+    input[type="search"]:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: rgba(56, 189, 248, 0.55);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.12);
+    }
+
+    textarea {
+      min-height: 108px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .pill-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      padding: 7px 11px;
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+    }
+
+    .pill.active {
+      color: var(--ink);
+      border-color: rgba(56, 189, 248, 0.46);
+      background: rgba(56, 189, 248, 0.12);
+    }
+
+    .workspace {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 360px minmax(0, 1fr) 360px;
+      align-items: start;
+      min-height: 780px;
+    }
+
+    .column {
+      min-width: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .stack-panel {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+
+    .section-head h2,
+    .section-head h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-family: var(--display);
+    }
+
+    .section-head p,
+    .section-head .note {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .queue {
+      display: grid;
+      gap: 8px;
+      max-height: 980px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .target-card,
+    .candidate-card,
+    .option-card,
+    .info-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-2);
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .target-card {
+      cursor: pointer;
+      transition: border-color 140ms ease, transform 140ms ease, background 140ms ease;
+    }
+
+    .target-card:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+    }
+
+    .target-card.active {
+      border-color: rgba(56, 189, 248, 0.48);
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.12), rgba(10, 19, 28, 0.92));
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: 1px solid var(--line);
+    }
+
+    .badge.matched {
+      color: var(--good);
+      border-color: rgba(52, 211, 153, 0.26);
+      background: rgba(52, 211, 153, 0.1);
+    }
+
+    .badge.low_confidence {
+      color: var(--warn);
+      border-color: rgba(245, 158, 11, 0.26);
+      background: rgba(245, 158, 11, 0.1);
+    }
+
+    .badge.unmatched {
+      color: var(--bad);
+      border-color: rgba(251, 113, 133, 0.28);
+      background: rgba(251, 113, 133, 0.1);
+    }
+
+    .badge.group {
+      color: var(--accent);
+      border-color: rgba(56, 189, 248, 0.28);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .badge.raw_market {
+      color: #c084fc;
+      border-color: rgba(192, 132, 252, 0.28);
+      background: rgba(192, 132, 252, 0.1);
+    }
+
+    .target-card h4,
+    .candidate-card h4,
+    .option-card h4,
+    .info-card h4 {
+      margin: 0;
+      font-size: 0.97rem;
+      line-height: 1.35;
+    }
+
+    .mini {
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.45;
+    }
+
+    .score {
+      font-family: var(--display);
+      font-size: 1rem;
+      color: var(--accent);
+    }
+
+    .detail-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .candidate-grid,
+    .option-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .candidate-card .matched-text,
+    .option-card .matched-text,
+    .info-card .matched-text {
+      border-left: 2px solid rgba(56, 189, 248, 0.35);
+      padding-left: 10px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .sample-list {
+      margin: 0;
+      padding-left: 16px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.5;
+      display: grid;
+      gap: 4px;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--line);
+      width: 100%;
+    }
+
+    .empty {
+      border: 1px dashed var(--line-strong);
+      border-radius: 14px;
+      padding: 18px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.55;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .link-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .link-row a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.82rem;
+    }
+
+    .link-row a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 1340px) {
+      .summary-grid,
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-row {
+        grid-template-columns: 1fr;
+      }
+
+      .queue {
+        max-height: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel header">
+      <div class="title-row">
+        <div>
+          <p class="kicker">Curated Market Review</p>
+          <h1 class="title">Handpicked Market Review</h1>
+          <p class="subtitle">
+            Review the rows imported from your handpicked market file, see exactly why a row was marked low confidence,
+            inspect the candidates the importer found, and manually fix the resolution without leaving the dashboard.
+          </p>
+        </div>
+        <div class="actions">
+          <button id="btnRefresh" type="button" class="primary">Refresh</button>
+          <a class="button-link" href="/api/intel/handpicked-review" target="_blank" rel="noopener">Open JSON</a>
+        </div>
+      </div>
+      <div class="meta-row" id="metaRow"></div>
+      <div class="summary-grid" id="summaryGrid"></div>
+    </section>
+
+    <section class="panel toolbar">
+      <div class="pill-row" id="statusPills"></div>
+      <div class="filter-row">
+        <input id="filterSearch" type="search" placeholder="Filter requested names, current match, or candidate text">
+        <select id="filterSource"></select>
+        <div class="action-row">
+          <button id="btnApplyFilters" type="button">Apply Filters</button>
+          <button id="btnResetFilters" type="button" class="ghost">Reset</button>
+        </div>
+      </div>
+      <div class="status" id="statusLine">Loading review queue…</div>
+    </section>
+
+    <main class="workspace">
+      <section class="column">
+        <div class="panel stack-panel">
+          <div class="section-head">
+            <div>
+              <h2>Review Queue</h2>
+              <p>Low confidence and unmatched rows are sorted to the top.</p>
+            </div>
+            <div class="note" id="queueCount">0 rows</div>
+          </div>
+          <div class="queue" id="queue"></div>
+        </div>
+      </section>
+
+      <section class="column">
+        <div class="panel stack-panel">
+          <div class="section-head">
+            <div>
+              <h2>Resolution Detail</h2>
+              <p>Why this item was flagged, what matched, and what the importer found.</p>
+            </div>
+          </div>
+          <div class="detail-grid" id="detailPane"></div>
+        </div>
+      </section>
+
+      <section class="column">
+        <div class="panel stack-panel">
+          <div class="section-head">
+            <div>
+              <h2>Manual Fix</h2>
+              <p>Search grouped markets or raw stored markets and apply a manual resolution.</p>
+            </div>
+          </div>
+          <input id="resolverSearch" type="search" placeholder="Search grouped or raw stored markets">
+          <div class="action-row">
+            <button id="btnSearchOptions" type="button" class="primary">Search Markets</button>
+            <button id="btnSaveNote" type="button">Save Note</button>
+            <button id="btnKeepLowConfidence" type="button">Keep Low Confidence</button>
+            <button id="btnMarkUnmatched" type="button" class="warn">Mark Unmatched</button>
+          </div>
+          <textarea id="resolverNote" placeholder="Optional manual note for this target"></textarea>
+          <div class="divider"></div>
+          <div class="section-head">
+            <div>
+              <h3>Search Results</h3>
+              <p>Use these to override the current resolution.</p>
+            </div>
+            <div class="note" id="searchStatus">No search yet.</div>
+          </div>
+          <div class="option-grid" id="optionGrid"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const FILTER_DEFS = [
+      { id: "review", label: "Needs Review" },
+      { id: "low_confidence", label: "Low Confidence" },
+      { id: "unmatched", label: "Unmatched" },
+      { id: "matched", label: "Matched" },
+      { id: "all", label: "All" },
+    ];
+
+    const state = {
+      filters: {
+        status: "review",
+        search: "",
+        sourceFile: "",
+      },
+      payload: null,
+      selectedTargetId: null,
+      optionSearch: "",
+      options: [],
+      lastLoadedAt: null,
+    };
+
+    const el = {
+      metaRow: document.getElementById("metaRow"),
+      summaryGrid: document.getElementById("summaryGrid"),
+      statusPills: document.getElementById("statusPills"),
+      filterSearch: document.getElementById("filterSearch"),
+      filterSource: document.getElementById("filterSource"),
+      btnApplyFilters: document.getElementById("btnApplyFilters"),
+      btnResetFilters: document.getElementById("btnResetFilters"),
+      btnRefresh: document.getElementById("btnRefresh"),
+      statusLine: document.getElementById("statusLine"),
+      queueCount: document.getElementById("queueCount"),
+      queue: document.getElementById("queue"),
+      detailPane: document.getElementById("detailPane"),
+      resolverSearch: document.getElementById("resolverSearch"),
+      resolverNote: document.getElementById("resolverNote"),
+      btnSearchOptions: document.getElementById("btnSearchOptions"),
+      btnSaveNote: document.getElementById("btnSaveNote"),
+      btnKeepLowConfidence: document.getElementById("btnKeepLowConfidence"),
+      btnMarkUnmatched: document.getElementById("btnMarkUnmatched"),
+      searchStatus: document.getElementById("searchStatus"),
+      optionGrid: document.getElementById("optionGrid"),
+    };
+
+    function formatDate(value) {
+      if (!value) return "n/a";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value);
+      return date.toLocaleString();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function statusBadge(status) {
+      return `<span class="badge ${status}">${escapeHtml(String(status || "unknown").replaceAll("_", " "))}</span>`;
+    }
+
+    function kindBadge(kind) {
+      return `<span class="badge ${kind}">${escapeHtml(String(kind || "group").replaceAll("_", " "))}</span>`;
+    }
+
+    function selectedTarget() {
+      const targets = state.payload?.targets || [];
+      return targets.find((item) => item.target_id === state.selectedTargetId) || targets[0] || null;
+    }
+
+    function setStatusLine(message) {
+      el.statusLine.textContent = message;
+    }
+
+    function renderStatusPills() {
+      el.statusPills.innerHTML = FILTER_DEFS.map((item) => (
+        `<button type="button" class="pill ${item.id === state.filters.status ? "active" : ""}" data-status="${item.id}">${item.label}</button>`
+      )).join("");
+      el.statusPills.querySelectorAll("[data-status]").forEach((node) => {
+        node.addEventListener("click", () => {
+          state.filters.status = node.getAttribute("data-status") || "review";
+          renderStatusPills();
+          loadSnapshot();
+        });
+      });
+    }
+
+    function renderMeta(payload) {
+      el.metaRow.innerHTML = [
+        `<span class="meta">Source Files: ${payload.counts.source_files_total}</span>`,
+        `<span class="meta">Latest Review: ${formatDate(payload.counts.latest_review_at)}</span>`,
+        `<span class="meta">Storage: ${escapeHtml(payload.storage.targets_table)}</span>`,
+      ].join("");
+    }
+
+    function renderSummary(payload) {
+      const counts = payload.counts || {};
+      el.summaryGrid.innerHTML = [
+        { label: "Needs Review", value: counts.review_total, hint: "Low confidence plus unmatched items still in the queue.", cls: "review" },
+        { label: "Low Confidence", value: counts.low_confidence_total, hint: "Rows where the top match was plausible but ambiguous.", cls: "review" },
+        { label: "Unmatched", value: counts.unmatched_total, hint: "Rows where the importer did not find a viable grouped-market resolution.", cls: "bad" },
+        { label: "Matched", value: counts.matched_total, hint: "Rows already resolved to a grouped or raw stored market.", cls: "good" },
+        { label: "Visible", value: counts.visible_targets, hint: "Rows currently shown after filters.", cls: "" },
+      ].map((card) => (
+        `<div class="summary-card ${card.cls}">` +
+          `<div class="label">${card.label}</div>` +
+          `<div class="value">${card.value ?? 0}</div>` +
+          `<div class="hint">${card.hint}</div>` +
+        `</div>`
+      )).join("");
+    }
+
+    function renderSourceFilter(payload) {
+      const current = state.filters.sourceFile;
+      const options = [`<option value="">All source files</option>`].concat(
+        (payload.source_files || []).map((item) => (
+          `<option value="${escapeHtml(item.source_file)}" ${item.source_file === current ? "selected" : ""}>` +
+            `${escapeHtml(item.source_file)} (${item.total_rows})` +
+          `</option>`
+        ))
+      );
+      el.filterSource.innerHTML = options.join("");
+    }
+
+    function renderQueue(payload) {
+      const targets = payload.targets || [];
+      el.queueCount.textContent = `${targets.length} rows`;
+      if (!targets.length) {
+        el.queue.innerHTML = `<div class="empty">No rows match the current filters.</div>`;
+        return;
+      }
+      el.queue.innerHTML = targets.map((item) => {
+        const label = item.matched_group_title || item.matched_group_slug || "No current resolution";
+        return (
+          `<article class="target-card ${item.target_id === state.selectedTargetId ? "active" : ""}" data-target-id="${item.target_id}">` +
+            `<div class="row">` +
+              `${statusBadge(item.match_status)}` +
+              `<span class="mini">line ${item.source_line_number}</span>` +
+            `</div>` +
+            `<h4>${escapeHtml(item.requested_name)}</h4>` +
+            `<div class="mini">${escapeHtml(item.requested_bucket || "No bucket")} · ${escapeHtml(label)}</div>` +
+            `<div class="row">` +
+              `<span class="mono">${escapeHtml(item.match_method || "unresolved")}</span>` +
+              `<span class="score">${item.match_score != null ? Number(item.match_score).toFixed(3) : "n/a"}</span>` +
+            `</div>` +
+          `</article>`
+        );
+      }).join("");
+      el.queue.querySelectorAll("[data-target-id]").forEach((node) => {
+        node.addEventListener("click", () => {
+          state.selectedTargetId = Number(node.getAttribute("data-target-id"));
+          syncSelectedTarget();
+          const target = targets.find((entry) => entry.target_id === state.selectedTargetId);
+          el.resolverSearch.value = target?.requested_name || "";
+          renderQueue(payload);
+          renderDetail();
+          searchOptions().catch(handleError);
+        });
+      });
+    }
+
+    function renderResolvedGroupCard(item) {
+      const resolved = item.resolved_group;
+      if (!resolved) {
+        return `<div class="empty">This row does not currently point at a resolved market or grouped market.</div>`;
+      }
+      const samples = (resolved.sample_questions || []).slice(0, 4);
+      return (
+        `<div class="info-card">` +
+          `<div class="row">` +
+            `${kindBadge(resolved.resolution_kind)}` +
+            `${statusBadge(item.match_status)}` +
+          `</div>` +
+          `<h4>${escapeHtml(resolved.group_title || "Resolved Market")}</h4>` +
+          `<div class="mini">${escapeHtml(resolved.scope_label || "Unknown scope")} · ${resolved.market_count || 1} market rows</div>` +
+          `<div class="matched-text">${escapeHtml(resolved.representative_question || "No representative question saved.")}</div>` +
+          `${samples.length ? `<ul class="sample-list">${samples.map((text) => `<li>${escapeHtml(text)}</li>`).join("")}</ul>` : ""}` +
+          `<div class="action-row">` +
+            `${resolved.public_url ? `<a class="button-link" href="${escapeHtml(resolved.public_url)}" target="_blank" rel="noopener">Open Polymarket</a>` : ""}` +
+            `<button type="button" class="primary" data-action="accept-current">Accept Current Resolution</button>` +
+          `</div>` +
+        `</div>`
+      );
+    }
+
+    function renderCandidateCards(item) {
+      const candidates = item.candidate_payload || [];
+      if (!candidates.length) {
+        return `<div class="empty">The importer did not save any candidate group matches for this row.</div>`;
+      }
+      return `<div class="candidate-grid">${
+        candidates.map((candidate, index) => {
+          const samples = (candidate.sample_questions || []).slice(0, 3);
+          return (
+            `<article class="candidate-card">` +
+              `<div class="row">` +
+                `${kindBadge("group")}` +
+                `<span class="score">${Number(candidate.score || 0).toFixed(3)}</span>` +
+              `</div>` +
+              `<h4>${escapeHtml(candidate.group_title || candidate.group_slug || `Candidate ${index + 1}`)}</h4>` +
+              `<div class="mini">${escapeHtml(candidate.scope_label || "Unknown scope")} · ${candidate.market_count || 0} market rows</div>` +
+              `<div class="matched-text">Matched via ${escapeHtml(candidate.matched_field || "unknown")}:\n${escapeHtml(candidate.matched_text || "")}</div>` +
+              `${candidate.representative_question ? `<div class="mini">Representative: ${escapeHtml(candidate.representative_question)}</div>` : ""}` +
+              `${samples.length ? `<ul class="sample-list">${samples.map((text) => `<li>${escapeHtml(text)}</li>`).join("")}</ul>` : ""}` +
+              `<div class="action-row">` +
+                `<button type="button" class="primary" data-action="accept-candidate" data-group-slug="${escapeHtml(candidate.group_slug)}">Use This Match</button>` +
+                `${candidate.public_url ? `<a class="button-link" href="${escapeHtml(candidate.public_url)}" target="_blank" rel="noopener">Open Polymarket</a>` : ""}` +
+              `</div>` +
+            `</article>`
+          );
+        }).join("")
+      }</div>`;
+    }
+
+    function renderDetail() {
+      const item = selectedTarget();
+      if (!item) {
+        el.detailPane.innerHTML = `<div class="empty">No row selected.</div>`;
+        el.resolverNote.value = "";
+        return;
+      }
+      el.resolverNote.value = item.notes || "";
+      const explanation = item.notes || "No explanation saved for this row yet.";
+      el.detailPane.innerHTML = [
+        `<div class="info-card">` +
+          `<div class="row">` +
+            `${statusBadge(item.match_status)}` +
+            `<span class="mini">line ${item.source_line_number}</span>` +
+          `</div>` +
+          `<h4>${escapeHtml(item.requested_name)}</h4>` +
+          `<div class="mini">${escapeHtml(item.requested_bucket || "No bucket")} · ${escapeHtml(item.source_file || "")}</div>` +
+          `<div class="matched-text">${escapeHtml(explanation)}</div>` +
+          `<div class="row">` +
+            `<span class="mini">Importer method: ${escapeHtml(item.match_method || "none")}</span>` +
+            `<span class="score">${item.match_score != null ? Number(item.match_score).toFixed(3) : "n/a"}</span>` +
+          `</div>` +
+        `</div>`,
+        renderResolvedGroupCard(item),
+        `<div class="info-card">` +
+          `<div class="section-head">` +
+            `<div>` +
+              `<h3>Importer Candidates</h3>` +
+              `<p>These are the grouped-market candidates the importer considered for this exact row.</p>` +
+            `</div>` +
+          `</div>` +
+          renderCandidateCards(item) +
+        `</div>`,
+      ].join("");
+
+      el.detailPane.querySelectorAll("[data-action='accept-candidate']").forEach((node) => {
+        node.addEventListener("click", () => {
+          applyResolution({ matched_group_slug: node.getAttribute("data-group-slug"), match_status: "matched" });
+        });
+      });
+      const acceptCurrent = el.detailPane.querySelector("[data-action='accept-current']");
+      if (acceptCurrent) {
+        acceptCurrent.addEventListener("click", () => {
+          const resolved = item.resolved_group;
+          if (!resolved) return;
+          if (resolved.group_slug) {
+            applyResolution({ matched_group_slug: resolved.group_slug, match_status: "matched" });
+          } else if (resolved.representative_market_id) {
+            applyResolution({ matched_market_id: resolved.representative_market_id, match_status: "matched" });
+          }
+        });
+      }
+    }
+
+    function renderOptions() {
+      if (!state.options.length) {
+        el.optionGrid.innerHTML = `<div class="empty">No manual search results yet.</div>`;
+        return;
+      }
+      el.optionGrid.innerHTML = state.options.map((option) => {
+        const samples = (option.sample_questions || []).slice(0, 3);
+        return (
+          `<article class="option-card">` +
+            `<div class="row">` +
+              `${kindBadge(option.kind)}` +
+              `<span class="mini">${escapeHtml(option.scope_label || "Unknown scope")}</span>` +
+            `</div>` +
+            `<h4>${escapeHtml(option.title || "Market option")}</h4>` +
+            `${option.question ? `<div class="matched-text">${escapeHtml(option.question)}</div>` : ""}` +
+            `${samples.length ? `<ul class="sample-list">${samples.map((text) => `<li>${escapeHtml(text)}</li>`).join("")}</ul>` : ""}` +
+            `<div class="action-row">` +
+              `<button type="button" class="primary" data-action="use-option" data-kind="${escapeHtml(option.kind)}" data-group-slug="${escapeHtml(option.group_slug || "")}" data-market-id="${escapeHtml(option.market_id || "")}">Use This</button>` +
+              `${option.public_url ? `<a class="button-link" href="${escapeHtml(option.public_url)}" target="_blank" rel="noopener">Open Polymarket</a>` : ""}` +
+            `</div>` +
+          `</article>`
+        );
+      }).join("");
+      el.optionGrid.querySelectorAll("[data-action='use-option']").forEach((node) => {
+        node.addEventListener("click", () => {
+          const groupSlug = node.getAttribute("data-group-slug") || "";
+          const marketId = node.getAttribute("data-market-id") || "";
+          if (groupSlug) {
+            applyResolution({ matched_group_slug: groupSlug, match_status: "matched" });
+          } else if (marketId) {
+            applyResolution({ matched_market_id: marketId, match_status: "matched" });
+          }
+        });
+      });
+    }
+
+    function syncSelectedTarget() {
+      const item = selectedTarget();
+      if (!item) return;
+      if (!state.selectedTargetId) {
+        state.selectedTargetId = item.target_id;
+      }
+      if (!el.resolverSearch.value.trim()) {
+        el.resolverSearch.value = item.requested_name || "";
+      }
+    }
+
+    async function loadSnapshot() {
+      setStatusLine("Loading review queue…");
+      const params = new URLSearchParams();
+      params.set("status", state.filters.status);
+      params.set("limit", "180");
+      if (state.filters.search) params.set("search", state.filters.search);
+      if (state.filters.sourceFile) params.set("source_file", state.filters.sourceFile);
+      const response = await fetch(`/api/intel/handpicked-review?${params.toString()}`);
+      if (!response.ok) {
+        const detail = await response.text();
+        throw new Error(detail || `HTTP ${response.status}`);
+      }
+      const payload = await response.json();
+      state.payload = payload;
+      state.lastLoadedAt = new Date();
+      if (!(payload.targets || []).some((item) => item.target_id === state.selectedTargetId)) {
+        state.selectedTargetId = payload.targets?.[0]?.target_id || null;
+      }
+      renderMeta(payload);
+      renderSummary(payload);
+      renderSourceFilter(payload);
+      renderQueue(payload);
+      syncSelectedTarget();
+      renderDetail();
+      setStatusLine(`Loaded ${payload.counts.visible_targets} visible rows at ${state.lastLoadedAt.toLocaleTimeString()}.`);
+    }
+
+    async function searchOptions() {
+      const query = el.resolverSearch.value.trim();
+      state.optionSearch = query;
+      if (!query) {
+        state.options = [];
+        el.searchStatus.textContent = "Enter a query to search grouped or raw stored markets.";
+        renderOptions();
+        return;
+      }
+      el.searchStatus.textContent = `Searching for "${query}"…`;
+      const response = await fetch(`/api/intel/handpicked-review/options?${new URLSearchParams({ search: query, limit: "24" }).toString()}`);
+      if (!response.ok) {
+        const detail = await response.text();
+        throw new Error(detail || `HTTP ${response.status}`);
+      }
+      const payload = await response.json();
+      state.options = payload.options || [];
+      el.searchStatus.textContent = `${state.options.length} option${state.options.length === 1 ? "" : "s"} for "${query}".`;
+      renderOptions();
+    }
+
+    async function postTargetUpdate(payload) {
+      const item = selectedTarget();
+      if (!item) return;
+      const response = await fetch(`/api/intel/handpicked-review/${item.target_id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}));
+        throw new Error(errorPayload.detail || `HTTP ${response.status}`);
+      }
+      await loadSnapshot();
+    }
+
+    async function applyResolution(payload) {
+      const note = el.resolverNote.value;
+      await postTargetUpdate({ ...payload, note });
+    }
+
+    async function saveNoteOnly() {
+      const item = selectedTarget();
+      if (!item) return;
+      await postTargetUpdate({ note: el.resolverNote.value });
+    }
+
+    function bindEvents() {
+      el.btnRefresh.addEventListener("click", () => loadSnapshot().catch(handleError));
+      el.btnApplyFilters.addEventListener("click", () => {
+        state.filters.search = el.filterSearch.value.trim();
+        state.filters.sourceFile = el.filterSource.value;
+        loadSnapshot().catch(handleError);
+      });
+      el.btnResetFilters.addEventListener("click", () => {
+        state.filters.status = "review";
+        state.filters.search = "";
+        state.filters.sourceFile = "";
+        el.filterSearch.value = "";
+        renderStatusPills();
+        loadSnapshot().catch(handleError);
+      });
+      el.filterSource.addEventListener("change", () => {
+        state.filters.sourceFile = el.filterSource.value;
+      });
+      el.filterSearch.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          state.filters.search = el.filterSearch.value.trim();
+          loadSnapshot().catch(handleError);
+        }
+      });
+      el.btnSearchOptions.addEventListener("click", () => searchOptions().catch(handleError));
+      el.resolverSearch.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          searchOptions().catch(handleError);
+        }
+      });
+      el.btnSaveNote.addEventListener("click", () => saveNoteOnly().catch(handleError));
+      el.btnKeepLowConfidence.addEventListener("click", () => {
+        const item = selectedTarget();
+        if (!item) return;
+        if (item.resolved_group?.group_slug) {
+          applyResolution({ matched_group_slug: item.resolved_group.group_slug, match_status: "low_confidence" }).catch(handleError);
+        } else if (item.resolved_group?.representative_market_id) {
+          applyResolution({ matched_market_id: item.resolved_group.representative_market_id, match_status: "low_confidence" }).catch(handleError);
+        } else {
+          postTargetUpdate({ match_status: "low_confidence", note: el.resolverNote.value }).catch(handleError);
+        }
+      });
+      el.btnMarkUnmatched.addEventListener("click", () => {
+        postTargetUpdate({ match_status: "unmatched", note: el.resolverNote.value }).catch(handleError);
+      });
+    }
+
+    function handleError(error) {
+      console.error(error);
+      setStatusLine(`Error: ${error.message || error}`);
+    }
+
+    async function init() {
+      renderStatusPills();
+      bindEvents();
+      try {
+        await loadSnapshot();
+        const item = selectedTarget();
+        if (item) {
+          el.resolverSearch.value = item.requested_name || "";
+          await searchOptions();
+        } else {
+          renderOptions();
+        }
+      } catch (error) {
+        handleError(error);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

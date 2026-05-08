@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stored Markets</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #071018;
+      --panel: rgba(11, 19, 28, 0.9);
+      --panel-2: rgba(16, 27, 38, 0.9);
+      --line: rgba(148, 163, 184, 0.16);
+      --line-strong: rgba(148, 163, 184, 0.34);
+      --ink: #e7eef6;
+      --muted: #91a4b7;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.16);
+      --good: #34d399;
+      --warn: #f59e0b;
+      --iran: #f97316;
+      --israel: #60a5fa;
+      --gaza: #f59e0b;
+      --ukraine: #facc15;
+      --oil: #22c55e;
+      --other: #94a3b8;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+      --font: "IBM Plex Sans", "Segoe UI", sans-serif;
+      --display: "Space Grotesk", "IBM Plex Sans", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(1200px 580px at 100% -10%, rgba(56, 189, 248, 0.14), transparent 52%),
+        radial-gradient(1000px 520px at -10% 110%, rgba(249, 115, 22, 0.11), transparent 44%),
+        var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+    }
+
+    .shell {
+      max-width: 1840px;
+      margin: 0 auto;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .header {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .kicker {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+
+    .title {
+      margin: 0;
+      font-family: var(--display);
+      font-size: 1.7rem;
+      line-height: 1.04;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      max-width: 860px;
+      color: var(--muted);
+      line-height: 1.56;
+      font-size: 0.92rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button,
+    a.button,
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--ink);
+      padding: 9px 12px;
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+    }
+
+    button:hover,
+    a.button:hover,
+    .pill:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .button.primary {
+      border-color: rgba(56, 189, 248, 0.45);
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.2), rgba(14, 165, 233, 0.08));
+    }
+
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .meta {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .summary-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .summary-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-2);
+      min-height: 108px;
+      padding: 12px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .summary-card .label {
+      color: var(--muted);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .summary-card .value {
+      font-family: var(--display);
+      font-size: 1.68rem;
+      line-height: 1;
+    }
+
+    .summary-card .hint {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .workspace {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 360px minmax(0, 1fr) 340px;
+      align-items: start;
+      min-height: 760px;
+    }
+
+    .column {
+      min-width: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .stack-panel {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+
+    .section-head h2,
+    .section-head h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-family: var(--display);
+    }
+
+    .section-head p,
+    .section-head .note {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    input[type="search"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.24);
+      color: var(--ink);
+      padding: 10px 12px;
+      font: inherit;
+    }
+
+    input[type="search"]:focus {
+      outline: none;
+      border-color: rgba(56, 189, 248, 0.55);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.12);
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 0.76rem;
+      color: var(--muted);
+    }
+
+    .pill.active {
+      border-color: rgba(56, 189, 248, 0.45);
+      background: rgba(2, 132, 199, 0.18);
+      color: #c9f1ff;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      max-height: 980px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .group-card,
+    .member-card,
+    .context-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .group-card {
+      cursor: pointer;
+    }
+
+    .group-card:hover,
+    .member-card:hover,
+    .context-card:hover {
+      border-color: var(--line-strong);
+      transform: translateY(-1px);
+      transition: transform 140ms ease, border-color 140ms ease;
+    }
+
+    .group-card.active {
+      border-color: rgba(56, 189, 248, 0.56);
+      box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.14);
+      background: rgba(7, 39, 59, 0.52);
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 0.94rem;
+      line-height: 1.35;
+      font-weight: 600;
+    }
+
+    .card-sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.77rem;
+      line-height: 1.48;
+      word-break: break-word;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 0.68rem;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .chip.scope-iran { border-color: rgba(249, 115, 22, 0.45); color: #fdba74; background: rgba(124, 45, 18, 0.22); }
+    .chip.scope-israel { border-color: rgba(96, 165, 250, 0.45); color: #bfdbfe; background: rgba(30, 64, 175, 0.2); }
+    .chip.scope-israel_iran { border-color: rgba(168, 85, 247, 0.45); color: #e9d5ff; background: rgba(107, 33, 168, 0.2); }
+    .chip.scope-gaza_israel { border-color: rgba(245, 158, 11, 0.45); color: #fcd34d; background: rgba(120, 53, 15, 0.22); }
+    .chip.scope-ukraine { border-color: rgba(250, 204, 21, 0.45); color: #fde68a; background: rgba(113, 63, 18, 0.22); }
+    .chip.scope-oil { border-color: rgba(34, 197, 94, 0.45); color: #bbf7d0; background: rgba(6, 78, 59, 0.22); }
+    .chip.scope-venezuela { border-color: rgba(239, 68, 68, 0.45); color: #fecaca; background: rgba(127, 29, 29, 0.22); }
+    .chip.scope-other { border-color: rgba(148, 163, 184, 0.45); color: #cbd5e1; background: rgba(30, 41, 59, 0.28); }
+    .chip.good { border-color: rgba(52, 211, 153, 0.45); color: #a7f3d0; background: rgba(6, 78, 59, 0.22); }
+
+    .detail-panel {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+      min-height: 760px;
+    }
+
+    .detail-hero {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background:
+        radial-gradient(600px 240px at 100% 0%, rgba(56, 189, 248, 0.12), transparent 60%),
+        rgba(255, 255, 255, 0.03);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .detail-title {
+      margin: 0;
+      font-family: var(--display);
+      font-size: 1.48rem;
+      line-height: 1.08;
+    }
+
+    .detail-copy {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.58;
+      font-size: 0.87rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 12px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .stat .k {
+      color: var(--muted);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .stat .v {
+      font-size: 1.24rem;
+      font-weight: 700;
+    }
+
+    .split-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .question-list,
+    .source-list,
+    .member-list,
+    .scope-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .question-item,
+    .scope-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .question-item {
+      color: #d8e6f4;
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
+    .scope-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .scope-item strong {
+      color: var(--ink);
+      font-size: 0.84rem;
+    }
+
+    .member-list {
+      max-height: 800px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .member-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .rank {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: var(--muted);
+      font-size: 0.7rem;
+      white-space: nowrap;
+    }
+
+    .empty {
+      padding: 26px;
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.86rem;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .mono {
+      font-family: "IBM Plex Mono", Menlo, monospace;
+      font-size: 0.74rem;
+    }
+
+    @media (max-width: 1420px) {
+      .workspace {
+        grid-template-columns: 320px minmax(0, 1fr);
+      }
+
+      .right-column {
+        grid-column: 1 / -1;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .summary-grid,
+      .stats-grid,
+      .split-grid,
+      .right-column {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .summary-grid,
+      .stats-grid,
+      .split-grid,
+      .right-column {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel header">
+      <div class="title-row">
+        <div>
+          <p class="kicker">Database Working Set</p>
+          <h1 class="title">Stored Markets</h1>
+          <p class="subtitle">
+            This is the clean database-facing market board: grouped market families from the scoped geopolitical, Israel, and Iran universe. Browse the groups on the left, then inspect every stored member market and its context in the detail pane.
+          </p>
+        </div>
+        <div class="actions">
+          <button id="btnRefresh" type="button" class="button primary">Refresh</button>
+          <a class="button" href="/api/intel/stored-markets" target="_blank" rel="noopener">Open JSON</a>
+        </div>
+      </div>
+      <div class="meta-row">
+        <span class="meta" id="generatedAt">generated: -</span>
+        <span class="meta" id="groupsTable">groups: -</span>
+        <span class="meta" id="membersTable">members: -</span>
+        <span class="meta" id="marketsTable">markets: -</span>
+      </div>
+      <div class="summary-grid" id="summaryGrid"></div>
+    </section>
+
+    <section class="workspace">
+      <div class="column">
+        <section class="panel stack-panel">
+          <div class="section-head">
+            <div>
+              <h2>Market Groups</h2>
+              <p>One grouped card per scoped event slug.</p>
+            </div>
+            <div class="note" id="groupCounter">0 groups</div>
+          </div>
+          <input id="searchInput" type="search" placeholder="Search group title, slug, scope, or sample questions">
+          <div class="pill-row" id="scopePills"></div>
+          <div class="list" id="groupList"></div>
+        </section>
+      </div>
+
+      <div class="column">
+        <section class="panel detail-panel">
+          <div id="detailMount" class="empty">Loading stored markets...</div>
+        </section>
+      </div>
+
+      <div class="column right-column">
+        <section class="panel stack-panel">
+          <div class="section-head">
+            <div>
+              <h3>Scope Breakdown</h3>
+              <p>How the grouped market set is distributed.</p>
+            </div>
+          </div>
+          <div class="scope-list" id="scopeList"></div>
+        </section>
+
+        <section class="panel stack-panel">
+          <div class="section-head">
+            <div>
+              <h3>Stored Tables</h3>
+              <p>These are the DB tables this page is reading.</p>
+            </div>
+          </div>
+          <div class="context-card">
+            <div class="card-title">Market Storage</div>
+            <div class="card-sub" id="storageCopy">Waiting for payload.</div>
+          </div>
+          <div class="context-card">
+            <div class="card-title">Source Pages</div>
+            <div class="source-list" id="sourceList"></div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const state = {
+      payload: null,
+      scope: "all",
+      search: "",
+      selectedSlug: null,
+    };
+
+    const el = {
+      generatedAt: document.getElementById("generatedAt"),
+      groupsTable: document.getElementById("groupsTable"),
+      membersTable: document.getElementById("membersTable"),
+      marketsTable: document.getElementById("marketsTable"),
+      summaryGrid: document.getElementById("summaryGrid"),
+      groupCounter: document.getElementById("groupCounter"),
+      searchInput: document.getElementById("searchInput"),
+      scopePills: document.getElementById("scopePills"),
+      groupList: document.getElementById("groupList"),
+      detailMount: document.getElementById("detailMount"),
+      scopeList: document.getElementById("scopeList"),
+      storageCopy: document.getElementById("storageCopy"),
+      sourceList: document.getElementById("sourceList"),
+      btnRefresh: document.getElementById("btnRefresh"),
+    };
+
+    function fmtInt(value) {
+      return Number(value || 0).toLocaleString();
+    }
+
+    function fmtDate(value) {
+      if (!value) return "n/a";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value);
+      return date.toLocaleString();
+    }
+
+    function esc(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function scopeClass(label) {
+      const key = String(label || "Other").toLowerCase().replaceAll("/", "_").replaceAll(" ", "_");
+      return `scope-${key}`;
+    }
+
+    function filteredGroups() {
+      const groups = Array.isArray(state.payload?.groups) ? state.payload.groups : [];
+      const needle = state.search.trim().toLowerCase();
+      return groups.filter((group) => {
+        if (state.scope !== "all" && String(group.scope_label || "").toLowerCase() !== state.scope) {
+          return false;
+        }
+        if (!needle) return true;
+        const haystack = [
+          group.group_title,
+          group.group_slug,
+          group.scope_label,
+          group.representative_question,
+          ...(Array.isArray(group.sample_questions) ? group.sample_questions : []),
+        ].join(" ").toLowerCase();
+        return haystack.includes(needle);
+      });
+    }
+
+    function currentGroup() {
+      const groups = filteredGroups();
+      if (!groups.length) return null;
+      let current = groups.find((group) => group.group_slug === state.selectedSlug) || null;
+      if (!current) {
+        current = groups[0];
+        state.selectedSlug = current.group_slug;
+      }
+      return current;
+    }
+
+    function renderSummary(payload) {
+      const counts = payload?.counts || {};
+      const cards = [
+        { label: "Grouped Cards", value: counts.groups_total, hint: "rows in public.market_groups" },
+        { label: "Stored Members", value: counts.member_markets_total, hint: "raw tradable markets linked into groups" },
+        { label: "Visible Groups", value: counts.visible_groups, hint: "after local search and scope filters" },
+        { label: "Visible Markets", value: counts.visible_markets, hint: "member rows inside the filtered set" },
+        { label: "Scope Families", value: counts.scopes_total, hint: `soonest end ${fmtDate(counts.soonest_end_date)}` },
+      ];
+      el.summaryGrid.innerHTML = cards.map((card) => (
+        `<article class="summary-card">` +
+          `<span class="label">${esc(card.label)}</span>` +
+          `<div class="value">${fmtInt(card.value)}</div>` +
+          `<div class="hint">${esc(card.hint)}</div>` +
+        `</article>`
+      )).join("");
+    }
+
+    function renderScopePills(payload) {
+      const items = [{ label: "All", groups: payload?.counts?.groups_total || 0, markets: payload?.counts?.member_markets_total || 0 }]
+        .concat(Array.isArray(payload?.scope_counts) ? payload.scope_counts : []);
+      el.scopePills.innerHTML = items.map((item) => {
+        const scopeKey = String(item.label || "All").toLowerCase();
+        const active = (scopeKey === "all" && state.scope === "all") || state.scope === scopeKey;
+        return (
+          `<button type="button" class="pill ${active ? "active" : ""}" data-scope="${esc(scopeKey)}">` +
+            `${esc(item.label)} ${fmtInt(item.groups)} groups` +
+          `</button>`
+        );
+      }).join("");
+    }
+
+    function renderGroupList() {
+      const groups = filteredGroups();
+      el.groupCounter.textContent = `${fmtInt(groups.length)} visible`;
+      if (!groups.length) {
+        el.groupList.innerHTML = '<div class="empty">No stored market groups match the current filter.</div>';
+        el.detailMount.innerHTML = '<div class="empty">Select a different scope or search term.</div>';
+        return;
+      }
+      el.groupList.innerHTML = groups.map((group) => (
+        `<article class="group-card ${group.group_slug === state.selectedSlug ? "active" : ""}" data-group="${esc(group.group_slug)}">` +
+          `<div class="chip-row">` +
+            `<span class="chip ${scopeClass(group.scope_label)}">${esc(group.scope_label || "Other")}</span>` +
+            `<span class="chip good">${fmtInt(group.tradable_market_count)} markets</span>` +
+            `<span class="chip">${fmtInt((group.source_urls || []).length)} source pages</span>` +
+          `</div>` +
+          `<h3 class="card-title">${esc(group.group_title || group.group_slug)}</h3>` +
+          `<p class="card-sub mono">${esc(group.group_slug || "")}</p>` +
+          `<p class="card-sub">${esc(group.representative_question || (group.sample_questions || [])[0] || "No representative question stored.")}</p>` +
+        `</article>`
+      )).join("");
+    }
+
+    function renderDetail() {
+      const group = currentGroup();
+      if (!group) {
+        el.detailMount.innerHTML = '<div class="empty">No stored market group is currently selected.</div>';
+        return;
+      }
+
+      const sourceCards = (Array.isArray(group.source_urls) ? group.source_urls : []).map((url) => (
+        `<a class="button" href="${esc(url)}" target="_blank" rel="noopener">${esc(url.replace("https://polymarket.com/", ""))}</a>`
+      )).join("") || '<div class="card-sub">No source pages stored.</div>';
+
+      const questionCards = (Array.isArray(group.sample_questions) ? group.sample_questions : []).map((question) => (
+        `<div class="question-item">${esc(question)}</div>`
+      )).join("") || '<div class="empty">No sample questions stored for this group.</div>';
+
+      const memberCards = (Array.isArray(group.members) ? group.members : []).map((member) => (
+        `<article class="member-card">` +
+          `<div class="member-top">` +
+            `<div>` +
+              `<h4 class="card-title">${esc(member.question || "(untitled market)")}</h4>` +
+              `<p class="card-sub mono">${esc(member.slug || member.market_id || "")}</p>` +
+            `</div>` +
+            `<span class="rank">rank ${fmtInt(member.priority_rank)}</span>` +
+          `</div>` +
+          `<div class="chip-row">` +
+            `<span class="chip">${esc(member.market_archetype || "unknown")}</span>` +
+            `<span class="chip">ends ${esc(fmtDate(member.end_date))}</span>` +
+          `</div>` +
+          `<p class="card-sub">${esc(member.description || member.market_context || "No extra stored context for this member market.")}</p>` +
+          `${member.public_url ? `<a class="button" href="${esc(member.public_url)}" target="_blank" rel="noopener">Open Market</a>` : ""}` +
+        `</article>`
+      )).join("") || '<div class="empty">No member markets stored for this group.</div>';
+
+      const overflowNote = group.member_overflow_count > 0
+        ? `<div class="card-sub">Showing ${fmtInt(group.members.length)} member markets here. ${fmtInt(group.member_overflow_count)} additional rows are stored in the database for this group.</div>`
+        : "";
+
+      el.detailMount.innerHTML =
+        `<div class="detail-hero">` +
+          `<div class="chip-row">` +
+            `<span class="chip ${scopeClass(group.scope_label)}">${esc(group.scope_label || "Other")}</span>` +
+            `<span class="chip good">${fmtInt(group.tradable_market_count)} stored markets</span>` +
+            `<span class="chip">${fmtInt(group.market_count)} total rows</span>` +
+          `</div>` +
+          `<div>` +
+            `<h2 class="detail-title">${esc(group.group_title || group.group_slug)}</h2>` +
+            `<p class="card-sub mono">${esc(group.group_slug || "")}</p>` +
+          `</div>` +
+          `<p class="detail-copy">${esc(group.representative_question || "This group does not have a representative question stored yet.")}</p>` +
+          `<div class="actions">` +
+            `${group.representative_public_url ? `<a class="button primary" href="${esc(group.representative_public_url)}" target="_blank" rel="noopener">Open Representative Market</a>` : ""}` +
+            `<span class="meta">updated ${esc(fmtDate(group.updated_at || group.generated_at))}</span>` +
+          `</div>` +
+        `</div>` +
+        `<div class="stats-grid">` +
+          `<article class="stat"><span class="k">Representative</span><div class="v">${esc(group.representative_market_id || "n/a")}</div></article>` +
+          `<article class="stat"><span class="k">Earliest End</span><div class="v">${esc(fmtDate(group.earliest_end_date))}</div></article>` +
+          `<article class="stat"><span class="k">Latest End</span><div class="v">${esc(fmtDate(group.latest_end_date))}</div></article>` +
+          `<article class="stat"><span class="k">Last Seen</span><div class="v">${esc(fmtDate(group.last_seen_at))}</div></article>` +
+        `</div>` +
+        `<div class="split-grid">` +
+          `<section class="context-card">` +
+            `<div class="section-head"><div><h3>Sample Questions</h3><p>These are the kinds of stored member markets inside this group.</p></div></div>` +
+            `<div class="question-list">${questionCards}</div>` +
+          `</section>` +
+          `<section class="context-card">` +
+            `<div class="section-head"><div><h3>Source Pages</h3><p>Why this group exists in the scoped market universe.</p></div></div>` +
+            `<div class="source-list">${sourceCards}</div>` +
+            `<p class="card-sub">${esc(group.representative_description || group.representative_context || "No representative description or context is stored for this group.")}</p>` +
+          `</section>` +
+        `</div>` +
+        `<section class="context-card">` +
+          `<div class="section-head"><div><h3>Stored Member Markets</h3><p>These are the actual database rows you would later map to channels, listen against, and trade around.</p></div></div>` +
+          `${overflowNote}` +
+          `<div class="member-list">${memberCards}</div>` +
+        `</section>`;
+    }
+
+    function renderScopeList(payload) {
+      const rows = Array.isArray(payload?.scope_counts) ? payload.scope_counts : [];
+      el.scopeList.innerHTML = rows.map((row) => (
+        `<div class="scope-item">` +
+          `<div>` +
+            `<strong>${esc(row.label)}</strong>` +
+            `<div>${fmtInt(row.groups)} groups</div>` +
+          `</div>` +
+          `<div>${fmtInt(row.markets)} markets</div>` +
+        `</div>`
+      )).join("") || '<div class="empty">No scope counts available.</div>';
+    }
+
+    function renderMeta(payload) {
+      el.generatedAt.textContent = `generated: ${fmtDate(payload.generated_at)}`;
+      el.groupsTable.textContent = `groups: ${payload?.storage?.groups_table || "-"}`;
+      el.membersTable.textContent = `members: ${payload?.storage?.members_table || "-"}`;
+      el.marketsTable.textContent = `markets: ${payload?.storage?.markets_table || "-"}`;
+      el.storageCopy.textContent = `This page reads grouped rows from ${payload?.storage?.groups_table || "public.market_groups"} and member rows from ${payload?.storage?.members_table || "public.market_group_members"}, while still linking back to raw rows in ${payload?.storage?.markets_table || "public.markets"}.`;
+      el.sourceList.innerHTML = (Array.isArray(payload?.source_pages) ? payload.source_pages : []).map((url) => (
+        `<a class="button" href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a>`
+      )).join("") || '<div class="empty">No source pages available.</div>';
+    }
+
+    function render(payload) {
+      state.payload = payload;
+      renderMeta(payload);
+      renderSummary(payload);
+      renderScopePills(payload);
+      renderScopeList(payload);
+      renderGroupList();
+      renderDetail();
+    }
+
+    async function load() {
+      el.btnRefresh.disabled = true;
+      try {
+        const response = await fetch("/api/intel/stored-markets?group_limit=250&member_limit=40", { headers: { Accept: "application/json" } });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload?.detail || "stored markets fetch failed");
+        render(payload);
+      } catch (error) {
+        const message = esc(error?.message || "Failed to load stored markets.");
+        el.groupList.innerHTML = `<div class="empty">${message}</div>`;
+        el.detailMount.innerHTML = `<div class="empty">${message}</div>`;
+      } finally {
+        el.btnRefresh.disabled = false;
+      }
+    }
+
+    el.searchInput.addEventListener("input", () => {
+      state.search = el.searchInput.value || "";
+      renderGroupList();
+      renderDetail();
+    });
+
+    el.scopePills.addEventListener("click", (event) => {
+      const target = event.target.closest("[data-scope]");
+      if (!target) return;
+      state.scope = String(target.getAttribute("data-scope") || "all");
+      state.selectedSlug = null;
+      renderScopePills(state.payload || {});
+      renderGroupList();
+      renderDetail();
+    });
+
+    el.groupList.addEventListener("click", (event) => {
+      const target = event.target.closest("[data-group]");
+      if (!target) return;
+      state.selectedSlug = String(target.getAttribute("data-group") || "");
+      renderGroupList();
+      renderDetail();
+    });
+
+    el.btnRefresh.addEventListener("click", load);
+    load();
+  </script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<html lang="en" vid="0"><head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">Workflow Automation Canvas</title>
+    <script src="https://cdn.tailwindcss.com" vid="5"></script>
+    <style vid="6">
+        :root {
+            --bg-canvas: #08080a;
+            --bg-panel: rgba(18, 18, 22, 0.85);
+            --border-panel: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-secondary: #8a8a90;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+            --accent-primary: #3b82f6;
+            --grid-dot: #1f2025;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden; 
+        }
+
+        
+        .dot-grid {
+            background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px);
+            background-size: 24px 24px;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            z-index: 0;
+        }
+
+        
+        .glass-panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-panel);
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
+        }
+
+        
+        .connection-line {
+            stroke: #333;
+            stroke-width: 2px;
+            fill: none;
+            transition: stroke 0.3s ease;
+        }
+        .connection-line.active {
+            stroke: #555; 
+        }
+
+        
+        .glow-effect {
+            position: absolute;
+            z-index: -1;
+            filter: blur(40px);
+            opacity: 0.4;
+            background: radial-gradient(circle, var(--accent-primary) 0%, transparent 70%);
+        }
+
+        
+        .input-dark {
+            background: #0f1012;
+            border: 1px solid #2a2a30;
+            color: #eee;
+            transition: border-color 0.2s;
+        }
+        .input-dark:focus {
+            border-color: #444;
+            outline: none;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen relative" vid="7">
+
+    
+    <div class="dot-grid" vid="8"></div>
+
+    
+    
+    <svg class="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible" vid="9">
+        
+        <path d="M 380 320 C 480 320, 480 240, 580 240" class="connection-line" vid="10"></path>
+        
+        <path d="M 380 320 C 480 320, 480 480, 580 480" class="connection-line" vid="11"></path>
+        
+        <path d="M 880 240 C 980 240, 980 360, 1080 360" class="connection-line" vid="12"></path>
+         
+         <path d="M 880 480 C 980 480, 980 360, 1080 360" class="connection-line" vid="13"></path>
+    </svg>
+
+    
+    <div class="absolute inset-0 z-20 overflow-visible" vid="14">
+        
+        
+        
+        <div class="absolute top-[220px] left-[80px] w-[300px] glass-panel rounded-2xl flex flex-col group" vid="15">
+            
+            <div class="glow-effect w-[120%] h-[120%] -top-[10%] -left-[10%] group-hover:opacity-60 transition-opacity" vid="16"></div>
+            
+            <div class="p-4 border-b border-white/5 flex items-center justify-between" vid="17">
+                <div class="flex items-center gap-2" vid="18">
+                    <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" vid="19"></div>
+                    <span class="text-sm font-medium text-white tracking-wide" vid="20">Webhook Listener</span>
+                </div>
+                <button class="text-gray-500 hover:text-white transition-colors" vid="21">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vid="22"><circle cx="12" cy="12" r="1" vid="23"></circle><circle cx="19" cy="12" r="1" vid="24"></circle><circle cx="5" cy="12" r="1" vid="25"></circle></svg>
+                </button>
+            </div>
+            
+            <div class="p-4 space-y-4" vid="26">
+                
+                <div class="space-y-1.5" vid="27">
+                    <label class="text-[11px] uppercase tracking-wider text-gray-500 font-semibold pl-1" vid="28">Source ID</label>
+                    <div class="relative" vid="29">
+                        <input type="text" value="hook_v1_9942a" class="w-full input-dark rounded-lg py-2 px-3 text-sm font-mono" readonly="" vid="30">
+                    </div>
+                </div>
+
+                <div class="space-y-1.5" vid="31">
+                    <label class="text-[11px] uppercase tracking-wider text-gray-500 font-semibold pl-1" vid="32">Event Type</label>
+                    <select class="w-full input-dark rounded-lg py-2 px-3 text-sm appearance-none bg-no-repeat bg-[right_10px_center]" vid="33">
+                        <option vid="34">user.signup</option>
+                        <option vid="35">order.created</option>
+                    </select>
+                </div>
+            </div>
+
+            
+            <div class="absolute -right-1.5 top-1/2 -mt-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-[#08080a] shadow-sm" vid="36"></div>
+        </div>
+
+        
+        <div class="absolute top-[140px] left-[580px] w-[300px] glass-panel rounded-2xl flex flex-col" vid="37">
+            <div class="absolute -left-1.5 top-1/2 -mt-1 w-3 h-3 bg-gray-600 rounded-full border-2 border-[#08080a]" vid="38"></div>
+            
+            <div class="p-4 border-b border-white/5 flex items-center justify-between" vid="39">
+                <div class="flex items-center gap-2" vid="40">
+                    <div class="w-2 h-2 rounded-full bg-orange-400" vid="41"></div>
+                    <span class="text-sm font-medium text-white tracking-wide" vid="42">Filter Logic</span>
+                </div>
+                <button class="text-gray-500 hover:text-white" vid="43"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vid="44"><circle cx="12" cy="12" r="1" vid="45"></circle><circle cx="19" cy="12" r="1" vid="46"></circle><circle cx="5" cy="12" r="1" vid="47"></circle></svg></button>
+            </div>
+
+            <div class="p-4 space-y-4" vid="48">
+                <div class="grid grid-cols-[1fr_auto_1fr] gap-2 items-center" vid="49">
+                    <input type="text" placeholder="Field" class="input-dark rounded-lg py-1.5 px-2 text-xs w-full" vid="50">
+                    <span class="text-gray-500 text-xs" vid="51">==</span>
+                    <input type="text" value="true" class="input-dark rounded-lg py-1.5 px-2 text-xs w-full text-blue-400" vid="52">
+                </div>
+                <div class="bg-white/5 rounded p-2 text-[10px] text-gray-400 font-mono leading-relaxed" vid="53">
+                    if (payload.verified) {<br vid="54">&nbsp;&nbsp;return next();<br vid="55">}
+                </div>
+            </div>
+            
+            <div class="absolute -right-1.5 top-1/2 -mt-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-[#08080a]" vid="56"></div>
+        </div>
+
+        
+        <div class="absolute top-[380px] left-[580px] w-[300px] glass-panel rounded-2xl flex flex-col" vid="57">
+            <div class="absolute -left-1.5 top-1/2 -mt-1 w-3 h-3 bg-gray-600 rounded-full border-2 border-[#08080a]" vid="58"></div>
+            
+            <div class="p-4 border-b border-white/5 flex items-center justify-between" vid="59">
+                <div class="flex items-center gap-2" vid="60">
+                    <div class="w-2 h-2 rounded-full bg-purple-500" vid="61"></div>
+                    <span class="text-sm font-medium text-white tracking-wide" vid="62">Data Transform</span>
+                </div>
+                <button class="text-gray-500 hover:text-white" vid="63"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vid="64"><circle cx="12" cy="12" r="1" vid="65"></circle><circle cx="19" cy="12" r="1" vid="66"></circle><circle cx="5" cy="12" r="1" vid="67"></circle></svg></button>
+            </div>
+
+            <div class="p-4 space-y-3" vid="68">
+                 <div class="space-y-1.5" vid="69">
+                    <label class="text-[11px] uppercase tracking-wider text-gray-500 font-semibold pl-1" vid="70">Schema</label>
+                    <div class="flex flex-wrap gap-2" vid="71">
+                        <span class="bg-white/5 text-gray-300 px-2 py-1 rounded text-[10px] border border-white/5" vid="72">JSON</span>
+                        <span class="bg-blue-500/20 text-blue-300 px-2 py-1 rounded text-[10px] border border-blue-500/20" vid="73">CSV</span>
+                    </div>
+                </div>
+                <div class="h-16 bg-black/20 rounded-lg border border-white/5 p-2 font-mono text-[10px] text-gray-400 overflow-hidden" vid="74">
+                    { "id": 1204, "status": "pending"... }
+                </div>
+            </div>
+            
+            <div class="absolute -right-1.5 top-1/2 -mt-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-[#08080a]" vid="75"></div>
+        </div>
+
+        
+        <div class="absolute top-[280px] left-[1080px] w-[300px] glass-panel rounded-2xl flex flex-col border-blue-500/30 shadow-[0_0_30px_-5px_rgba(59,130,246,0.1)]" vid="76">
+             <div class="absolute -left-1.5 top-1/2 -mt-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-[#08080a] shadow-[0_0_8px_rgba(59,130,246,0.8)]" vid="77"></div>
+            
+            <div class="p-4 border-b border-white/5 flex items-center justify-between" vid="78">
+                <div class="flex items-center gap-2" vid="79">
+                    <div class="w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]" vid="80"></div>
+                    <span class="text-sm font-medium text-white tracking-wide" vid="81">Sync to Database</span>
+                </div>
+                <div class="flex gap-2" vid="82">
+                    <div class="w-1.5 h-1.5 rounded-full bg-gray-600" vid="83"></div>
+                    <div class="w-1.5 h-1.5 rounded-full bg-gray-600" vid="84"></div>
+                </div>
+            </div>
+            
+            <div class="relative w-full aspect-[4/3] bg-gradient-to-br from-black to-gray-900 overflow-hidden group" vid="85">
+                 
+                 <div class="absolute inset-0 flex items-center justify-center" vid="86">
+                    <div class="text-center space-y-2" vid="87">
+                        <div class="w-10 h-10 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center mx-auto border border-green-500/30" vid="88">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vid="89"><path d="M20 6L9 17l-5-5" vid="90"></path></svg>
+                        </div>
+                        <p class="text-xs text-gray-400 font-medium" vid="91">Record Updated</p>
+                        <p class="text-[10px] text-gray-600 font-mono" vid="92">ID: #9942a</p>
+                    </div>
+                 </div>
+                 
+                 <div class="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-green-500/10 to-transparent" vid="93"></div>
+            </div>
+
+            <div class="p-3 bg-black/20 border-t border-white/5" vid="94">
+                <div class="flex items-center justify-between text-[10px] text-gray-500" vid="95">
+                    <span vid="96">Latency: 24ms</span>
+                    <span class="text-green-500" vid="97">Success</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    
+    
+    <div class="absolute inset-0 z-50 pointer-events-none p-6 flex flex-col justify-between" vid="98">
+        
+        
+        <div class="flex justify-between items-start pointer-events-auto" vid="99">
+            
+            <div class="glass-panel rounded-full px-1.5 py-1.5 flex items-center gap-1 pr-4" vid="100">
+                <button class="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 transition-colors" vid="101">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vid="102"><path d="M19 12H5" vid="103"></path><path d="M12 19l-7-7 7-7" vid="104"></path></svg>
+                </button>
+                <div class="h-4 w-[1px] bg-white/10 mx-1" vid="105"></div>
+                <span class="text-sm font-medium text-gray-400 px-1" vid="106">Workflows</span>
+                <span class="text-gray-600" vid="107">/</span>
+                <span class="text-sm font-medium text-white px-1" vid="108">User Onboarding V3</span>
+            </div>
+
+            
+            
+            <div class="flex gap-3" vid="109">
+                <div class="glass-panel rounded-full p-1.5 flex items-center gap-1" vid="110">
+                    <button class="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400" vid="111">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vid="112"><circle cx="12" cy="12" r="1" vid="113"></circle><circle cx="19" cy="12" r="1" vid="114"></circle><circle cx="5" cy="12" r="1" vid="115"></circle></svg>
+                    </button>
+                    <button class="h-8 px-4 rounded-full flex items-center gap-2 hover:bg-white/10 text-sm font-medium transition-colors" vid="116">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vid="117"><path d="M5 12h14" vid="118"></path><path d="M12 5l7 7-7 7" vid="119"></path></svg>
+                        Queue Run
+                    </button>
+                </div>
+                
+                <div class="glass-panel rounded-full p-1.5 flex items-center gap-2 pl-4" vid="120">
+                    <button class="text-sm font-medium hover:text-white text-gray-300 transition-colors" vid="121">Share</button>
+                    <button class="h-8 px-4 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition-colors flex items-center gap-2" vid="122">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vid="123"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" vid="124"></path><polyline points="17 8 12 3 7 8" vid="125"></polyline><line x1="12" y1="3" x2="12" y2="15" vid="126"></line></svg>
+                        Deploy
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="absolute left-6 top-24 bottom-24 w-[280px] pointer-events-auto hidden xl:block" vid="127">
+            <div class="glass-panel w-full h-full rounded-2xl flex flex-col overflow-hidden" vid="128">
+                <div class="p-4 border-b border-white/5" vid="129">
+                    <h3 class="text-sm font-medium text-white flex items-center gap-2" vid="130">
+                        <div class="w-1.5 h-1.5 bg-green-500 rounded-full" vid="131"></div>
+                        Webhook Listener
+                    </h3>
+                    <p class="text-[11px] text-gray-500 mt-1" vid="132">Configures the entry point trigger.</p>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto p-4 space-y-6" vid="133">
+                    
+                    <div class="space-y-3" vid="134">
+                        <div class="flex items-center justify-between" vid="135">
+                            <label class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider" vid="136">Parameters</label>
+                            <span class="text-[10px] text-blue-400 cursor-pointer hover:underline" vid="137">Reset</span>
+                        </div>
+                        
+                        <div class="space-y-2" vid="138">
+                            <div class="grid grid-cols-2 gap-2" vid="139">
+                                <div class="bg-white/5 p-2 rounded-lg border border-white/5 hover:border-white/10 cursor-pointer transition-colors" vid="140">
+                                    <div class="text-[10px] text-gray-500 mb-1" vid="141">Method</div>
+                                    <div class="text-xs font-mono" vid="142">POST</div>
+                                </div>
+                                <div class="bg-white/5 p-2 rounded-lg border border-white/5 hover:border-white/10 cursor-pointer transition-colors" vid="143">
+                                    <div class="text-[10px] text-gray-500 mb-1" vid="144">Auth</div>
+                                    <div class="text-xs font-mono" vid="145">Bearer</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="space-y-3" vid="146">
+                        <label class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider" vid="147">Options</label>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5" vid="148">
+                            <span class="text-xs text-gray-300" vid="149">Validate Payload</span>
+                            <div class="w-8 h-4 bg-blue-600 rounded-full relative cursor-pointer" vid="150">
+                                <div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow-sm" vid="151"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5" vid="152">
+                            <span class="text-xs text-gray-300" vid="153">Retry on Fail</span>
+                            <div class="w-8 h-4 bg-gray-600 rounded-full relative cursor-pointer" vid="154">
+                                <div class="absolute left-0.5 top-0.5 w-3 h-3 bg-gray-400 rounded-full shadow-sm" vid="155"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="space-y-2 pt-4 border-t border-white/5" vid="156">
+                         <label class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider" vid="157">Usage (24h)</label>
+                         <div class="flex gap-1 h-16 items-end pb-2 border-b border-white/5" vid="158">
+                             <div class="flex-1 bg-white/10 hover:bg-blue-500/50 h-[40%] rounded-sm transition-all" vid="159"></div>
+                             <div class="flex-1 bg-white/10 hover:bg-blue-500/50 h-[70%] rounded-sm transition-all" vid="160"></div>
+                             <div class="flex-1 bg-white/10 hover:bg-blue-500/50 h-[50%] rounded-sm transition-all" vid="161"></div>
+                             <div class="flex-1 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)] h-[90%] rounded-sm transition-all relative group" vid="162">
+                                <div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-black text-[9px] px-1 py-0.5 rounded border border-white/10 opacity-0 group-hover:opacity-100 whitespace-nowrap" vid="163">94 req</div>
+                             </div>
+                             <div class="flex-1 bg-white/10 hover:bg-blue-500/50 h-[30%] rounded-sm transition-all" vid="164"></div>
+                             <div class="flex-1 bg-white/10 hover:bg-blue-500/50 h-[45%] rounded-sm transition-all" vid="165"></div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="w-full flex justify-center pointer-events-auto pb-4" vid="166">
+            
+            <div class="glass-panel rounded-2xl p-1.5 flex items-center gap-1" vid="167">
+                 <button class="w-9 h-9 rounded-xl hover:bg-white/10 flex items-center justify-center text-gray-400 transition-colors" vid="168">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vid="169"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" vid="170"></path></svg>
+                </button>
+                <div class="h-5 w-[1px] bg-white/10 mx-1" vid="171"></div>
+                <button class="w-9 h-9 rounded-xl hover:bg-white/10 flex items-center justify-center text-gray-400 transition-colors" vid="172">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vid="173"><circle cx="11" cy="11" r="8" vid="174"></circle><line x1="21" y1="21" x2="16.65" y2="16.65" vid="175"></line><line x1="11" y1="8" x2="11" y2="14" vid="176"></line><line x1="8" y1="11" x2="14" y2="11" vid="177"></line></svg>
+                </button>
+                <button class="px-3 h-9 rounded-xl hover:bg-white/10 flex items-center justify-center text-sm font-medium text-white transition-colors" vid="178">
+                    100%
+                </button>
+                 <button class="w-9 h-9 rounded-xl hover:bg-white/10 flex items-center justify-center text-gray-400 transition-colors" vid="179">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vid="180"><circle cx="11" cy="11" r="8" vid="181"></circle><line x1="21" y1="21" x2="16.65" y2="16.65" vid="182"></line><line x1="8" y1="11" x2="14" y2="11" vid="183"></line></svg>
+                </button>
+                <div class="h-5 w-[1px] bg-white/10 mx-1" vid="184"></div>
+                 <button class="px-3 h-9 rounded-xl hover:bg-white/10 flex items-center justify-center text-sm font-medium text-gray-400 gap-2 transition-colors" vid="185">
+                    <span vid="186">Export</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vid="187"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" vid="188"></path><polyline points="7 10 12 15 17 10" vid="189"></polyline><line x1="12" y1="15" x2="12" y2="3" vid="190"></line></svg>
+                </button>
+            </div>
+        </div>
+
+        
+        
+        <div class="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-auto" vid="191">
+            <div class="glass-panel rounded-full p-1.5 flex flex-col gap-2" vid="192">
+                 <button class="w-9 h-9 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 transition-colors tooltip" title="Add Note" vid="193">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vid="194"><path d="M12 5v14M5 12h14" vid="195"></path></svg>
+                </button>
+                 <button class="w-9 h-9 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 transition-colors" vid="196">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vid="197"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" vid="198"></path><path d="M21 3v5h-5" vid="199"></path></svg>
+                </button>
+                <div class="w-5 h-[1px] bg-white/10 mx-auto" vid="200"></div>
+                <button class="w-9 h-9 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-400 transition-colors" vid="201">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" vid="202"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" vid="203"></path><circle cx="12" cy="12" r="3" vid="204"></circle></svg>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+
+</body></html>

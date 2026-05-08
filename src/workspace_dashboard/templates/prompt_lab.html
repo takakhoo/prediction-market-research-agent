@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prompt Lab</title>
+  <style>
+    :root {
+      --bg: #081018;
+      --panel: #101a25;
+      --panel-soft: #0b141d;
+      --line: rgba(255,255,255,0.1);
+      --text: #e7edf3;
+      --muted: #9aa9b8;
+      --accent: #14b8a6;
+      --warn: #f59e0b;
+      --ok: #22c55e;
+      --font: "IBM Plex Sans", "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(900px 500px at 100% -10%, rgba(20,184,166,0.16), transparent 55%),
+        radial-gradient(700px 380px at -5% 100%, rgba(245,158,11,0.08), transparent 45%),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+    }
+
+    .page {
+      max-width: 1700px;
+      margin: 0 auto;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    .header {
+      padding: 14px 16px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto auto;
+      gap: 8px;
+      align-items: end;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(0,0,0,0.24);
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 0.9rem;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.primary {
+      border-color: rgba(20,184,166,0.6);
+      background: rgba(20,184,166,0.14);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 12px;
+      min-height: calc(100vh - 180px);
+    }
+
+    .list-panel {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      overflow: hidden;
+    }
+
+    .list-head, .detail-head {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .list {
+      overflow: auto;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .item.active {
+      border-color: rgba(20,184,166,0.55);
+      background: rgba(20,184,166,0.08);
+    }
+
+    .item h3 {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.3;
+    }
+
+    .item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.75rem;
+      line-height: 1.4;
+    }
+
+    .chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.69rem;
+      color: var(--muted);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .chip.ok {
+      color: #b8f3c7;
+      border-color: rgba(34,197,94,0.35);
+      background: rgba(34,197,94,0.12);
+    }
+
+    .chip.warn {
+      color: #fde68a;
+      border-color: rgba(245,158,11,0.35);
+      background: rgba(245,158,11,0.12);
+    }
+
+    .detail-panel {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
+    }
+
+    .detail-body {
+      overflow: auto;
+      padding: 14px 16px 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .section {
+      display: grid;
+      gap: 8px;
+    }
+
+    .section h4 {
+      margin: 0;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .summary {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    pre {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-soft);
+      color: #d7e1ea;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-size: 0.77rem;
+      line-height: 1.5;
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.84rem;
+      background: rgba(255,255,255,0.02);
+    }
+
+    @media (max-width: 1100px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .controls {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="panel header">
+      <h1 class="title">Prompt Lab</h1>
+      <p class="subtitle">
+        This view shows the current prompt inventory for the agent. It distinguishes real prompt templates from the parts that are still running as heuristics, so you can tune the system without losing track of what is actually live.
+      </p>
+      <div class="controls">
+        <div>
+          <label for="search">Search</label>
+          <input id="search" type="search" placeholder="Search by title, scope, status, or summary">
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button id="reload" class="primary" type="button">Reload</button>
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button id="copyPrompt" type="button">Copy Template</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="layout">
+      <aside class="panel list-panel">
+        <div class="list-head">
+          <strong>Prompt Inventory</strong>
+          <div id="counter" class="meta"></div>
+        </div>
+        <div id="list" class="list"></div>
+      </aside>
+
+      <section class="panel detail-panel">
+        <div class="detail-head">
+          <strong id="detailTitle">Select a prompt component</strong>
+          <div id="detailMeta" class="meta">No prompt selected.</div>
+        </div>
+        <div id="detailBody" class="detail-body">
+          <div class="empty">Choose a prompt from the left to inspect its template, runtime file, and current status.</div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    const state = {
+      items: [],
+      filtered: [],
+      selectedId: null,
+    };
+
+    const elements = {
+      search: document.getElementById("search"),
+      reload: document.getElementById("reload"),
+      copyPrompt: document.getElementById("copyPrompt"),
+      counter: document.getElementById("counter"),
+      list: document.getElementById("list"),
+      detailTitle: document.getElementById("detailTitle"),
+      detailMeta: document.getElementById("detailMeta"),
+      detailBody: document.getElementById("detailBody"),
+    };
+
+    function init() {
+      elements.search.addEventListener("input", applyFilter);
+      elements.reload.addEventListener("click", loadPrompts);
+      elements.copyPrompt.addEventListener("click", copySelectedTemplate);
+      loadPrompts();
+    }
+
+    async function loadPrompts() {
+      elements.list.innerHTML = '<div class="empty">Loading prompt registry...</div>';
+      try {
+        const response = await fetch("/api/intel/prompts", { headers: { Accept: "application/json" } });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`HTTP ${response.status}: ${text.slice(0, 200)}`);
+        }
+        const payload = await response.json();
+        state.items = Array.isArray(payload.items) ? payload.items : [];
+        state.filtered = state.items.slice();
+        if (!state.selectedId && state.filtered.length) {
+          state.selectedId = state.filtered[0].id;
+        }
+        if (state.selectedId && !state.items.find((item) => item.id === state.selectedId)) {
+          state.selectedId = state.filtered[0]?.id || null;
+        }
+        render();
+      } catch (error) {
+        elements.list.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+        elements.detailTitle.textContent = "Prompt registry unavailable";
+        elements.detailMeta.textContent = "Reload after fixing the backend route.";
+        elements.detailBody.innerHTML = `<div class="empty">${escapeHtml(error.message)}</div>`;
+      }
+    }
+
+    function applyFilter() {
+      const search = String(elements.search.value || "").trim().toLowerCase();
+      if (!search) {
+        state.filtered = state.items.slice();
+      } else {
+        state.filtered = state.items.filter((item) => {
+          const blob = `${item.title || ""} ${item.scope || ""} ${item.status || ""} ${item.summary || ""}`.toLowerCase();
+          return blob.includes(search);
+        });
+      }
+      if (state.selectedId && !state.filtered.find((item) => item.id === state.selectedId)) {
+        state.selectedId = state.filtered[0]?.id || null;
+      }
+      render();
+    }
+
+    function render() {
+      renderList();
+      renderDetail();
+    }
+
+    function renderList() {
+      elements.counter.textContent = `${state.filtered.length} visible | ${state.items.length} total`;
+      if (!state.filtered.length) {
+        elements.list.innerHTML = '<div class="empty">No prompt components match the current filter.</div>';
+        return;
+      }
+      elements.list.innerHTML = state.filtered.map((item) => {
+        const statusClass = item.status && item.status.includes("planned") ? "warn" : "ok";
+        const activeClass = item.id === state.selectedId ? "active" : "";
+        return `
+          <article class="item ${activeClass}" data-id="${escapeAttr(item.id)}">
+            <div>
+              <h3>${escapeHtml(item.title)}</h3>
+              <p>${escapeHtml(item.scope || "")}</p>
+            </div>
+            <div class="chips">
+              <span class="chip ${statusClass}">${escapeHtml(item.status || "unknown")}</span>
+              <span class="chip">${escapeHtml(item.runtime_mode || "unknown")}</span>
+            </div>
+            <p>${escapeHtml(item.summary || "")}</p>
+          </article>
+        `;
+      }).join("");
+
+      elements.list.querySelectorAll(".item").forEach((node) => {
+        node.addEventListener("click", () => {
+          state.selectedId = node.dataset.id || null;
+          render();
+        });
+      });
+    }
+
+    function renderDetail() {
+      const item = state.items.find((entry) => entry.id === state.selectedId);
+      if (!item) {
+        elements.detailTitle.textContent = "Select a prompt component";
+        elements.detailMeta.textContent = "No prompt selected.";
+        elements.detailBody.innerHTML = '<div class="empty">Choose a prompt from the left.</div>';
+        return;
+      }
+
+      elements.detailTitle.textContent = item.title || item.id;
+      elements.detailMeta.textContent = `${item.scope || "unknown scope"} | ${item.status || "unknown status"} | runtime=${item.runtime_engine || "unknown"}`;
+
+      elements.detailBody.innerHTML = `
+        <section class="section">
+          <h4>Summary</h4>
+          <p class="summary">${escapeHtml(item.summary || "No summary.")}</p>
+          <div class="chips">
+            <span class="chip">${escapeHtml(item.runtime_mode || "unknown")}</span>
+            <span class="chip">${escapeHtml(item.runtime_version || "n/a")}</span>
+            <span class="chip ${item.template_available ? "ok" : "warn"}">${item.template_available ? "template available" : "no template file"}</span>
+          </div>
+          <div class="meta">
+            template: ${escapeHtml(item.template_path || "none")}<br>
+            runtime source: ${escapeHtml(item.runtime_source_path || "none")}
+          </div>
+        </section>
+
+        <section class="section">
+          <h4>Prompt Template</h4>
+          <pre>${escapeHtml(item.template_content || "No prompt template file is attached to this component yet.")}</pre>
+        </section>
+
+        <section class="section">
+          <h4>Runtime Excerpt</h4>
+          <pre>${escapeHtml(item.runtime_excerpt || "No runtime source excerpt available.")}</pre>
+        </section>
+      `;
+    }
+
+    async function copySelectedTemplate() {
+      const item = state.items.find((entry) => entry.id === state.selectedId);
+      if (!item || !item.template_content) {
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(item.template_content);
+        elements.copyPrompt.textContent = "Copied";
+        window.setTimeout(() => {
+          elements.copyPrompt.textContent = "Copy Template";
+        }, 1200);
+      } catch {
+        elements.copyPrompt.textContent = "Copy failed";
+        window.setTimeout(() => {
+          elements.copyPrompt.textContent = "Copy Template";
+        }, 1200);
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value);
+    }
+
+    init();
+  </script>
+</body>
+</html>

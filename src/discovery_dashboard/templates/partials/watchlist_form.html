@@ -1,0 +1,31 @@
+{% if not channel %}
+<div class="empty">Channel metadata is unavailable.</div>
+{% else %}
+<form hx-post="ui/watchlist" hx-target="#watchlist-panel" hx-swap="innerHTML" hx-indicator="#watchlist-save-loading" hx-disabled-elt="#watchlist-save-button">
+  <input type="hidden" name="chat_id" value="{{ channel.chat_id }}">
+
+  <div style="margin-bottom:8px;">
+    <strong>{{ channel.title }}</strong>
+    <div class="muted">ID: {{ channel.chat_id }}{% if channel.username %} | @{{ channel.username }}{% endif %}</div>
+  </div>
+
+  <div style="display:grid;gap:8px;">
+    <div>
+      <label>Trust Weight (0.0 - 1.0)</label>
+      <input type="number" name="trust_weight" min="0" max="1" step="0.01" value="{{ default_weight }}" required>
+    </div>
+    <div>
+      <label>Tags (comma-separated)</label>
+      <input name="tags" placeholder="region, language, type">
+    </div>
+    <div>
+      <label>Notes</label>
+      <textarea name="notes" rows="3" placeholder="Initial reliability observations"></textarea>
+    </div>
+    <div>
+      <button id="watchlist-save-button" type="submit">Save to Watchlist</button>
+      <span id="watchlist-save-loading" class="loading htmx-indicator">Saving...</span>
+    </div>
+  </div>
+</form>
+{% endif %}

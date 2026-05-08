@@ -1,0 +1,41 @@
+{% if not items %}
+<div class="empty">Watchlist is empty.</div>
+{% else %}
+<div class="muted" style="margin-bottom:8px;">Entries: <strong>{{ items|length }}</strong></div>
+<div style="display:grid;gap:10px;max-height:520px;overflow:auto;">
+  {% for item in items %}
+  <article style="border:1px solid #e2e5ea;border-radius:8px;padding:10px;">
+    <div style="display:flex;justify-content:space-between;gap:10px;">
+      <div>
+        <div style="font-weight:700;">{{ item.title if item.title else "Unknown Channel" }}</div>
+        <div class="muted">ID: {{ item.chat_id }}{% if item.username %} | @{{ item.username }}{% endif %}</div>
+      </div>
+      <div class="muted">updated: {{ item.updated_at }}</div>
+    </div>
+
+    <form
+      hx-patch="ui/watchlist/{{ item.chat_id }}"
+      hx-target="#watchlist-panel"
+      hx-swap="innerHTML"
+      style="margin-top:8px;display:grid;gap:8px;"
+    >
+      <div>
+        <label>Trust Weight</label>
+        <input type="number" name="trust_weight" min="0" max="1" step="0.01" value="{{ item.trust_weight }}">
+      </div>
+      <div>
+        <label>Tags</label>
+        <input name="tags" value="{{ item.tags | join(', ') }}">
+      </div>
+      <div>
+        <label>Notes</label>
+        <textarea name="notes" rows="2">{{ item.notes }}</textarea>
+      </div>
+      <div>
+        <button type="submit">Update</button>
+      </div>
+    </form>
+  </article>
+  {% endfor %}
+</div>
+{% endif %}

@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Workspace Command Center</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --panel: #ffffff;
+      --panel-2: #f8fbff;
+      --ink: #0f172a;
+      --muted: #475569;
+      --line: #d7e2ef;
+      --accent: #0b5fff;
+      --accent-2: #084bc7;
+      --good: #047857;
+      --warn: #b45309;
+      --danger: #b91c1c;
+      --sidebar: #0f172a;
+      --sidebar-ink: #e2e8f0;
+      --font: "IBM Plex Sans", "Segoe UI", sans-serif;
+      --mono: "IBM Plex Mono", Menlo, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: var(--sidebar);
+      color: var(--sidebar-ink);
+      border-right: 1px solid rgba(148, 163, 184, 0.22);
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 12px;
+      padding: 14px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+    }
+
+    .brand p {
+      margin: 6px 0 0;
+      font-size: 0.78rem;
+      color: #94a3b8;
+      line-height: 1.45;
+    }
+
+    .status-card {
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.58);
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.78rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 6px;
+      vertical-align: middle;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .dot.good { background: #22c55e; }
+    .dot.warn { background: #f59e0b; }
+    .dot.danger { background: #f43f5e; }
+
+    .nav {
+      display: grid;
+      gap: 6px;
+      align-content: start;
+    }
+
+    .nav button {
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.45);
+      color: var(--sidebar-ink);
+      text-align: left;
+      padding: 10px 10px;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 22px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .nav button.active {
+      border-color: rgba(56, 189, 248, 0.7);
+      background: linear-gradient(90deg, rgba(11,95,255,0.35), rgba(59,130,246,0.18));
+    }
+
+    .nav .key {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: #94a3b8;
+    }
+
+    .sidebar-footer {
+      border-top: 1px solid rgba(148, 163, 184, 0.22);
+      padding-top: 10px;
+      color: #94a3b8;
+      font-size: 0.74rem;
+      line-height: 1.4;
+    }
+
+    .main {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 12px;
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 1.18rem;
+    }
+
+    .topbar p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .toolbar button, .toolbar a {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 10px;
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toolbar button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .toolbar button.primary:hover {
+      background: var(--accent-2);
+      border-color: var(--accent-2);
+    }
+
+    .kpi-grid {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
+
+    .kpi {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 9px;
+      background: var(--panel-2);
+    }
+
+    .kpi .k {
+      display: block;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.67rem;
+      margin-bottom: 4px;
+    }
+
+    .kpi .v {
+      font-size: 1.18rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .kpi .hint {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .quick-grid {
+      margin-top: 8px;
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 2fr 1fr 1fr;
+      align-items: end;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .frame-wrap {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 66vh;
+    }
+
+    .frame-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfdff;
+    }
+
+    .frame-head .left {
+      min-width: 0;
+      display: grid;
+      gap: 2px;
+    }
+
+    .frame-title {
+      font-size: 0.89rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .frame-subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 800px;
+    }
+
+    .frame-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .frame-actions button, .frame-actions a {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 7px 9px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .frame-stage {
+      position: relative;
+      min-height: 0;
+    }
+
+    .frame {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: none;
+    }
+
+    .frame.active {
+      display: block;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(248, 250, 252, 0.85);
+      z-index: 4;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .overlay.active {
+      display: flex;
+    }
+
+    .mono {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 1400px) {
+      .kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .quick-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 1120px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+      .nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <section class="brand">
+        <h1>Polymarket News Agent</h1>
+        <p>Unified command center for Telegram discovery, market intelligence, backtesting, and prompt operations.</p>
+      </section>
+
+      <section class="status-card">
+        <div class="status-row">
+          <span>Workspace API</span>
+          <span id="statusApi"><span class="dot warn"></span>checking</span>
+        </div>
+        <div class="status-row">
+          <span>DB Snapshot</span>
+          <span id="statusDb"><span class="dot warn"></span>checking</span>
+        </div>
+        <div class="status-row">
+          <span>Last Refresh</span>
+          <span id="statusRefresh" class="mono">never</span>
+        </div>
+      </section>
+
+      <nav class="nav" id="nav"></nav>
+
+      <footer class="sidebar-footer">
+        Shortcuts: `1..7` switch tabs, `R` refresh active view, `O` open active tab in new page.
+      </footer>
+    </aside>
+
+    <main class="main">
+      <section class="panel">
+        <div class="topbar">
+          <div>
+            <h2 id="topTitle">Workspace Command Center</h2>
+            <p id="topSubtitle">Use the sidebar to switch between workflows. KPIs below refresh automatically.</p>
+          </div>
+          <div class="toolbar">
+            <button id="btnRefreshOverview" type="button">Refresh Overview</button>
+            <button id="btnToggleAuto" type="button" class="primary">Auto Refresh: ON</button>
+            <a href="/api/intel/workspace-overview" target="_blank" rel="noopener">Overview JSON</a>
+          </div>
+        </div>
+
+        <div class="kpi-grid" id="kpiGrid"></div>
+
+        <div class="quick-grid">
+          <div>
+            <label for="quickMarketRef">Quick Backtest Market Ref</label>
+            <input id="quickMarketRef" type="text" placeholder="https://polymarket.com/event/iran-strikes-israel-on">
+          </div>
+          <div>
+            <label for="quickClassFilter">Open Classified Filter</label>
+            <select id="quickClassFilter">
+              <option value="all">all</option>
+              <option value="track_now">track_now</option>
+              <option value="track_later">track_later</option>
+              <option value="ignore">ignore</option>
+              <option value="unclassified">unclassified</option>
+            </select>
+          </div>
+          <div class="toolbar">
+            <button id="btnOpenBacktest" type="button" class="primary">Go Backtest</button>
+            <button id="btnOpenClassified" type="button">Go Classified</button>
+            <button id="btnOpenRail" type="button">Go Rail</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="frame-wrap">
+        <div class="frame-head">
+          <div class="left">
+            <p class="frame-title" id="frameTitle">Telegram</p>
+            <p class="frame-subtitle" id="frameSubtitle">Read-only discovery dashboard and channel tooling.</p>
+          </div>
+          <div class="frame-actions">
+            <button id="btnReloadFrame" type="button">Reload Active</button>
+            <a id="btnOpenFrame" href="telegram/" target="_blank" rel="noopener">Open New Tab</a>
+            <span class="mono" id="activePath">/telegram/</span>
+          </div>
+        </div>
+
+        <div class="frame-stage">
+          <div id="frameOverlay" class="overlay">Loading view...</div>
+          <iframe id="frame-telegram" class="frame" src="telegram/" title="Telegram Dashboard"></iframe>
+          <iframe id="frame-polymarket" class="frame" src="polymarket/" title="Polymarket Dashboard"></iframe>
+          <iframe id="frame-pipeline" class="frame" src="pipeline-map" title="Pipeline Map"></iframe>
+          <iframe id="frame-storedmarkets" class="frame" src="stored-markets" title="Stored Markets"></iframe>
+          <iframe id="frame-savedmap" class="frame" src="saved-channel-map" title="Saved Channel Map"></iframe>
+          <iframe id="frame-livelistener" class="frame" src="telegram-live" title="Telegram Live Listener"></iframe>
+          <iframe id="frame-handpicked" class="frame" src="handpicked-review" title="Handpicked Review"></iframe>
+          <iframe id="frame-agentlab" class="frame" src="agent-lab" title="Agent Lab"></iframe>
+          <iframe id="frame-backtest" class="frame" src="backtest" title="Backtest"></iframe>
+          <iframe id="frame-classified" class="frame" src="classified-markets" title="Classified Markets"></iframe>
+          <iframe id="frame-marketrail" class="frame" src="market-rail" title="Market Rail"></iframe>
+          <iframe id="frame-runtime" class="frame" src="agent-runtime" title="Agent Runtime"></iframe>
+          <iframe id="frame-prompts" class="frame" src="prompt-lab" title="Prompt Lab"></iframe>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const TAB_DEFS = [
+      { id: "telegram", label: "Telegram", icon: "✈", key: "1", path: "telegram/", title: "Telegram", subtitle: "Read-only discovery dashboard and channel tooling." },
+      { id: "polymarket", label: "Polymarket", icon: "◎", key: "2", path: "polymarket/", title: "Polymarket", subtitle: "Market discovery, market data, and intelligence feeds." },
+      { id: "pipeline", label: "Pipeline", icon: "◈", key: "3", path: "pipeline-map", title: "Pipeline Map", subtitle: "Clean market scope, saved channels, and the runtime lane in one view." },
+      { id: "storedmarkets", label: "Stored Markets", icon: "▣", key: "4", path: "stored-markets", title: "Stored Markets", subtitle: "Grouped database markets with clear context and drill-down into stored member rows." },
+      { id: "savedmap", label: "Saved Graph", icon: "⟗", key: "g", path: "saved-channel-map", title: "Saved Channel Map", subtitle: "Persisted channel-to-market links with graph filtering, drill-down, and explicit DB storage context." },
+      { id: "livelistener", label: "Live Listener", icon: "◉", key: "l", path: "telegram-live", title: "Telegram Live Listener", subtitle: "Real-time listener heartbeat plus recent stored Telegram messages, matches, and activations from the saved graph." },
+      { id: "handpicked", label: "Handpicked Review", icon: "◬", key: "h", path: "handpicked-review", title: "Handpicked Review", subtitle: "Review low-confidence and unmatched curated market requests, inspect candidates, and fix them inline." },
+      { id: "agentlab", label: "Agent Lab", icon: "⟟", key: "5", path: "agent-lab", title: "Agent Lab", subtitle: "Graph interaction and mapping workspace." },
+      { id: "backtest", label: "Backtest", icon: "⏱", key: "6", path: "backtest", title: "Backtest", subtitle: "Step-by-step Telegram pipeline backtest with prompts." },
+      { id: "classified", label: "Classified", icon: "⇄", key: "7", path: "classified-markets", title: "Classification Fixer", subtitle: "Swipe and fix market classifications quickly." },
+      { id: "marketrail", label: "Market Rail", icon: "⋯", key: "8", path: "market-rail", title: "Market Rail", subtitle: "Scrollable market-to-channel rail with smooth card navigation." },
+      { id: "runtime", label: "Runtime", icon: "●", key: "9", path: "agent-runtime", title: "Agent Runtime", subtitle: "Live agent heartbeat, current market scan progress, and event logs." },
+      { id: "prompts", label: "Prompts", icon: "⚙", key: "0", path: "prompt-lab", title: "Prompt Lab", subtitle: "Inspect runtime prompt templates and active models." },
+    ];
+
+    const STORAGE_KEY_TAB = "workspace.activeTab.v2";
+
+    const state = {
+      activeTab: "telegram",
+      autoRefresh: true,
+      intervalRef: null,
+      overview: null,
+    };
+
+    const el = {
+      nav: document.getElementById("nav"),
+      frameOverlay: document.getElementById("frameOverlay"),
+      frameTitle: document.getElementById("frameTitle"),
+      frameSubtitle: document.getElementById("frameSubtitle"),
+      activePath: document.getElementById("activePath"),
+      btnOpenFrame: document.getElementById("btnOpenFrame"),
+      btnReloadFrame: document.getElementById("btnReloadFrame"),
+      btnRefreshOverview: document.getElementById("btnRefreshOverview"),
+      btnToggleAuto: document.getElementById("btnToggleAuto"),
+      statusApi: document.getElementById("statusApi"),
+      statusDb: document.getElementById("statusDb"),
+      statusRefresh: document.getElementById("statusRefresh"),
+      kpiGrid: document.getElementById("kpiGrid"),
+      quickMarketRef: document.getElementById("quickMarketRef"),
+      quickClassFilter: document.getElementById("quickClassFilter"),
+      btnOpenBacktest: document.getElementById("btnOpenBacktest"),
+      btnOpenClassified: document.getElementById("btnOpenClassified"),
+      btnOpenRail: document.getElementById("btnOpenRail"),
+      topTitle: document.getElementById("topTitle"),
+      topSubtitle: document.getElementById("topSubtitle"),
+    };
+
+    function dot(label, cls) {
+      return `<span><span class="dot ${cls}"></span>${label}</span>`;
+    }
+
+    function currentTabDef() {
+      return TAB_DEFS.find((item) => item.id === state.activeTab) || TAB_DEFS[0];
+    }
+
+    function activeFrame() {
+      return document.getElementById(`frame-${state.activeTab}`);
+    }
+
+    function renderNav() {
+      el.nav.innerHTML = TAB_DEFS.map((tab) => (
+        `<button type="button" data-tab="${tab.id}" class="${tab.id === state.activeTab ? "active" : ""}">` +
+          `<span>${tab.icon}</span>` +
+          `<span>${tab.label}</span>` +
+          `<span class="key">${tab.key}</span>` +
+        `</button>`
+      )).join("");
+    }
+
+    function activateTab(tabId, { persist = true } = {}) {
+      const target = TAB_DEFS.find((item) => item.id === tabId) || TAB_DEFS[0];
+      state.activeTab = target.id;
+      if (persist) localStorage.setItem(STORAGE_KEY_TAB, state.activeTab);
+
+      TAB_DEFS.forEach((tab) => {
+        const frame = document.getElementById(`frame-${tab.id}`);
+        if (!frame) return;
+        if (tab.id === state.activeTab) frame.classList.add("active");
+        else frame.classList.remove("active");
+      });
+
+      renderNav();
+      el.frameTitle.textContent = target.title;
+      el.frameSubtitle.textContent = target.subtitle;
+      el.activePath.textContent = `/${target.path}`;
+      el.btnOpenFrame.href = target.path;
+      el.topTitle.textContent = `${target.title} Workspace`;
+      el.topSubtitle.textContent = target.subtitle;
+    }
+
+    function renderOverview(payload) {
+      const markets = payload?.markets || {};
+      const links = payload?.links || {};
+      const channels = payload?.channels || {};
+      const messages = payload?.messages || {};
+      const activations = payload?.activations || {};
+      const backtests = payload?.backtests || {};
+
+      const cards = [
+        { label: "Open Markets", value: markets.open ?? 0, hint: "active + not closed" },
+        { label: "Track Now", value: markets.track_now ?? 0, hint: "live monitored candidates" },
+        { label: "Track Later", value: markets.track_later ?? 0, hint: "parked for future" },
+        { label: "Ignored", value: markets.ignore ?? 0, hint: "explicitly skipped" },
+        { label: "Unclassified", value: markets.unclassified ?? 0, hint: "needs review" },
+        { label: "Linked Channels", value: links.linked_channels ?? 0, hint: `${links.active_links ?? 0} active links` },
+        { label: "Active Telegram", value: channels.active ?? 0, hint: `${channels.over_1k_members ?? 0} ≥ 1k members` },
+        { label: "Messages 24h", value: messages.ingested_24h ?? 0, hint: `activations ${activations.total ?? 0} • backtests 7d ${backtests.runs_7d ?? 0}` },
+      ];
+
+      el.kpiGrid.innerHTML = cards.map((card) => (
+        `<article class="kpi">` +
+          `<span class="k">${card.label}</span>` +
+          `<div class="v">${card.value}</div>` +
+          `<div class="hint">${card.hint}</div>` +
+        `</article>`
+      )).join("");
+    }
+
+    async function refreshOverview() {
+      const now = new Date();
+      el.statusApi.innerHTML = dot("checking", "warn");
+      try {
+        const healthRes = await fetch("/api/health", { headers: { Accept: "application/json" } });
+        if (!healthRes.ok) throw new Error("health endpoint unavailable");
+        const health = await healthRes.json();
+        el.statusApi.innerHTML = dot(health?.status === "ok" ? "online" : "degraded", health?.status === "ok" ? "good" : "warn");
+      } catch (error) {
+        el.statusApi.innerHTML = dot("offline", "danger");
+      }
+
+      try {
+        const overviewRes = await fetch("/api/intel/workspace-overview", { headers: { Accept: "application/json" } });
+        const payload = await overviewRes.json();
+        if (!overviewRes.ok) throw new Error(payload?.detail || "overview fetch failed");
+        state.overview = payload;
+        renderOverview(payload);
+        el.statusDb.innerHTML = dot("connected", "good");
+      } catch (error) {
+        el.statusDb.innerHTML = dot("error", "danger");
+      }
+
+      el.statusRefresh.textContent = now.toLocaleTimeString();
+    }
+
+    function reloadActiveFrame() {
+      const frame = activeFrame();
+      if (!frame) return;
+      el.frameOverlay.classList.add("active");
+      frame.src = frame.src;
+    }
+
+    function setupFrames() {
+      TAB_DEFS.forEach((tab) => {
+        const frame = document.getElementById(`frame-${tab.id}`);
+        if (!frame) return;
+        frame.addEventListener("load", () => {
+          if (tab.id === state.activeTab) el.frameOverlay.classList.remove("active");
+        });
+      });
+    }
+
+    function startAutoRefreshLoop() {
+      if (state.intervalRef) clearInterval(state.intervalRef);
+      if (!state.autoRefresh) return;
+      state.intervalRef = setInterval(refreshOverview, 45000);
+    }
+
+    function toggleAutoRefresh() {
+      state.autoRefresh = !state.autoRefresh;
+      el.btnToggleAuto.textContent = `Auto Refresh: ${state.autoRefresh ? "ON" : "OFF"}`;
+      el.btnToggleAuto.classList.toggle("primary", state.autoRefresh);
+      startAutoRefreshLoop();
+    }
+
+    function goBacktestWithMarket() {
+      const value = String(el.quickMarketRef.value || "").trim();
+      activateTab("backtest");
+      if (value) {
+        // backtest page currently owns its own form; we pass via URL hash as a convenience note.
+        const frame = document.getElementById("frame-backtest");
+        if (frame) {
+          frame.src = `backtest#market_ref=${encodeURIComponent(value)}`;
+          el.frameOverlay.classList.add("active");
+        }
+      }
+    }
+
+    function goClassifiedWithFilter() {
+      const filter = String(el.quickClassFilter.value || "all").trim();
+      activateTab("classified");
+      const frame = document.getElementById("frame-classified");
+      if (frame) {
+        frame.src = `classified-markets#classification=${encodeURIComponent(filter)}`;
+        el.frameOverlay.classList.add("active");
+      }
+    }
+
+    function goMarketRail() {
+      activateTab("marketrail");
+      const frame = document.getElementById("frame-marketrail");
+      if (frame) {
+        frame.src = `market-rail#classification=track_now`;
+        el.frameOverlay.classList.add("active");
+      }
+    }
+
+    function handleKeydown(event) {
+      const tag = String(event.target?.tagName || "").toLowerCase();
+      if (["input", "textarea", "select"].includes(tag)) return;
+
+      const key = String(event.key || "").toLowerCase();
+      const byKey = TAB_DEFS.find((tab) => tab.key === event.key);
+      if (byKey) {
+        event.preventDefault();
+        activateTab(byKey.id);
+        return;
+      }
+      if (key === "r") {
+        event.preventDefault();
+        reloadActiveFrame();
+        return;
+      }
+      if (key === "o") {
+        event.preventDefault();
+        window.open(currentTabDef().path, "_blank", "noopener");
+      }
+    }
+
+    function boot() {
+      const savedTab = localStorage.getItem(STORAGE_KEY_TAB);
+      if (savedTab && TAB_DEFS.some((item) => item.id === savedTab)) {
+        state.activeTab = savedTab;
+      }
+
+      renderNav();
+      activateTab(state.activeTab, { persist: false });
+      setupFrames();
+      refreshOverview();
+      startAutoRefreshLoop();
+
+      el.nav.addEventListener("click", (event) => {
+        const target = event.target.closest("button[data-tab]");
+        if (!target) return;
+        activateTab(String(target.getAttribute("data-tab") || "telegram"));
+      });
+
+      el.btnRefreshOverview.addEventListener("click", refreshOverview);
+      el.btnToggleAuto.addEventListener("click", toggleAutoRefresh);
+      el.btnReloadFrame.addEventListener("click", reloadActiveFrame);
+      el.btnOpenBacktest.addEventListener("click", goBacktestWithMarket);
+      el.btnOpenClassified.addEventListener("click", goClassifiedWithFilter);
+      el.btnOpenRail.addEventListener("click", goMarketRail);
+      document.addEventListener("keydown", handleKeydown);
+    }
+
+    boot();
+  </script>
+</body>
+</html>

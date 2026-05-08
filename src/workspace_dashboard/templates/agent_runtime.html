@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Runtime</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #060b16;
+      --card: #0d1526;
+      --card-2: #101b31;
+      --line: #1e2f4d;
+      --text: #e7eefc;
+      --muted: #9cb0d4;
+      --ok: #34d399;
+      --warn: #fbbf24;
+      --bad: #f87171;
+      --accent: #5ea2ff;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #060b16 0%, #071022 100%);
+      color: var(--text);
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    .wrap {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--card);
+    }
+
+    .title {
+      font-size: 21px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tools {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .tools input,
+    .tools select,
+    .tools button {
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--card-2);
+      color: var(--text);
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
+    .tools button {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .tools .primary {
+      border-color: #2c6fd5;
+      background: #16396b;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 12px;
+      padding: 12px;
+      min-height: 86px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .value {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .sub {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--muted);
+      display: inline-block;
+    }
+
+    .dot.ok { background: var(--ok); }
+    .dot.warn { background: var(--warn); }
+    .dot.bad { background: var(--bad); }
+
+    .market {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 12px;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .market-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .market-meta {
+      color: var(--muted);
+      font-size: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .bar {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: #0a1222;
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+
+    .bar > span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2f7fff, #58b1ff);
+      transition: width 200ms ease;
+    }
+
+    .events {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 12px;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .events-head {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .events-list {
+      max-height: 460px;
+      overflow: auto;
+      padding: 8px 12px 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .event {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--card-2);
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .event-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .event-time { color: var(--muted); }
+    .event-msg { font-size: 13px; color: var(--text); line-height: 1.4; }
+    .event-meta {
+      color: var(--muted);
+      font-size: 11px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mono {
+      font-family: "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+    }
+
+    .empty {
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 720px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="head">
+      <div>
+        <h1 class="title">Agent Runtime Monitor</h1>
+        <p class="subtitle">Live status for discovery/listener cycles and current market scan progress.</p>
+      </div>
+      <div class="tools">
+        <input id="agentName" type="text" value="telegram-market-agent" aria-label="Agent name">
+        <input id="eventLimit" type="number" min="10" max="500" value="100" aria-label="Event limit">
+        <select id="pollSeconds" aria-label="Refresh interval">
+          <option value="2">2s</option>
+          <option value="5" selected>5s</option>
+          <option value="10">10s</option>
+          <option value="20">20s</option>
+        </select>
+        <button id="toggleAuto" class="primary" type="button">Auto: ON</button>
+        <button id="refreshNow" type="button">Refresh</button>
+        <a id="openJson" class="pill" target="_blank" rel="noopener">Open JSON</a>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <div class="label">Agent</div>
+        <div class="value" id="kAgent">-</div>
+        <div class="sub" id="kStage">stage: -</div>
+      </article>
+      <article class="card">
+        <div class="label">Heartbeat</div>
+        <div class="value" id="kHeartbeat">-</div>
+        <div class="sub" id="kHeartbeatRaw">-</div>
+      </article>
+      <article class="card">
+        <div class="label">Current State</div>
+        <div class="value" id="kState">-</div>
+        <div class="sub" id="kPidHost">-</div>
+      </article>
+      <article class="card">
+        <div class="label">Event Count</div>
+        <div class="value" id="kEventCount">0</div>
+        <div class="sub" id="kLastRefresh">-</div>
+      </article>
+    </section>
+
+    <section class="market">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;">
+        <h2 class="market-title" id="marketQuestion">No market currently scanning</h2>
+        <span id="marketStatusPill" class="pill"><span class="dot warn"></span>idle</span>
+      </div>
+      <div class="market-meta" id="marketMeta"></div>
+      <div class="bar"><span id="marketBar"></span></div>
+      <div class="sub" id="marketProgressText">0 / 0</div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <div class="label">Discovery Cycle</div>
+        <div class="sub" id="discoverMeta1">started: -</div>
+        <div class="sub" id="discoverMeta2">completed: -</div>
+        <div class="sub" id="discoverMeta3">markets: - updated: -</div>
+        <div class="sub" id="discoverMeta4">links: - api_errors: - elapsed: -</div>
+      </article>
+      <article class="card">
+        <div class="label">Listener Cycle</div>
+        <div class="sub" id="listenerMeta1">started: -</div>
+        <div class="sub" id="listenerMeta2">completed: -</div>
+        <div class="sub" id="listenerMeta3">polled: - new: - fetch_errors: -</div>
+        <div class="sub" id="listenerMeta4">matched: - activations: - elapsed: -</div>
+      </article>
+      <article class="card">
+        <div class="label">Last Error</div>
+        <div class="value" id="lastError" style="font-size:14px;font-weight:600;line-height:1.4;">none</div>
+      </article>
+      <article class="card">
+        <div class="label">Data Freshness</div>
+        <div id="freshnessPill" class="pill"><span class="dot warn"></span>unknown</div>
+      </article>
+    </section>
+
+    <section class="events">
+      <div class="events-head">
+        <div>
+          <div style="font-size:18px;font-weight:700;">Recent Runtime Events</div>
+          <div class="sub">Newest first; includes cycle transitions and per-market progress traces.</div>
+        </div>
+      </div>
+      <div id="eventsList" class="events-list"></div>
+    </section>
+  </main>
+
+  <script>
+    const el = {
+      agentName: document.getElementById("agentName"),
+      eventLimit: document.getElementById("eventLimit"),
+      pollSeconds: document.getElementById("pollSeconds"),
+      toggleAuto: document.getElementById("toggleAuto"),
+      refreshNow: document.getElementById("refreshNow"),
+      openJson: document.getElementById("openJson"),
+      kAgent: document.getElementById("kAgent"),
+      kStage: document.getElementById("kStage"),
+      kHeartbeat: document.getElementById("kHeartbeat"),
+      kHeartbeatRaw: document.getElementById("kHeartbeatRaw"),
+      kState: document.getElementById("kState"),
+      kPidHost: document.getElementById("kPidHost"),
+      kEventCount: document.getElementById("kEventCount"),
+      kLastRefresh: document.getElementById("kLastRefresh"),
+      marketQuestion: document.getElementById("marketQuestion"),
+      marketStatusPill: document.getElementById("marketStatusPill"),
+      marketMeta: document.getElementById("marketMeta"),
+      marketBar: document.getElementById("marketBar"),
+      marketProgressText: document.getElementById("marketProgressText"),
+      discoverMeta1: document.getElementById("discoverMeta1"),
+      discoverMeta2: document.getElementById("discoverMeta2"),
+      discoverMeta3: document.getElementById("discoverMeta3"),
+      discoverMeta4: document.getElementById("discoverMeta4"),
+      listenerMeta1: document.getElementById("listenerMeta1"),
+      listenerMeta2: document.getElementById("listenerMeta2"),
+      listenerMeta3: document.getElementById("listenerMeta3"),
+      listenerMeta4: document.getElementById("listenerMeta4"),
+      lastError: document.getElementById("lastError"),
+      freshnessPill: document.getElementById("freshnessPill"),
+      eventsList: document.getElementById("eventsList"),
+    };
+
+    const state = {
+      auto: true,
+      timer: null,
+      loading: false,
+    };
+
+    function fmtTime(ts) {
+      if (!ts) return "-";
+      try { return new Date(ts).toLocaleString(); } catch (_) { return String(ts); }
+    }
+
+    function fmtMs(ms) {
+      if (ms == null) return "-";
+      const n = Number(ms);
+      if (!Number.isFinite(n)) return "-";
+      if (n < 1000) return `${n.toFixed(0)}ms`;
+      return `${(n / 1000).toFixed(2)}s`;
+    }
+
+    function stalePill(staleSeconds) {
+      if (staleSeconds == null) {
+        return { cls: "warn", label: "heartbeat unknown" };
+      }
+      if (staleSeconds <= 20) {
+        return { cls: "ok", label: `fresh (${staleSeconds.toFixed(1)}s)` };
+      }
+      if (staleSeconds <= 90) {
+        return { cls: "warn", label: `aging (${staleSeconds.toFixed(1)}s)` };
+      }
+      return { cls: "bad", label: `stale (${staleSeconds.toFixed(1)}s)` };
+    }
+
+    function eventLevelClass(level) {
+      const v = String(level || "").toLowerCase();
+      if (v === "error") return "bad";
+      if (v === "warn" || v === "warning") return "warn";
+      return "ok";
+    }
+
+    function marketStateClass(stage, stateValue) {
+      const s = String(stage || "").toLowerCase();
+      const st = String(stateValue || "").toLowerCase();
+      if (st.includes("error") || s.includes("error")) return { cls: "bad", label: "error" };
+      if (st.includes("running") || s.includes("discover") || s.includes("listener")) return { cls: "ok", label: "running" };
+      return { cls: "warn", label: "idle" };
+    }
+
+    function buildUrl() {
+      const agent = encodeURIComponent(String(el.agentName.value || "telegram-market-agent").trim() || "telegram-market-agent");
+      const limit = Math.max(1, Math.min(Number(el.eventLimit.value || 100), 500));
+      return `/api/intel/agent-runtime?agent_name=${agent}&event_limit=${limit}`;
+    }
+
+    function renderEvents(events) {
+      if (!events || events.length === 0) {
+        el.eventsList.innerHTML = `<div class="empty">No runtime events yet.</div>`;
+        return;
+      }
+      el.eventsList.innerHTML = events.map((evt) => {
+        const lvl = eventLevelClass(evt.level);
+        const stage = evt.stage ? `<span class="pill">stage: ${evt.stage}</span>` : "";
+        const mid = evt.market_id ? `<span class="mono">market: ${evt.market_id}</span>` : "";
+        return (
+          `<article class="event">` +
+            `<div class="event-top">` +
+              `<span class="pill"><span class="dot ${lvl}"></span>${evt.level || "info"} · ${evt.event_type || "event"}</span>` +
+              `<span class="event-time">${fmtTime(evt.event_time)}</span>` +
+            `</div>` +
+            `<div class="event-msg">${evt.message || "(no message)"}</div>` +
+            `<div class="event-meta">${stage}${mid}</div>` +
+          `</article>`
+        );
+      }).join("");
+    }
+
+    function render(payload) {
+      const status = payload?.status || {};
+      const discover = status.discover || {};
+      const listener = status.listener || {};
+      const market = status.current_market || {};
+      const events = Array.isArray(payload?.events) ? payload.events : [];
+      const stale = stalePill(status.stale_seconds);
+      const runState = marketStateClass(status.stage, status.state);
+
+      el.kAgent.textContent = payload?.agent_name || "-";
+      el.kStage.textContent = `stage: ${status.stage || "-"}`;
+      el.kHeartbeat.textContent = status.stale_seconds == null ? "-" : `${Number(status.stale_seconds).toFixed(1)}s`;
+      el.kHeartbeatRaw.textContent = `heartbeat_at: ${fmtTime(status.heartbeat_at)}`;
+      el.kState.textContent = status.state || "-";
+      el.kPidHost.textContent = `pid: ${status.pid || "-"} · host: ${status.hostname || "-"}`;
+      el.kEventCount.textContent = String(payload?.event_count || 0);
+      el.kLastRefresh.textContent = `updated: ${fmtTime(status.updated_at)}`;
+
+      el.marketQuestion.textContent = market.question || market.slug || "No market currently scanning";
+      const index = market.index ?? 0;
+      const total = market.total ?? 0;
+      const ratio = Number.isFinite(Number(market.progress_ratio)) ? Number(market.progress_ratio) : 0;
+      el.marketBar.style.width = `${Math.max(0, Math.min(1, ratio)) * 100}%`;
+      el.marketProgressText.textContent = `${index} / ${total} (${(ratio * 100).toFixed(1)}%)`;
+      el.marketMeta.innerHTML = [
+        market.market_id ? `<span class="pill mono">market_id: ${market.market_id}</span>` : "",
+        market.slug ? `<span class="pill mono">slug: ${market.slug}</span>` : "",
+        market.detail ? `<span class="pill">${market.detail}</span>` : "",
+      ].join("");
+      el.marketStatusPill.innerHTML = `<span class="dot ${runState.cls}"></span>${runState.label}`;
+
+      el.discoverMeta1.textContent = `started: ${fmtTime(discover.started_at)}`;
+      el.discoverMeta2.textContent = `completed: ${fmtTime(discover.completed_at)}`;
+      el.discoverMeta3.textContent = `markets: ${discover.markets_considered ?? "-"} updated: ${discover.markets_updated ?? "-"}`;
+      el.discoverMeta4.textContent = `links: ${discover.links_written ?? "-"} api_errors: ${discover.api_errors ?? "-"} elapsed: ${fmtMs(discover.elapsed_ms)}`;
+
+      el.listenerMeta1.textContent = `started: ${fmtTime(listener.started_at)}`;
+      el.listenerMeta2.textContent = `completed: ${fmtTime(listener.completed_at)}`;
+      el.listenerMeta3.textContent = `polled: ${listener.channels_polled ?? "-"} new: ${listener.new_messages ?? "-"} fetch_errors: ${listener.fetch_errors ?? "-"}`;
+      el.listenerMeta4.textContent = `matched: ${listener.matched_pairs ?? "-"} activations: ${listener.activations_inserted ?? "-"} elapsed: ${fmtMs(listener.elapsed_ms)}`;
+
+      el.lastError.textContent = status.last_error || "none";
+      el.freshnessPill.innerHTML = `<span class="dot ${stale.cls}"></span>${stale.label}`;
+
+      renderEvents(events);
+      el.openJson.href = buildUrl();
+    }
+
+    function renderError(message) {
+      el.eventsList.innerHTML = `<div class="empty">Failed to load runtime snapshot: ${message}</div>`;
+    }
+
+    async function fetchSnapshot() {
+      if (state.loading) return;
+      state.loading = true;
+      try {
+        const url = buildUrl();
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) {
+          let detail = `${res.status} ${res.statusText}`;
+          try {
+            const body = await res.json();
+            if (body?.detail) detail = body.detail;
+          } catch (_) {}
+          throw new Error(detail);
+        }
+        const payload = await res.json();
+        render(payload);
+      } catch (err) {
+        renderError(err?.message || String(err));
+      } finally {
+        state.loading = false;
+      }
+    }
+
+    function setAuto(enabled) {
+      state.auto = enabled;
+      el.toggleAuto.textContent = `Auto: ${enabled ? "ON" : "OFF"}`;
+      if (state.timer) {
+        clearInterval(state.timer);
+        state.timer = null;
+      }
+      if (enabled) {
+        const interval = Math.max(2, Number(el.pollSeconds.value || 5)) * 1000;
+        state.timer = setInterval(fetchSnapshot, interval);
+      }
+    }
+
+    el.refreshNow.addEventListener("click", fetchSnapshot);
+    el.toggleAuto.addEventListener("click", () => setAuto(!state.auto));
+    el.pollSeconds.addEventListener("change", () => { if (state.auto) setAuto(true); });
+    el.agentName.addEventListener("change", fetchSnapshot);
+    el.eventLimit.addEventListener("change", fetchSnapshot);
+
+    setAuto(true);
+    fetchSnapshot();
+  </script>
+</body>
+</html>

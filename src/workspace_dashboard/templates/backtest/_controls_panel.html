@@ -1,0 +1,46 @@
+<section class="panel grid">
+  <div class="col-12">
+    <label for="marketRef">Market Link / Slug / ID</label>
+    <input id="marketRef" type="text" placeholder="https://polymarket.com/event/iran-strikes-israel-on" />
+  </div>
+  <div class="col-3">
+    <label for="targetChannels">Target Channels</label>
+    <input id="targetChannels" type="number" min="1" max="100" value="25" />
+  </div>
+  <div class="col-3">
+    <label for="maxQueries">Max Queries</label>
+    <input id="maxQueries" type="number" min="1" max="12" value="6" />
+  </div>
+  <div class="col-3">
+    <label for="minMembers">Min Members</label>
+    <input id="minMembers" type="number" min="0" value="25000" />
+  </div>
+  <div class="col-3">
+    <label for="maxReviewChannels">Review Channels (Max)</label>
+    <input id="maxReviewChannels" type="number" min="1" max="50" value="20" />
+  </div>
+  <div class="col-3">
+    <label for="reviewMessageLimit">Messages Per Channel</label>
+    <input id="reviewMessageLimit" type="number" min="1" max="20" value="10" />
+  </div>
+  <div class="col-3">
+    <label for="sessionRunId">Saved Run ID</label>
+    <input id="sessionRunId" type="number" min="1" placeholder="8" />
+  </div>
+  <div class="col-9 actions">
+    <button id="loadLatestButton" type="button">Load Latest Saved Run</button>
+    <button id="loadRunButton" type="button">Load Run ID</button>
+    <button id="clearSessionButton" type="button">Clear Session</button>
+    <span id="currentSessionChip" class="chip">Session: none</span>
+  </div>
+  <div class="col-12 actions">
+    <button id="runButton" class="primary" type="button">Run Backtest</button>
+    <button id="rerunPromptButton" type="button">Rerun With Edited Prompt</button>
+    <button id="prevButton" type="button">Prev</button>
+    <button id="nextButton" type="button">Next</button>
+    <span id="stageChip" class="chip">Stage 0 / 0</span>
+  </div>
+  <div class="col-12">
+    <div id="status" class="status">Ready.</div>
+  </div>
+</section>

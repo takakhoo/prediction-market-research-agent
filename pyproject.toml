@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "polymarket-news-agent"
+version = "0.1.0"
+description = "Telegram discovery dashboard MVP for channel discovery"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "aiotdlib==0.27.6",
+  "fastapi>=0.110,<1.0",
+  "uvicorn[standard]>=0.29,<1.0",
+  "jinja2>=3.1,<4.0",
+  "python-multipart>=0.0.9,<1.0",
+  "aiosqlite>=0.20,<1.0",
+  "openai>=1.75,<2.0",
+  "psycopg[binary]>=3.1,<4.0",
+  "pydantic-settings>=2.1,<3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0,<9.0",
+  "pytest-asyncio>=0.23,<1.0",
+  "httpx>=0.27,<1.0",
+]
+
+[tool.setuptools]
+packages = ["src", "src.discovery", "src.discovery_dashboard", "src.polymarket", "src.polymarket_dashboard", "src.workspace_dashboard"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

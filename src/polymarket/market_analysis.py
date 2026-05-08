@@ -1,0 +1,563 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+import json
+from typing import Any, Callable
+
+from .config import PolymarketConfig
+from .llm_runtime import JSONReasoningClient, resolve_reasoning_client
+from .market_intel_repository import MarketIntelRepository
+from .prompt_store import load_prompt_template, render_prompt_template
+
+
+@dataclass(frozen=True)
+class MarketAnalysisResult:
+    market_id: str
+    rules_hash: str | None
+    is_local: bool
+    local_score: float
+    classification: str
+    reason_json: dict[str, Any]
+    status: str = "active"
+    analysis_version: str = "v1"
+    prompt_version: str = "local-market-template-v1"
+
+    def as_repo_row(self) -> dict[str, Any]:
+        return {
+            "market_id": self.market_id,
+            "rules_hash": self.rules_hash,
+            "is_local": self.is_local,
+            "local_score": self.local_score,
+            "classification": self.classification,
+            "reason_json": self.reason_json,
+            "status": self.status,
+            "analysis_version": self.analysis_version,
+            "prompt_version": self.prompt_version,
+        }
+
+
+@dataclass(frozen=True)
+class MarketAnalysisStats:
+    pending_markets: int
+    analyzed_markets: int
+    local_candidates: int
+    track_now: int
+    track_later: int
+    ignored: int
+
+
+class LocalMarketRuleClassifier:
+    """AI-first local-market classifier with legacy heuristic fallback."""
+
+    def __init__(
+        self,
+        *,
+        analysis_version: str | None = None,
+        prompt_version: str | None = None,
+        reasoning_client: JSONReasoningClient | None = None,
+        model: str | None = None,
+        config: PolymarketConfig | None = None,
+    ):
+        self.config = config or PolymarketConfig.from_env()
+        self.reasoning_client = reasoning_client or resolve_reasoning_client(self.config, required=False)
+        self.model = model or self.config.ai_market_classifier_model
+        self.runtime_mode = "ai" if self.reasoning_client is not None else "heuristic_legacy"
+        self.analysis_version = analysis_version or (
+            "ai_local_market_v1" if self.runtime_mode == "ai" else "heuristic_local_market_v1"
+        )
+        self.prompt_version = prompt_version or (
+            "local-market-template-v2-ai"
+            if self.runtime_mode == "ai"
+            else "local-market-template-v1-legacy"
+        )
+        self._high_signal_tokens = {
+            "strike",
+            "air strike",
+            "airstrike",
+            "missile",
+            "drone",
+            "offensive",
+            "ceasefire",
+            "military",
+            "war",
+            "forces enter",
+            "gaza",
+            "lebanon",
+            "iran",
+            "israel",
+            "ukraine",
+            "russia",
+            "coup",
+            "leader",
+            "regime",
+            "border",
+        }
+        self._low_signal_tokens = {
+            "nba",
+            "nfl",
+            "mlb",
+            "nhl",
+            "premier league",
+            "champions league",
+            "grammy",
+            "oscar",
+            "box office",
+            "album",
+            "crypto price",
+            "bitcoin price",
+            "eth price",
+        }
+
+    def classify(self, market: dict[str, Any]) -> MarketAnalysisResult:
+        if self.reasoning_client is not None:
+            return self._classify_with_ai(market)
+        return self._classify_with_heuristic(market)
+
+    def classify_with_trace(self, market: dict[str, Any]) -> dict[str, Any]:
+        return self.classify_with_trace_overrides(
+            market,
+            system_prompt_override=None,
+            user_prompt_override=None,
+        )
+
+    def classify_with_trace_overrides(
+        self,
+        market: dict[str, Any],
+        *,
+        system_prompt_override: str | None,
+        user_prompt_override: str | None,
+    ) -> dict[str, Any]:
+        if self.reasoning_client is not None:
+            result, prompt_debug = self._classify_with_ai_trace_overrides(
+                market,
+                system_prompt_override=system_prompt_override,
+                user_prompt_override=user_prompt_override,
+            )
+        else:
+            result = self._classify_with_heuristic(market)
+            prompt_debug = {
+                "runtime_mode": self.runtime_mode,
+                "editable": False,
+                "model": None,
+                "schema_name": "market_local_classifier",
+                "input_materials": self._market_payload(market),
+                "system_prompt": self._ai_system_prompt(),
+                "user_prompt": self._ai_user_prompt(market),
+                "output_json": None,
+                "override_applied": False,
+                "note": "AI runtime is not enabled. This market-local result was generated by legacy heuristic fallback.",
+            }
+        return {
+            "result": result.as_repo_row(),
+            "prompt_debug": prompt_debug,
+        }
+
+    def _classify_with_ai(self, market: dict[str, Any]) -> MarketAnalysisResult:
+        system_prompt = self._ai_system_prompt()
+        user_prompt = self._ai_user_prompt(market)
+        payload = self.reasoning_client.generate_json(
+            model=self.model,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            schema_name="market_local_classifier",
+            schema=_market_classifier_schema(),
+        )
+        return self._build_result_from_ai_payload(
+            market=market,
+            payload=payload,
+        )
+
+    def _classify_with_ai_trace_overrides(
+        self,
+        market: dict[str, Any],
+        *,
+        system_prompt_override: str | None,
+        user_prompt_override: str | None,
+    ) -> tuple[MarketAnalysisResult, dict[str, Any]]:
+        system_prompt = (
+            str(system_prompt_override).strip()
+            if system_prompt_override and str(system_prompt_override).strip()
+            else self._ai_system_prompt()
+        )
+        user_prompt = (
+            str(user_prompt_override).strip()
+            if user_prompt_override and str(user_prompt_override).strip()
+            else self._ai_user_prompt(market)
+        )
+        payload = self.reasoning_client.generate_json(
+            model=self.model,
+            system_prompt=system_prompt,
+            user_prompt=user_prompt,
+            schema_name="market_local_classifier",
+            schema=_market_classifier_schema(),
+        )
+        result = self._build_result_from_ai_payload(
+            market=market,
+            payload=payload,
+        )
+        prompt_debug = {
+            "runtime_mode": self.runtime_mode,
+            "editable": False,
+            "model": self.model,
+            "schema_name": "market_local_classifier",
+            "input_materials": self._market_payload(market),
+            "system_prompt": system_prompt,
+            "user_prompt": user_prompt,
+            "output_json": payload,
+            "override_applied": bool(
+                (system_prompt_override and str(system_prompt_override).strip())
+                or (user_prompt_override and str(user_prompt_override).strip())
+            ),
+            "note": "",
+        }
+        return result, prompt_debug
+
+    def _build_result_from_ai_payload(
+        self,
+        *,
+        market: dict[str, Any],
+        payload: dict[str, Any],
+    ) -> MarketAnalysisResult:
+
+        reason_json = payload.get("reason_json") or {}
+        classification = str(payload.get("classification") or "track_later").strip().lower()
+        if classification not in {"track_now", "track_later", "ignore"}:
+            classification = "track_later"
+        is_local = bool(payload.get("is_local"))
+        local_score = max(0.0, min(float(payload.get("local_score") or 0.0), 1.0))
+        if not bool(market.get("active", False)) or bool(market.get("closed", False)):
+            classification = "ignore"
+            is_local = False
+            local_score = 0.0
+            reason_json = {
+                **reason_json,
+                "track_decision": "ignore",
+                "reason_short": "market_inactive_or_closed",
+            }
+
+        return MarketAnalysisResult(
+            market_id=str(market.get("market_id") or ""),
+            rules_hash=market.get("rules_hash"),
+            is_local=is_local,
+            local_score=round(local_score, 5),
+            classification=classification,
+            reason_json=reason_json,
+            status="active",
+            analysis_version=self.analysis_version,
+            prompt_version=self.prompt_version,
+        )
+
+    def _ai_system_prompt(self) -> str:
+        fallback = (
+            "You are classifying Polymarket markets for a local-information-edge trading and discovery system. "
+            "Decide whether this market should be tracked now, tracked later, or ignored. "
+            "Reason about whether local on-the-ground information, local languages, official local channels, "
+            "regional journalists, or community alerts could provide a speed edge. "
+            "Return strict JSON only."
+        )
+        return load_prompt_template("local_market/system.txt", fallback)
+
+    def _ai_user_prompt(self, market: dict[str, Any]) -> str:
+        fallback_template = (
+            "Classify this market.\n\n"
+            "Requirements:\n"
+            "- 'track_now' means there is likely a fast local-information edge worth immediate Telegram discovery.\n"
+            "- 'track_later' means the market may matter but does not currently justify aggressive local discovery.\n"
+            "- 'ignore' means it should not be part of this local-news pipeline.\n"
+            "- Prefer geopolitics, war, military actions, coups, border incidents, regime stability, and similar local-reporting-sensitive events.\n"
+            "- Down-rank sports, entertainment, broad public-information markets, and anything with little local speed edge.\n"
+            "- Include priority regions, languages, and channel profile types we would need.\n\n"
+            "MARKET_JSON:\n{{MARKET_JSON}}"
+        )
+        template = load_prompt_template("local_market/user.txt", fallback_template)
+        return render_prompt_template(
+            template,
+            {
+                "MARKET_JSON": json.dumps(self._market_payload(market), ensure_ascii=False, indent=2),
+            },
+        )
+
+    def _classify_with_heuristic(self, market: dict[str, Any]) -> MarketAnalysisResult:
+        market_id = str(market.get("market_id") or "")
+        question = str(market.get("question") or "")
+        description = str(market.get("description") or "")
+        rules_text = str(market.get("rules_text") or "")
+        market_context = str(market.get("market_context") or "")
+
+        searchable = " ".join([question, description, rules_text, market_context]).lower()
+        high_hits = [token for token in self._high_signal_tokens if token in searchable]
+        low_hits = [token for token in self._low_signal_tokens if token in searchable]
+
+        score = 0.25
+        score += min(0.55, 0.11 * len(high_hits))
+        score -= min(0.35, 0.10 * len(low_hits))
+
+        archetype = str(market.get("market_archetype") or "unknown")
+        if archetype.startswith("binary"):
+            score += 0.10
+        if archetype == "categorical_group":
+            score -= 0.05
+
+        high_competition = bool(market.get("high_competition"))
+        if high_competition:
+            score -= 0.08
+
+        score = max(0.0, min(score, 1.0))
+        is_local = score >= 0.55
+
+        track_decision = "track_now" if is_local else "track_later"
+        if not bool(market.get("active", False)) or bool(market.get("closed", False)):
+            track_decision = "ignore"
+            is_local = False
+            score = 0.0
+
+        outcomes = market.get("outcomes") or []
+        price_flags = []
+        for item in outcomes:
+            probability = _safe_float(item.get("probability"))
+            flag = "neutral"
+            if probability is not None and probability >= 0.75:
+                flag = "likely"
+            elif probability is not None and probability <= 0.25:
+                flag = "unlikely"
+            price_flags.append(
+                {
+                    "outcome_index": item.get("outcome_index"),
+                    "label": item.get("outcome_label"),
+                    "probability": probability,
+                    "flag": flag,
+                }
+            )
+
+        priority_languages = _suggest_languages(searchable)
+        priority_regions = _suggest_regions(searchable)
+
+        reason_short = (
+            f"high_hits={len(high_hits)} low_hits={len(low_hits)} "
+            f"archetype={archetype} high_competition={high_competition}"
+        )
+        reason_json = {
+            "track_decision": track_decision,
+            "edge_hypothesis": _edge_hypothesis(is_local, high_hits, low_hits),
+            "priority_languages": priority_languages,
+            "priority_regions": priority_regions,
+            "channel_profiles_needed": _channel_profiles_for_market(searchable),
+            "competition_flag": {
+                "high_competition": high_competition,
+                "reason": "volume_above_threshold" if high_competition else "volume_below_threshold",
+            },
+            "price_flags": price_flags,
+            "reason_short": reason_short,
+            "reason_detailed": [
+                f"Detected high-signal tokens: {high_hits}" if high_hits else "No high-signal tokens detected",
+                f"Detected low-signal tokens: {low_hits}" if low_hits else "No low-signal tokens detected",
+                f"Archetype: {archetype}",
+            ],
+        }
+
+        return MarketAnalysisResult(
+            market_id=market_id,
+            rules_hash=market.get("rules_hash"),
+            is_local=is_local,
+            local_score=round(score, 5),
+            classification=track_decision,
+            reason_json=reason_json,
+            status="active",
+            analysis_version=self.analysis_version,
+            prompt_version=self.prompt_version,
+        )
+
+    def _market_payload(self, market: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "market_id": str(market.get("market_id") or ""),
+            "slug": str(market.get("slug") or ""),
+            "question": str(market.get("question") or ""),
+            "description": str(market.get("description") or ""),
+            "rules_text": str(market.get("rules_text") or ""),
+            "market_context": str(market.get("market_context") or ""),
+            "market_archetype": str(market.get("market_archetype") or "unknown"),
+            "high_competition": bool(market.get("high_competition")),
+            "active": bool(market.get("active", False)),
+            "closed": bool(market.get("closed", False)),
+            "outcomes": list(market.get("outcomes") or []),
+        }
+
+
+class MarketAnalysisService:
+    def __init__(
+        self,
+        repository: MarketIntelRepository,
+        classifier: LocalMarketRuleClassifier,
+        log_fn: Callable[[str], None] | None = None,
+    ):
+        self.repository = repository
+        self.classifier = classifier
+        self._log = log_fn or (lambda _: None)
+
+    def analyze_pending(self, *, limit: int = 100) -> MarketAnalysisStats:
+        pending = self.repository.get_pending_market_analysis_rows(limit=limit)
+        self._log(f"analysis_pending count={len(pending)}")
+        if not pending:
+            return MarketAnalysisStats(
+                pending_markets=0,
+                analyzed_markets=0,
+                local_candidates=0,
+                track_now=0,
+                track_later=0,
+                ignored=0,
+            )
+
+        results = [self.classifier.classify(market) for market in pending]
+        repo_rows = [item.as_repo_row() for item in results]
+        analyzed = self.repository.save_market_analysis_results(
+            repo_rows,
+            keep_history=self.classifier.config.market_analysis_keep_history,
+        )
+
+        track_now = sum(1 for item in results if item.classification == "track_now")
+        track_later = sum(1 for item in results if item.classification == "track_later")
+        ignored = sum(1 for item in results if item.classification == "ignore")
+        local_candidates = sum(1 for item in results if item.is_local)
+
+        return MarketAnalysisStats(
+            pending_markets=len(pending),
+            analyzed_markets=analyzed,
+            local_candidates=local_candidates,
+            track_now=track_now,
+            track_later=track_later,
+            ignored=ignored,
+        )
+
+
+def _safe_float(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _suggest_languages(searchable_text: str) -> list[str]:
+    languages = {"en"}
+    if any(token in searchable_text for token in ["israel", "gaza", "lebanon", "idf", "iran", "tehran"]):
+        languages.update({"ar", "he", "fa"})
+    if any(token in searchable_text for token in ["venezuela", "mexico", "argentina", "colombia", "brazil"]):
+        languages.add("es")
+    return sorted(languages)
+
+
+def _suggest_regions(searchable_text: str) -> list[str]:
+    regions = []
+    if any(token in searchable_text for token in ["israel", "gaza", "lebanon", "iran", "yemen", "syria"]):
+        regions.append("middle_east")
+    if any(token in searchable_text for token in ["ukraine", "russia"]):
+        regions.append("eastern_europe")
+    if any(token in searchable_text for token in ["venezuela", "argentina", "colombia"]):
+        regions.append("latin_america")
+    return regions or ["global"]
+
+
+def _channel_profiles_for_market(searchable_text: str) -> list[str]:
+    if any(token in searchable_text for token in ["strike", "offensive", "military", "forces"]):
+        return ["official_military", "local_journalists", "community_alerts"]
+    if any(token in searchable_text for token in ["election", "leader", "president"]):
+        return ["official_government", "local_political_reporters", "regional_newsrooms"]
+    return ["general_local_reporters", "regional_wire_channels"]
+
+
+def _edge_hypothesis(is_local: bool, high_hits: list[str], low_hits: list[str]) -> str:
+    if is_local:
+        return (
+            "Likely local-info edge due to fast on-ground reporting potential and "
+            f"signal terms {high_hits[:4]}."
+        )
+    if low_hits:
+        return (
+            "Lower local edge likely because market appears dominated by broad/public "
+            f"information channels ({low_hits[:3]})."
+        )
+    return "Insufficient local-edge indicators; keep in lower-priority monitoring tier."
+
+
+def _market_classifier_schema() -> dict[str, Any]:
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "required": [
+            "is_local",
+            "local_score",
+            "classification",
+            "reason_json",
+        ],
+        "properties": {
+            "is_local": {"type": "boolean"},
+            "local_score": {"type": "number"},
+            "classification": {
+                "type": "string",
+                "enum": ["track_now", "track_later", "ignore"],
+            },
+            "reason_json": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "track_decision",
+                    "edge_hypothesis",
+                    "priority_languages",
+                    "priority_regions",
+                    "channel_profiles_needed",
+                    "competition_flag",
+                    "price_flags",
+                    "reason_short",
+                    "reason_detailed",
+                ],
+                "properties": {
+                    "track_decision": {
+                        "type": "string",
+                        "enum": ["track_now", "track_later", "ignore"],
+                    },
+                    "edge_hypothesis": {"type": "string"},
+                    "priority_languages": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                    },
+                    "priority_regions": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                    },
+                    "channel_profiles_needed": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                    },
+                    "competition_flag": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["high_competition", "reason"],
+                        "properties": {
+                            "high_competition": {"type": "boolean"},
+                            "reason": {"type": "string"},
+                        },
+                    },
+                    "price_flags": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "required": ["outcome_index", "label", "probability", "flag"],
+                            "properties": {
+                                "outcome_index": {"type": ["integer", "null"]},
+                                "label": {"type": ["string", "null"]},
+                                "probability": {"type": ["number", "null"]},
+                                "flag": {"type": "string"},
+                            },
+                        },
+                    },
+                    "reason_short": {"type": "string"},
+                    "reason_detailed": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                    },
+                },
+            },
+        },
+    }

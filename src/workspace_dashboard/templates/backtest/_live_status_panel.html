@@ -1,0 +1,23 @@
+<section class="panel live-panel">
+  <h2 style="font-size:16px;">Live Status</h2>
+  <p class="subtitle">Real-time run status while backtest is in progress. This is the in-progress tracker.</p>
+  <div class="live-grid">
+    <div class="live-card">
+      <span class="live-label">State</span>
+      <div id="liveState" class="live-chip idle">idle</div>
+    </div>
+    <div class="live-card">
+      <span class="live-label">Elapsed</span>
+      <div id="liveElapsed" class="live-value">00:00</div>
+    </div>
+    <div class="live-card">
+      <span class="live-label">Current Operation</span>
+      <div id="liveStep" class="live-value">Waiting for run</div>
+    </div>
+    <div class="live-card">
+      <span class="live-label">Last Result</span>
+      <div id="liveResult" class="live-value">None yet</div>
+    </div>
+  </div>
+  <ul id="liveLog" class="live-log"></ul>
+</section>

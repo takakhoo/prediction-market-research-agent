@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Telegram Live Listener</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #06101b;
+      --panel: #0d1828;
+      --panel-2: #101d31;
+      --line: #203352;
+      --text: #e8eefb;
+      --muted: #97a9c9;
+      --accent: #57a5ff;
+      --good: #34d399;
+      --warn: #fbbf24;
+      --bad: #f87171;
+      --ink-2: #bfd3f6;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top right, rgba(87, 165, 255, 0.14), transparent 26%),
+        linear-gradient(180deg, #06101b 0%, #071220 100%);
+      color: var(--text);
+      font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .wrap {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .hero,
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(15, 26, 44, 0.94), rgba(11, 20, 34, 0.98));
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero {
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+    }
+
+    .hero p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      max-width: 780px;
+      line-height: 1.45;
+      font-size: 0.92rem;
+    }
+
+    .tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tools input,
+    .tools select,
+    .tools button {
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(10, 18, 30, 0.9);
+      color: var(--text);
+      padding: 0 10px;
+      font: inherit;
+      font-size: 0.82rem;
+    }
+
+    .tools button {
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .tools .primary {
+      background: #153d6f;
+      border-color: #2b73d7;
+    }
+
+    .status-strip {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--ink-2);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--muted);
+      display: inline-block;
+    }
+
+    .dot.good { background: var(--good); }
+    .dot.warn { background: var(--warn); }
+    .dot.bad { background: var(--bad); }
+
+    .kpi-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 12px;
+      min-height: 88px;
+    }
+
+    .k {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.67rem;
+      margin-bottom: 6px;
+    }
+
+    .v {
+      font-size: 1.35rem;
+      font-weight: 800;
+      line-height: 1.05;
+    }
+
+    .hint {
+      margin-top: 6px;
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .layout {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: minmax(0, 2fr) minmax(320px, 0.95fr);
+      align-items: start;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 0.98rem;
+      font-weight: 800;
+    }
+
+    .section-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .message {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .message-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .message-title {
+      margin: 0;
+      font-size: 0.98rem;
+      font-weight: 800;
+    }
+
+    .meta,
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.76rem;
+      margin-top: 6px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 0.72rem;
+      line-height: 1;
+      color: var(--ink-2);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .chip.good {
+      border-color: rgba(52, 211, 153, 0.45);
+      background: rgba(52, 211, 153, 0.12);
+      color: #8ff0ca;
+    }
+
+    .chip.warn {
+      border-color: rgba(251, 191, 36, 0.4);
+      background: rgba(251, 191, 36, 0.12);
+      color: #fde49a;
+    }
+
+    .chip.bad {
+      border-color: rgba(248, 113, 113, 0.4);
+      background: rgba(248, 113, 113, 0.12);
+      color: #fecaca;
+    }
+
+    .message-body {
+      white-space: pre-wrap;
+      line-height: 1.55;
+      font-size: 0.91rem;
+      color: var(--text);
+    }
+
+    .match-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .match {
+      border: 1px solid rgba(87, 165, 255, 0.28);
+      border-radius: 12px;
+      background: rgba(87, 165, 255, 0.08);
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .match-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      font-size: 0.78rem;
+    }
+
+    .match-title {
+      font-weight: 800;
+      color: #d5e5ff;
+    }
+
+    .side-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .side-list {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      max-height: 440px;
+      overflow: auto;
+    }
+
+    .activation,
+    .event {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .activation h3,
+    .event h3 {
+      margin: 0;
+      font-size: 0.86rem;
+      font-weight: 800;
+    }
+
+    .tiny {
+      font-size: 0.73rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .empty {
+      padding: 24px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      text-align: center;
+    }
+
+    @media (max-width: 1260px) {
+      .kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 740px) {
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <h1>Telegram Live Listener</h1>
+        <p>Simple runtime validation view for the saved handpicked graph. This page polls the database for fresh listener output so you can compare what the system received against Telegram in near real time.</p>
+      </div>
+      <div class="tools">
+        <input id="sourceFile" type="text" placeholder="source file filter, optional">
+        <input id="linkSource" type="text" value="ai_handpicked_batch_v1" placeholder="link source">
+        <select id="messageLimit">
+          <option value="40">40 messages</option>
+          <option value="80" selected>80 messages</option>
+          <option value="120">120 messages</option>
+        </select>
+        <button id="refreshBtn" type="button" class="primary">Refresh</button>
+        <button id="autoBtn" type="button">Auto: ON</button>
+        <a id="jsonLink" href="/api/intel/telegram-live" target="_blank" rel="noopener">Open JSON</a>
+      </div>
+    </section>
+
+    <section class="status-strip">
+      <div class="pill" id="pillHeartbeat"><span class="dot warn"></span>checking heartbeat</div>
+      <div class="pill" id="pillScope">scope pending</div>
+      <div class="pill" id="pillLastMessage">last message pending</div>
+      <div class="pill" id="pillRefresh">never refreshed</div>
+    </section>
+
+    <section class="panel">
+      <div class="section-head">
+        <div>
+          <h2>Listener Snapshot</h2>
+          <p>DB-backed runtime counters from the saved graph and the listener heartbeat.</p>
+        </div>
+      </div>
+      <div class="list">
+        <div class="kpi-grid" id="kpiGrid"></div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="section-head">
+          <div>
+            <h2>Recent Messages</h2>
+            <p>Latest stored messages from watched channels, plus saved-market matches and activations.</p>
+          </div>
+          <div class="tiny" id="messageSummary">loading</div>
+        </div>
+        <div class="list" id="messageList">
+          <div class="empty">Loading recent messages…</div>
+        </div>
+      </section>
+
+      <aside class="side-stack">
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Recent Activations</h2>
+              <p>Most recent stored activations linked to saved handpicked markets.</p>
+            </div>
+          </div>
+          <div class="side-list" id="activationList">
+            <div class="empty">No activations loaded.</div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <h2>Runtime Events</h2>
+              <p>Listener startup, refresh, and error events from <code>agent_runtime_events</code>.</p>
+            </div>
+          </div>
+          <div class="side-list" id="eventList">
+            <div class="empty">No events loaded.</div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      auto: true,
+      intervalRef: null,
+    };
+
+    const el = {
+      sourceFile: document.getElementById("sourceFile"),
+      linkSource: document.getElementById("linkSource"),
+      messageLimit: document.getElementById("messageLimit"),
+      refreshBtn: document.getElementById("refreshBtn"),
+      autoBtn: document.getElementById("autoBtn"),
+      jsonLink: document.getElementById("jsonLink"),
+      pillHeartbeat: document.getElementById("pillHeartbeat"),
+      pillScope: document.getElementById("pillScope"),
+      pillLastMessage: document.getElementById("pillLastMessage"),
+      pillRefresh: document.getElementById("pillRefresh"),
+      kpiGrid: document.getElementById("kpiGrid"),
+      messageSummary: document.getElementById("messageSummary"),
+      messageList: document.getElementById("messageList"),
+      activationList: document.getElementById("activationList"),
+      eventList: document.getElementById("eventList"),
+    };
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function fmtDate(value) {
+      if (!value) return "n/a";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return escapeHtml(value);
+      return date.toLocaleString();
+    }
+
+    function formatCount(value) {
+      const number = Number(value || 0);
+      return Number.isFinite(number) ? number.toLocaleString() : "0";
+    }
+
+    function heartbeatState(status) {
+      const stale = Number(status?.stale_seconds ?? 1e9);
+      if (!status?.heartbeat_at) {
+        return { cls: "warn", label: "no heartbeat" };
+      }
+      if (stale <= 15) return { cls: "good", label: `healthy • ${Math.round(stale)}s stale` };
+      if (stale <= 60) return { cls: "warn", label: `late • ${Math.round(stale)}s stale` };
+      return { cls: "bad", label: `stale • ${Math.round(stale)}s stale` };
+    }
+
+    function buildUrl() {
+      const params = new URLSearchParams();
+      const sourceFile = el.sourceFile.value.trim();
+      const linkSource = el.linkSource.value.trim();
+      params.set("message_limit", el.messageLimit.value);
+      params.set("event_limit", "24");
+      params.set("activation_limit", "16");
+      if (sourceFile) params.set("source_file", sourceFile);
+      if (linkSource) params.set("link_source", linkSource);
+      return `/api/intel/telegram-live?${params.toString()}`;
+    }
+
+    function updateJsonLink() {
+      el.jsonLink.href = buildUrl();
+    }
+
+    function renderKpis(payload) {
+      const counts = payload?.counts || {};
+      const runtime = payload?.runtime?.status || {};
+      const raw = runtime?.raw || {};
+      const cards = [
+        ["Watched Channels", counts.watched_channels_total, "linked channels in runtime allowlist"],
+        ["Watched Markets", counts.watched_markets_total, "approved markets currently watched"],
+        ["Saved Links", counts.links_total, "active saved graph edges"],
+        ["Messages 24h", counts.messages_24h, "stored incoming messages from watched channels"],
+        ["Matched 24h", counts.matched_messages_24h, "messages with at least one positive market match"],
+        ["Activations 24h", counts.activations_24h, "stored market activations from listener"],
+        ["Queue", raw.queued_messages ?? 0, "current in-memory listener queue"],
+        ["AI Failures", raw.ai_failures ?? 0, "message stored, match skipped"],
+        ["Stored", raw.stored_messages ?? 0, "messages persisted since listener start"],
+        ["Evaluated", raw.evaluated_messages ?? 0, "messages passed to AI matcher"],
+        ["Matched Pairs", raw.matched_pairs ?? 0, "positive message-market pair count"],
+        ["Bindings Refresh", runtime?.raw?.last_binding_refresh_at ? fmtDate(runtime.raw.last_binding_refresh_at) : "n/a", "last saved-graph refresh"],
+      ];
+      el.kpiGrid.innerHTML = cards.map(([label, value, hint]) => (
+        `<article class="card">` +
+          `<div class="k">${escapeHtml(label)}</div>` +
+          `<div class="v">${escapeHtml(typeof value === "number" ? formatCount(value) : value)}</div>` +
+          `<div class="hint">${escapeHtml(hint)}</div>` +
+        `</article>`
+      )).join("");
+    }
+
+    function renderMessages(payload) {
+      const messages = payload?.messages || [];
+      el.messageSummary.textContent = `${formatCount(messages.length)} rows loaded`;
+      if (!messages.length) {
+        el.messageList.innerHTML = `<div class="empty">No stored messages yet for the watched channel set.</div>`;
+        return;
+      }
+      el.messageList.innerHTML = messages.map((item) => {
+        const matchChips = (item.matched_markets || []).map((match) => (
+          `<div class="match">` +
+            `<div class="match-top">` +
+              `<span class="match-title">${escapeHtml(match.market_label)}</span>` +
+              `<span class="chip ${item.has_activation ? "good" : "warn"}">conf ${escapeHtml(match.confidence ?? "n/a")}</span>` +
+            `</div>` +
+            `<div class="tiny">${escapeHtml(match.bucket || "Other")}</div>` +
+            `<div class="tiny">${escapeHtml(match.reason_short || "")}</div>` +
+          `</div>`
+        )).join("");
+        const stats = [
+          `${formatCount(item.evaluated_market_count)} evaluated`,
+          `${formatCount(item.matched_market_count)} matched`,
+          item.has_activation ? `${formatCount(item.activations?.length || 0)} activation` : "no activation",
+          item.has_media ? "has media" : "text",
+        ];
+        return (
+          `<article class="message">` +
+            `<div class="message-top">` +
+              `<div>` +
+                `<h3 class="message-title">${escapeHtml(item.channel_title || item.chat_id)}</h3>` +
+                `<div class="meta">` +
+                  `<span>${escapeHtml(item.channel_username ? "@" + item.channel_username : "no username")}</span>` +
+                  `<span>${escapeHtml(fmtDate(item.posted_at || item.ingested_at))}</span>` +
+                  `<span>${escapeHtml(formatCount(item.member_count))} members</span>` +
+                  `<span>msg ${escapeHtml(item.message_id)}</span>` +
+                `</div>` +
+              `</div>` +
+              `<div class="chips">` +
+                `${stats.map((stat) => `<span class="chip ${item.has_activation ? "good" : ""}">${escapeHtml(stat)}</span>`).join("")}` +
+                `${item.public_url ? `<a class="chip" href="${escapeHtml(item.public_url)}" target="_blank" rel="noopener">open post</a>` : ""}` +
+              `</div>` +
+            `</div>` +
+            `<div class="message-body">${escapeHtml(item.text || "")}</div>` +
+            `${item.matched_markets?.length ? `<div class="match-grid">${matchChips}</div>` : `<div class="tiny">No positive market matches stored for this message.</div>`}` +
+          `</article>`
+        );
+      }).join("");
+    }
+
+    function renderActivations(payload) {
+      const items = payload?.recent_activations || [];
+      if (!items.length) {
+        el.activationList.innerHTML = `<div class="empty">No activations stored for this watched graph yet.</div>`;
+        return;
+      }
+      el.activationList.innerHTML = items.map((item) => (
+        `<article class="activation">` +
+          `<h3>${escapeHtml(item.market_label)}</h3>` +
+          `<div class="tiny">${escapeHtml(item.bucket || "Other")}</div>` +
+          `<div class="tiny">${escapeHtml(fmtDate(item.activation_time))}</div>` +
+          `<div class="tiny">${escapeHtml(item.channel_title || item.chat_id || "")} • msg ${escapeHtml(item.message_id)}</div>` +
+          `<div class="tiny">${escapeHtml(item.notes || item.activation_source || "")}</div>` +
+          `${item.public_url ? `<a href="${escapeHtml(item.public_url)}" target="_blank" rel="noopener">open market</a>` : ""}` +
+        `</article>`
+      )).join("");
+    }
+
+    function renderEvents(payload) {
+      const items = payload?.runtime?.events || [];
+      if (!items.length) {
+        el.eventList.innerHTML = `<div class="empty">No runtime events stored yet.</div>`;
+        return;
+      }
+      el.eventList.innerHTML = items.map((item) => (
+        `<article class="event">` +
+          `<h3>${escapeHtml(item.event_type || "event")}</h3>` +
+          `<div class="chips">` +
+            `<span class="chip ${item.level === "error" ? "bad" : "good"}">${escapeHtml(item.level || "info")}</span>` +
+            `${item.stage ? `<span class="chip">${escapeHtml(item.stage)}</span>` : ""}` +
+          `</div>` +
+          `<div class="tiny">${escapeHtml(fmtDate(item.event_time))}</div>` +
+          `<div class="tiny">${escapeHtml(item.message || "")}</div>` +
+        `</article>`
+      )).join("");
+    }
+
+    function renderStatus(payload) {
+      const runtime = payload?.runtime?.status || {};
+      const raw = runtime?.raw || {};
+      const hb = heartbeatState(runtime);
+      el.pillHeartbeat.innerHTML = `<span class="dot ${hb.cls}"></span>${escapeHtml(hb.label)}`;
+      el.pillScope.textContent = `${formatCount(payload?.counts?.watched_channels_total || 0)} channels • ${formatCount(payload?.counts?.watched_markets_total || 0)} markets`;
+      el.pillLastMessage.textContent = raw?.last_message_at
+        ? `last message ${fmtDate(raw.last_message_at)}`
+        : "no stored listener message yet";
+      el.pillRefresh.textContent = `refreshed ${new Date().toLocaleTimeString()}`;
+    }
+
+    async function load() {
+      updateJsonLink();
+      const url = buildUrl();
+      const res = await fetch(url, { headers: { Accept: "application/json" } });
+      if (!res.ok) {
+        const detail = await res.text();
+        throw new Error(detail || `HTTP ${res.status}`);
+      }
+      const payload = await res.json();
+      renderStatus(payload);
+      renderKpis(payload);
+      renderMessages(payload);
+      renderActivations(payload);
+      renderEvents(payload);
+    }
+
+    function setAuto(enabled) {
+      state.auto = !!enabled;
+      el.autoBtn.textContent = `Auto: ${state.auto ? "ON" : "OFF"}`;
+      if (state.intervalRef) {
+        clearInterval(state.intervalRef);
+        state.intervalRef = null;
+      }
+      if (state.auto) {
+        state.intervalRef = setInterval(() => {
+          load().catch((error) => {
+            el.pillHeartbeat.innerHTML = `<span class="dot bad"></span>${escapeHtml(error.message || error)}`;
+          });
+        }, 4000);
+      }
+    }
+
+    el.refreshBtn.addEventListener("click", () => {
+      load().catch((error) => {
+        el.pillHeartbeat.innerHTML = `<span class="dot bad"></span>${escapeHtml(error.message || error)}`;
+      });
+    });
+
+    el.autoBtn.addEventListener("click", () => setAuto(!state.auto));
+    el.sourceFile.addEventListener("change", updateJsonLink);
+    el.linkSource.addEventListener("change", updateJsonLink);
+    el.messageLimit.addEventListener("change", updateJsonLink);
+
+    setAuto(true);
+    load().catch((error) => {
+      el.pillHeartbeat.innerHTML = `<span class="dot bad"></span>${escapeHtml(error.message || error)}`;
+      el.messageList.innerHTML = `<div class="empty">${escapeHtml(error.message || error)}</div>`;
+    });
+  </script>
+</body>
+</html>

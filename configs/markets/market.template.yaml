@@ -1,0 +1,34 @@
+market_id: "replace_me"
+question: "Will Israel strike Lebanon on YYYY-MM-DD?"
+region_tags:
+  - "Israel"
+  - "Lebanon"
+languages:
+  - "ar"
+  - "he"
+  - "en"
+time_window_utc:
+  start: "2026-02-21T00:00:00Z"
+  end: "2026-02-21T23:59:59Z"
+resolution_rules:
+  - "Paste exact market resolution rules here."
+definitions:
+  counts_as:
+    - "airstrike"
+    - "missile strike"
+  does_not_count_as:
+    - "threat only"
+    - "unverified rumor"
+keywords:
+  en:
+    - "Israel"
+    - "Lebanon"
+    - "airstrike"
+  ar:
+    - "لبنان"
+    - "غارة"
+    - "قصف"
+  he:
+    - "לבנון"
+    - "תקיפה"
+    - "צהל"

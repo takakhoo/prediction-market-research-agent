@@ -1,0 +1,11 @@
+Classify relevance for this market-message pair.
+
+MARKET:
+- market_id: {{MARKET_ID}}
+- archetype: {{MARKET_ARCHETYPE}}
+- question: {{QUESTION}}
+- rules_text: {{RULES_TEXT}}
+- market_context: {{MARKET_CONTEXT}}
+
+MESSAGE:
+{{MESSAGE_TEXT}}

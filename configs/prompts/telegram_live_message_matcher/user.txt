@@ -1,0 +1,18 @@
+Review this Telegram message against the candidate markets below.
+
+Decision standard:
+- Select a market only if the message is directly relevant to that market's proposition.
+- Prefer concrete operational updates, official statements, attacks, ceasefires, elections, dissolutions, recognition moves, or other events that change the market materially.
+- Do not select markets just because they share a country or region.
+- If evidence is weak, ambiguous, or only loosely topical, return no match for that market.
+
+Return:
+- matches: only the candidate IDs you believe are relevant
+- confidence: 0.0 to 1.0
+- reason_short: one short sentence grounded in the message text
+
+MESSAGE_JSON:
+{{MESSAGE_JSON}}
+
+CANDIDATE_MARKETS_JSON:
+{{MARKETS_JSON}}

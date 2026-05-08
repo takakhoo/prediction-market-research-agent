@@ -1,0 +1,12 @@
+Classify this market.
+
+Requirements:
+- `track_now` means there is likely a fast local-information edge worth immediate Telegram discovery.
+- `track_later` means the market may matter but does not currently justify aggressive local discovery.
+- `ignore` means it should not be part of this local-news pipeline.
+- Prefer geopolitics, war, military actions, coups, border incidents, regime stability, and similar local-reporting-sensitive events.
+- Down-rank sports, entertainment, broad public-information markets, and anything with little local speed edge.
+- Include priority regions, languages, and channel profile types we would need.
+
+MARKET_JSON:
+{{MARKET_JSON}}

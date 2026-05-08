@@ -1,0 +1,49 @@
+{% if not search.channels %}
+<div class="empty">No public channels found for "{{ search.query }}". Try broader keywords or language variants.</div>
+{% else %}
+<div class="muted" style="margin-bottom:8px;">Run ID: <span class="code">{{ search.run_id }}</span> | query: <strong>{{ search.query }}</strong> | results: <strong>{{ search.channels|length }}</strong></div>
+<div class="tip" style="margin-bottom:10px;">Click any channel card to load recent posts, similar channels, and watchlist editor together.</div>
+<div style="display:grid;gap:10px;">
+  {% for channel in search.channels %}
+  <article
+    style="border:1px solid #e2e5ea;border-radius:8px;padding:10px;cursor:pointer;"
+    onclick="selectChannel({{ channel.chat_id }});"
+  >
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">
+      <div>
+        <div style="font-weight:700;">{{ channel.title }}</div>
+        <div class="muted">ID: {{ channel.chat_id }}{% if channel.username %} | @{{ channel.username }}{% endif %}{% if channel.member_count %} | members: {{ channel.member_count }}{% endif %}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button
+          class="light"
+          onclick="event.stopPropagation();{% if channel.username %}window.open('https://t.me/{{ channel.username }}','_blank','noopener,noreferrer');{% endif %}"
+          hx-get="ui/channels/{{ channel.chat_id }}/messages"
+          hx-target="#preview-panel"
+          hx-swap="innerHTML"
+        >Preview</button>
+        <button
+          class="secondary"
+          onclick="event.stopPropagation();"
+          hx-post="ui/channels/{{ channel.chat_id }}/expand-similar"
+          hx-target="#similar-panel"
+          hx-swap="innerHTML"
+        >Expand Similar</button>
+        <button
+          onclick="event.stopPropagation();"
+          hx-get="ui/channels/{{ channel.chat_id }}/watchlist-form"
+          hx-target="#watchlist-editor"
+          hx-swap="innerHTML"
+        >Watchlist</button>
+      </div>
+    </div>
+    {% if channel.description %}
+      <p class="muted" style="margin:8px 0 0;">{{ channel.description }}</p>
+    {% endif %}
+    {% if channel.username %}
+      <div style="margin-top:6px;"><a href="https://t.me/{{ channel.username }}" onclick="event.stopPropagation();" target="_blank" rel="noreferrer">Open channel in Telegram</a></div>
+    {% endif %}
+  </article>
+  {% endfor %}
+</div>
+{% endif %}

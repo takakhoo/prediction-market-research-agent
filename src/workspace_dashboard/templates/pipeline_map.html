@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pipeline Map</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #071016;
+      --panel: rgba(12, 23, 32, 0.88);
+      --panel-2: rgba(17, 31, 43, 0.82);
+      --line: rgba(255, 255, 255, 0.1);
+      --line-strong: rgba(255, 255, 255, 0.2);
+      --text: #e7edf3;
+      --muted: #94a6b6;
+      --accent: #22d3ee;
+      --accent-2: #0ea5a2;
+      --channel: #fbbf24;
+      --warn: #f59e0b;
+      --good: #34d399;
+      --danger: #fb7185;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --shadow: 0 18px 60px rgba(0, 0, 0, 0.34);
+      --font: "IBM Plex Sans", "Segoe UI", sans-serif;
+      --display: "Space Grotesk", "IBM Plex Sans", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(1200px 600px at 100% -10%, rgba(34, 211, 238, 0.18), transparent 55%),
+        radial-gradient(900px 500px at -10% 110%, rgba(251, 191, 36, 0.12), transparent 45%),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+    }
+
+    .shell {
+      max-width: 1780px;
+      margin: 0 auto;
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .header {
+      padding: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .kicker {
+      margin: 0 0 8px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-size: 0.74rem;
+      font-weight: 700;
+    }
+
+    .title {
+      margin: 0;
+      font-family: var(--display);
+      font-size: 1.65rem;
+      line-height: 1.05;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      max-width: 860px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.92rem;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button,
+    a.button {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      padding: 9px 12px;
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+    }
+
+    button:hover,
+    a.button:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .button.primary {
+      border-color: rgba(34, 211, 238, 0.5);
+      background: linear-gradient(180deg, rgba(34, 211, 238, 0.22), rgba(14, 165, 162, 0.1));
+    }
+
+    .meta-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .meta-chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .kpi-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .kpi {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-2);
+      display: grid;
+      gap: 6px;
+      min-height: 110px;
+    }
+
+    .kpi-label {
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .kpi-value {
+      font-family: var(--display);
+      font-size: 1.75rem;
+      line-height: 1;
+    }
+
+    .kpi-hint {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.4;
+    }
+
+    .workflow {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-family: var(--display);
+      font-size: 1.06rem;
+    }
+
+    .section-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .flow-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      position: relative;
+    }
+
+    .flow-grid::before {
+      content: "";
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      top: 52%;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(34, 211, 238, 0.2), rgba(251, 191, 36, 0.2));
+      border-radius: 999px;
+      z-index: 0;
+    }
+
+    .flow-card {
+      position: relative;
+      z-index: 1;
+      min-height: 190px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .flow-card.ready {
+      border-color: rgba(52, 211, 153, 0.4);
+      box-shadow: inset 0 0 0 1px rgba(52, 211, 153, 0.08);
+    }
+
+    .flow-card.pending {
+      border-color: rgba(251, 191, 36, 0.4);
+      box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.08);
+    }
+
+    .flow-status {
+      width: fit-content;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .flow-card.ready .flow-status {
+      color: #a7f3d0;
+      border-color: rgba(52, 211, 153, 0.38);
+      background: rgba(6, 78, 59, 0.26);
+    }
+
+    .flow-card.pending .flow-status {
+      color: #fde68a;
+      border-color: rgba(251, 191, 36, 0.34);
+      background: rgba(120, 53, 15, 0.26);
+    }
+
+    .flow-title {
+      margin: 0;
+      font-family: var(--display);
+      font-size: 1rem;
+    }
+
+    .flow-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .flow-hint {
+      color: var(--muted);
+      font-size: 0.77rem;
+      line-height: 1.45;
+    }
+
+    .board {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: minmax(0, 1.15fr) minmax(340px, 0.85fr);
+    }
+
+    .left-stack,
+    .right-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .split-panel {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    input[type="search"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text);
+      padding: 10px 12px;
+      font: inherit;
+    }
+
+    input[type="search"]:focus {
+      outline: none;
+      border-color: rgba(34, 211, 238, 0.55);
+      box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.12);
+    }
+
+    .scope-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .scope-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.76rem;
+      transition: border-color 140ms ease, background 140ms ease;
+    }
+
+    .scope-pill.active {
+      border-color: rgba(34, 211, 238, 0.5);
+      background: rgba(8, 145, 178, 0.18);
+      color: #bff7ff;
+    }
+
+    .list-grid {
+      display: grid;
+      gap: 10px;
+      max-height: 880px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .card:hover {
+      border-color: var(--line-strong);
+      transform: translateY(-1px);
+      transition: transform 140ms ease, border-color 140ms ease;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 0.92rem;
+      line-height: 1.35;
+      font-weight: 600;
+    }
+
+    .card-sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 0.68rem;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .chip.market {
+      border-color: rgba(34, 211, 238, 0.45);
+      color: #bff7ff;
+      background: rgba(8, 145, 178, 0.18);
+    }
+
+    .chip.channel {
+      border-color: rgba(251, 191, 36, 0.45);
+      color: #fde68a;
+      background: rgba(120, 53, 15, 0.24);
+    }
+
+    .chip.good {
+      border-color: rgba(52, 211, 153, 0.45);
+      color: #a7f3d0;
+      background: rgba(6, 78, 59, 0.24);
+    }
+
+    .chip.warn {
+      border-color: rgba(251, 191, 36, 0.45);
+      color: #fde68a;
+      background: rgba(120, 53, 15, 0.24);
+    }
+
+    .small-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.55;
+    }
+
+    .empty {
+      padding: 20px;
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.84rem;
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    @media (max-width: 1280px) {
+      .kpi-grid,
+      .flow-grid,
+      .small-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .board {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 840px) {
+      .kpi-grid,
+      .flow-grid,
+      .small-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-grid::before {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel header">
+      <div class="title-row">
+        <div>
+          <p class="kicker">Clean Runtime Scope</p>
+          <h1 class="title">Pipeline Map</h1>
+          <p class="subtitle">
+            This page is the clean working set: saved Telegram channels on one side, scoped tradable Polymarket markets on the other, and the next runtime steps in the middle. It is meant to replace the old broad market universe as your operator view.
+          </p>
+        </div>
+        <div class="header-actions">
+          <button id="btnRefresh" type="button" class="button primary">Refresh</button>
+          <a id="btnJson" class="button" href="/api/intel/pipeline-map" target="_blank" rel="noopener">Open JSON</a>
+        </div>
+      </div>
+      <div class="meta-row">
+        <span class="meta-chip" id="generatedAt">generated: -</span>
+        <span class="meta-chip" id="channelsTable">channels: -</span>
+        <span class="meta-chip" id="marketsTable">markets: -</span>
+        <span class="meta-chip" id="linksTable">links: -</span>
+        <span class="meta-chip" id="scopeSources">scope: -</span>
+      </div>
+      <div class="kpi-grid" id="kpiGrid"></div>
+    </section>
+
+    <section class="panel workflow">
+      <div class="section-head">
+        <div>
+          <h2>Runtime Lane</h2>
+          <p>Same pipeline, but with the cleaned market scope and no stale mappings.</p>
+        </div>
+        <div class="note" id="nextAction">Next action: load data.</div>
+      </div>
+      <div class="flow-grid" id="workflowGrid"></div>
+    </section>
+
+    <section class="board">
+      <div class="left-stack">
+        <section class="panel split-panel">
+          <div class="section-head">
+            <div>
+              <h2>Scoped Markets</h2>
+              <p>Tradable-only rows from geopolitics, Israel, and Iran.</p>
+            </div>
+            <div class="note" id="marketCounter">0 markets</div>
+          </div>
+          <input id="marketSearch" type="search" placeholder="Search question, event slug, or scope">
+          <div class="scope-row" id="scopeRow"></div>
+          <div class="list-grid" id="marketList"></div>
+        </section>
+      </div>
+
+      <div class="right-stack">
+        <section class="panel split-panel">
+          <div class="section-head">
+            <div>
+              <h2>Saved Channels</h2>
+              <p>Inventory kept from the old discovery work.</p>
+            </div>
+            <div class="note" id="channelCounter">0 channels</div>
+          </div>
+          <input id="channelSearch" type="search" placeholder="Search title, username, or notes">
+          <div class="small-grid">
+            <article class="card">
+              <h3 class="card-title">Storage</h3>
+              <p class="card-sub">Saved channels live in <code>public.telegram_channels</code>. Future AI-generated mappings will be written into <code>public.channel_market_map</code>.</p>
+            </article>
+            <article class="card">
+              <h3 class="card-title">Current Status</h3>
+              <p class="card-sub" id="statusNote">Waiting for payload.</p>
+            </article>
+          </div>
+          <div class="list-grid" id="channelList"></div>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const state = {
+      payload: null,
+      marketScope: "all",
+      marketSearch: "",
+      channelSearch: "",
+    };
+
+    const el = {
+      generatedAt: document.getElementById("generatedAt"),
+      channelsTable: document.getElementById("channelsTable"),
+      marketsTable: document.getElementById("marketsTable"),
+      linksTable: document.getElementById("linksTable"),
+      scopeSources: document.getElementById("scopeSources"),
+      kpiGrid: document.getElementById("kpiGrid"),
+      workflowGrid: document.getElementById("workflowGrid"),
+      nextAction: document.getElementById("nextAction"),
+      marketSearch: document.getElementById("marketSearch"),
+      channelSearch: document.getElementById("channelSearch"),
+      scopeRow: document.getElementById("scopeRow"),
+      marketList: document.getElementById("marketList"),
+      channelList: document.getElementById("channelList"),
+      marketCounter: document.getElementById("marketCounter"),
+      channelCounter: document.getElementById("channelCounter"),
+      statusNote: document.getElementById("statusNote"),
+      btnRefresh: document.getElementById("btnRefresh"),
+    };
+
+    function fmtInt(value) {
+      return Number(value || 0).toLocaleString();
+    }
+
+    function fmtMembers(value) {
+      const num = Number(value || 0);
+      if (!num) return "members unknown";
+      return `${num.toLocaleString()} members`;
+    }
+
+    function fmtDate(value) {
+      if (!value) return "no date";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value);
+      return date.toLocaleString();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function nextActionText(payload) {
+      const counts = payload?.counts || {};
+      if (!counts.channels_total || !counts.markets_total) {
+        return "Next action: make sure channels and scoped markets are loaded.";
+      }
+      if (!counts.active_links) {
+        return "Next action: run the cheap AI mapper to create fresh channel_market_map rows.";
+      }
+      if (!counts.messages_total) {
+        return "Next action: start the live Telegram listener on the new mapping set.";
+      }
+      return "Next action: wire the paper trader on top of AI-approved message signals.";
+    }
+
+    function renderKpis(payload) {
+      const counts = payload?.counts || {};
+      const cards = [
+        { label: "Saved Channels", value: counts.channels_total, hint: "channel inventory preserved from discovery" },
+        { label: "Active Channels", value: counts.channels_active, hint: "current monitorable flag state" },
+        { label: "Tradable Markets", value: counts.markets_total, hint: "scoped markets only" },
+        { label: "Fresh Links", value: counts.active_links, hint: "new AI mapping target" },
+        { label: "Messages", value: counts.messages_total, hint: "listener output table" },
+        { label: "Activations", value: counts.activations_total, hint: "paper trader trigger candidates" },
+      ];
+      el.kpiGrid.innerHTML = cards.map((card) => (
+        `<article class="kpi">` +
+          `<span class="kpi-label">${escapeHtml(card.label)}</span>` +
+          `<div class="kpi-value">${fmtInt(card.value)}</div>` +
+          `<div class="kpi-hint">${escapeHtml(card.hint)}</div>` +
+        `</article>`
+      )).join("");
+    }
+
+    function renderWorkflow(payload) {
+      const workflow = Array.isArray(payload?.workflow) ? payload.workflow : [];
+      el.workflowGrid.innerHTML = workflow.map((step) => (
+        `<article class="flow-card ${escapeHtml(step.status || "pending")}">` +
+          `<span class="flow-status">${escapeHtml(step.status || "pending")}</span>` +
+          `<h3 class="flow-title">${escapeHtml(step.label || "Step")}</h3>` +
+          `<div class="flow-value">${fmtInt(step.value)}</div>` +
+          `<div class="flow-hint">${escapeHtml(step.hint || "")}</div>` +
+        `</article>`
+      )).join("");
+      el.nextAction.textContent = nextActionText(payload);
+    }
+
+    function renderScopes(payload) {
+      const scopes = [{ label: "All", count: (payload?.markets || []).length }].concat(payload?.market_scope_counts || []);
+      el.scopeRow.innerHTML = scopes.map((scope) => {
+        const key = String(scope.label || "All");
+        const active = state.marketScope === key.toLowerCase() || (key === "All" && state.marketScope === "all");
+        return (
+          `<button type="button" class="scope-pill ${active ? "active" : ""}" data-scope="${escapeHtml(key.toLowerCase())}">` +
+            `${escapeHtml(scope.label)} · ${fmtInt(scope.count)}` +
+          `</button>`
+        );
+      }).join("");
+    }
+
+    function filteredMarkets() {
+      const markets = Array.isArray(state.payload?.markets) ? state.payload.markets : [];
+      const needle = state.marketSearch.trim().toLowerCase();
+      return markets.filter((market) => {
+        const scope = String(market.scope_label || "").toLowerCase();
+        if (state.marketScope !== "all" && scope !== state.marketScope) return false;
+        if (!needle) return true;
+        const haystack = [
+          market.question,
+          market.slug,
+          market.event_slug,
+          market.scope_label,
+          market.market_archetype,
+        ].join(" ").toLowerCase();
+        return haystack.includes(needle);
+      });
+    }
+
+    function renderMarkets() {
+      const items = filteredMarkets();
+      el.marketCounter.textContent = `${fmtInt(items.length)} visible · ${fmtInt((state.payload?.markets || []).length)} total`;
+      if (!items.length) {
+        el.marketList.innerHTML = '<div class="empty">No markets match the current filter.</div>';
+        return;
+      }
+      el.marketList.innerHTML = items.map((market) => (
+        `<article class="card">` +
+          `<h3 class="card-title">${escapeHtml(market.question || "(untitled market)")}</h3>` +
+          `<p class="card-sub">${escapeHtml(market.event_slug || market.slug || market.market_id || "")}</p>` +
+          `<div class="chip-row">` +
+            `<span class="chip market">${escapeHtml(market.scope_label || "Other")}</span>` +
+            `<span class="chip">${escapeHtml(market.market_archetype || "unknown")}</span>` +
+            `<span class="chip good">tradable</span>` +
+            `<span class="chip ${Number(market.mapped_channels || 0) > 0 ? "channel" : ""}">mapped ${fmtInt(market.mapped_channels)}</span>` +
+          `</div>` +
+          `<p class="card-sub">ends ${escapeHtml(fmtDate(market.end_date))}</p>` +
+          `${market.public_url ? `<a class="button" href="${escapeHtml(market.public_url)}" target="_blank" rel="noopener">Open Market</a>` : ""}` +
+        `</article>`
+      )).join("");
+    }
+
+    function filteredChannels() {
+      const channels = Array.isArray(state.payload?.channels) ? state.payload.channels : [];
+      const needle = state.channelSearch.trim().toLowerCase();
+      return channels.filter((channel) => {
+        if (!needle) return true;
+        const haystack = [
+          channel.title,
+          channel.username,
+          channel.notes,
+          channel.description,
+        ].join(" ").toLowerCase();
+        return haystack.includes(needle);
+      });
+    }
+
+    function renderChannels() {
+      const items = filteredChannels();
+      el.channelCounter.textContent = `${fmtInt(items.length)} visible · ${fmtInt((state.payload?.channels || []).length)} total`;
+      if (!items.length) {
+        el.channelList.innerHTML = '<div class="empty">No channels match the current filter.</div>';
+        return;
+      }
+      el.channelList.innerHTML = items.map((channel) => (
+        `<article class="card">` +
+          `<h3 class="card-title">${escapeHtml(channel.title || "(untitled channel)")}</h3>` +
+          `<p class="card-sub">@${escapeHtml(channel.username || "no_username")}</p>` +
+          `<div class="chip-row">` +
+            `<span class="chip channel">${fmtMembers(channel.member_count)}</span>` +
+            `<span class="chip ${channel.is_active ? "good" : "warn"}">${channel.is_active ? "active" : "inactive"}</span>` +
+            `<span class="chip">mapped ${fmtInt(channel.mapped_markets)}</span>` +
+          `</div>` +
+          `<p class="card-sub">${escapeHtml((channel.notes || channel.description || "").slice(0, 180) || "No notes stored.")}</p>` +
+          `${channel.public_url ? `<a class="button" href="${escapeHtml(channel.public_url)}" target="_blank" rel="noopener">Open Channel</a>` : ""}` +
+        `</article>`
+      )).join("");
+    }
+
+    function render(payload) {
+      state.payload = payload;
+      const sourceCount = Array.isArray(payload?.scope_sources) ? payload.scope_sources.length : 0;
+      const slugCount = Object.values(payload?.source_slug_counts || {}).reduce((sum, value) => sum + Number(value || 0), 0);
+      el.generatedAt.textContent = `generated: ${fmtDate(payload.generated_at)}`;
+      el.channelsTable.textContent = `channels: ${payload?.storage?.channels_table || "-"}`;
+      el.marketsTable.textContent = `markets: ${payload?.storage?.markets_table || "-"}`;
+      el.linksTable.textContent = `links: ${payload?.storage?.links_table || "-"}`;
+      el.scopeSources.textContent = `scope: ${fmtInt(sourceCount)} pages · ${fmtInt(slugCount)} raw event slugs`;
+      el.statusNote.textContent = nextActionText(payload);
+      renderKpis(payload);
+      renderWorkflow(payload);
+      renderScopes(payload);
+      renderMarkets();
+      renderChannels();
+    }
+
+    async function load() {
+      el.btnRefresh.disabled = true;
+      try {
+        const response = await fetch("/api/intel/pipeline-map?market_limit=400&channel_limit=220", { headers: { Accept: "application/json" } });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload?.detail || "pipeline map fetch failed");
+        render(payload);
+      } catch (error) {
+        el.marketList.innerHTML = `<div class="empty">${escapeHtml(error.message || "Failed to load pipeline map.")}</div>`;
+        el.channelList.innerHTML = '<div class="empty">No channel data available.</div>';
+      } finally {
+        el.btnRefresh.disabled = false;
+      }
+    }
+
+    el.marketSearch.addEventListener("input", () => {
+      state.marketSearch = el.marketSearch.value || "";
+      renderMarkets();
+    });
+
+    el.channelSearch.addEventListener("input", () => {
+      state.channelSearch = el.channelSearch.value || "";
+      renderChannels();
+    });
+
+    el.scopeRow.addEventListener("click", (event) => {
+      const target = event.target.closest("[data-scope]");
+      if (!target) return;
+      state.marketScope = String(target.getAttribute("data-scope") || "all");
+      renderScopes(state.payload || {});
+      renderMarkets();
+    });
+
+    el.btnRefresh.addEventListener("click", load);
+    load();
+  </script>
+</body>
+</html>

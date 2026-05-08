@@ -1,0 +1,32 @@
+<div class="code" style="margin-bottom:8px;">count={{ count }}, limit={{ limit }}, offset={{ offset }}</div>
+{% if not markets %}
+<div class="empty">No markets returned for these filters.</div>
+{% else %}
+<div style="max-height:320px;overflow:auto;border:1px solid #dbe1ea;border-radius:8px;">
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead style="position:sticky;top:0;background:#f8fafc;">
+      <tr>
+        <th style="text-align:left;padding:8px;border-bottom:1px solid #dbe1ea;">ID</th>
+        <th style="text-align:left;padding:8px;border-bottom:1px solid #dbe1ea;">Question</th>
+        <th style="text-align:left;padding:8px;border-bottom:1px solid #dbe1ea;">Active</th>
+        <th style="text-align:left;padding:8px;border-bottom:1px solid #dbe1ea;">Closed</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for market in markets %}
+      <tr>
+        <td style="padding:8px;border-bottom:1px solid #eef2f7;">{{ market.id }}</td>
+        <td style="padding:8px;border-bottom:1px solid #eef2f7;">{{ market.question }}</td>
+        <td style="padding:8px;border-bottom:1px solid #eef2f7;">{{ market.active }}</td>
+        <td style="padding:8px;border-bottom:1px solid #eef2f7;">{{ market.closed }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<details style="margin-top:10px;">
+  <summary style="cursor:pointer;font-weight:600;">Raw JSON payload</summary>
+  <pre style="margin-top:8px;max-height:300px;overflow:auto;background:#0f172a;color:#e2e8f0;padding:10px;border-radius:8px;font-size:12px;">{{ json_payload }}</pre>
+</details>

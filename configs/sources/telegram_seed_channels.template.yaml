@@ -1,0 +1,17 @@
+market_id: "replace_me"
+updated_at: "2026-02-21T00:00:00Z"
+channels:
+  - handle: "@replace_channel_1"
+    language: "ar"
+    region_tags:
+      - "Lebanon"
+    source_type: "news"
+    seed_weight: 0.7
+    notes: "initial seed"
+  - handle: "@replace_channel_2"
+    language: "he"
+    region_tags:
+      - "Israel"
+    source_type: "official"
+    seed_weight: 0.9
+    notes: "official source example"

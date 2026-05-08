@@ -1,0 +1,1058 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Market Rail Explorer</title>
+  <style>
+    :root {
+      --bg: #070a0f;
+      --panel: rgba(16, 22, 30, 0.88);
+      --panel-2: rgba(11, 16, 23, 0.92);
+      --line: rgba(148, 163, 184, 0.24);
+      --line-strong: rgba(148, 163, 184, 0.44);
+      --ink: #e7edf5;
+      --muted: #94a3b8;
+      --accent: #0ea5a2;
+      --accent-2: #0284c7;
+      --warn: #f59e0b;
+      --danger: #f43f5e;
+      --good: #34d399;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --font: "IBM Plex Sans", "Segoe UI", sans-serif;
+      --mono: "IBM Plex Mono", Menlo, monospace;
+      --channel-card-height: 116px;
+      --channel-card-gap: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(900px 450px at 96% -15%, rgba(14, 165, 162, 0.16), transparent 55%),
+        radial-gradient(800px 500px at -12% 100%, rgba(14, 116, 144, 0.12), transparent 45%),
+        var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+    }
+
+    .dot-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: radial-gradient(rgba(30, 41, 59, 0.8) 1px, transparent 1px);
+      background-size: 24px 24px;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1820px;
+      margin: 0 auto;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      backdrop-filter: blur(9px);
+      -webkit-backdrop-filter: blur(9px);
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.35);
+      padding: 12px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 1.2rem;
+      letter-spacing: 0.01em;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .status-chip {
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: var(--muted);
+      font-size: 0.74rem;
+      background: rgba(2, 6, 23, 0.44);
+    }
+
+    .controls {
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 160px 110px 140px 140px 1fr 120px;
+      align-items: end;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 0.67rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+
+    input, select, button {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(2, 6, 23, 0.5);
+      color: var(--ink);
+      font: inherit;
+      padding: 8px 10px;
+      font-size: 0.84rem;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 700;
+      border-color: rgba(14, 165, 162, 0.5);
+      background: linear-gradient(180deg, rgba(45, 212, 191, 0.22), rgba(14, 116, 144, 0.15));
+    }
+
+    button:hover {
+      border-color: rgba(45, 212, 191, 0.9);
+    }
+
+    .status-line {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.77rem;
+      min-height: 18px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 350px minmax(600px, 1fr) 360px;
+      gap: 12px;
+      min-height: 700px;
+    }
+
+    .side {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto auto auto 1fr;
+      min-height: 700px;
+    }
+
+    .side h2 {
+      margin: 0;
+      font-size: 0.94rem;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .counter-row {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.73rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .search-wrap {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .list {
+      overflow: auto;
+      padding: 8px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .market-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.52);
+      padding: 9px;
+      cursor: pointer;
+      display: grid;
+      gap: 6px;
+    }
+
+    .market-item:hover {
+      border-color: var(--line-strong);
+      transform: translateY(-1px);
+      transition: 140ms ease;
+    }
+
+    .market-item.active {
+      border-color: rgba(14, 165, 162, 0.7);
+      box-shadow: 0 0 0 1px rgba(14, 165, 162, 0.2) inset;
+      background: rgba(13, 33, 41, 0.62);
+    }
+
+    .market-item .q {
+      margin: 0;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      color: #dbe6f4;
+    }
+
+    .market-links {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .market-links a {
+      color: #7dd3fc;
+      text-decoration: none;
+      font-size: 0.7rem;
+      border: 1px solid rgba(125, 211, 252, 0.35);
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: rgba(2, 132, 199, 0.12);
+    }
+
+    .market-links a:hover {
+      border-color: rgba(125, 211, 252, 0.7);
+      background: rgba(2, 132, 199, 0.2);
+    }
+
+    .chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.68rem;
+      color: var(--muted);
+      background: rgba(2, 6, 23, 0.45);
+      white-space: nowrap;
+    }
+
+    .chip.class-track_now { color: #ccfbf1; background: rgba(5, 150, 105, 0.25); border-color: rgba(5, 150, 105, 0.5); }
+    .chip.class-track_later { color: #fef3c7; background: rgba(180, 83, 9, 0.25); border-color: rgba(180, 83, 9, 0.5); }
+    .chip.class-ignore { color: #fecdd3; background: rgba(190, 24, 93, 0.25); border-color: rgba(190, 24, 93, 0.5); }
+    .chip.class-unclassified { color: #e2e8f0; background: rgba(71, 85, 105, 0.35); border-color: rgba(148, 163, 184, 0.4); }
+    .chip.good { color: #d1fae5; border-color: rgba(52, 211, 153, 0.5); background: rgba(6, 95, 70, 0.28); }
+    .chip.warn { color: #fde68a; border-color: rgba(245, 158, 11, 0.55); background: rgba(146, 64, 14, 0.35); }
+    .chip.corrected { color: #bfdbfe; border-color: rgba(59, 130, 246, 0.5); background: rgba(30, 64, 175, 0.3); }
+
+    .mono {
+      font-family: var(--mono);
+      font-size: 0.66rem;
+      color: var(--muted);
+    }
+
+    .stage {
+      position: relative;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      min-height: 700px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .stage-top {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.74rem;
+    }
+
+    .stage-canvas {
+      position: relative;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(420px, 1fr) 360px;
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .market-card {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.58);
+      padding: 12px;
+      display: grid;
+      gap: 9px;
+      align-content: start;
+    }
+
+    .market-card h3 {
+      margin: 0;
+      font-size: 1.02rem;
+      line-height: 1.3;
+      color: #f1f5f9;
+    }
+
+    .market-card .desc {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+      max-height: 110px;
+      overflow: auto;
+    }
+
+    .market-card .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .market-card a {
+      color: #7dd3fc;
+      font-size: 0.75rem;
+      text-decoration: none;
+    }
+
+    .action-link {
+      border: 1px solid rgba(125, 211, 252, 0.35);
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: rgba(2, 132, 199, 0.1);
+    }
+
+    .market-card .port {
+      position: absolute;
+      right: -7px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: #22d3ee;
+      border: 2px solid #020617;
+      box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+    }
+
+    .connector-svg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .connector-path {
+      stroke: rgba(148, 163, 184, 0.5);
+      stroke-width: 2.2;
+      fill: none;
+      stroke-dasharray: 4 6;
+    }
+
+    .rail {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(8, 13, 22, 0.75);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .rail-head {
+      padding: 10px 10px 8px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.74rem;
+    }
+
+    .rail-viewport {
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+      padding: 10px;
+    }
+
+    .rail-track {
+      position: relative;
+      display: grid;
+      gap: var(--channel-card-gap);
+      transition: transform 340ms cubic-bezier(.2,.7,.25,1);
+      will-change: transform;
+    }
+
+    .channel-card {
+      position: relative;
+      height: var(--channel-card-height);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 9px;
+      display: grid;
+      gap: 6px;
+      align-content: start;
+      opacity: 0.7;
+      transform: scale(0.985);
+      transition: 220ms ease;
+    }
+
+    .channel-card.active {
+      border-color: rgba(14, 165, 162, 0.75);
+      background: rgba(13, 33, 41, 0.72);
+      opacity: 1;
+      transform: scale(1);
+      box-shadow: 0 0 0 1px rgba(14, 165, 162, 0.22) inset;
+    }
+
+    .channel-card .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 0;
+    }
+
+    .channel-card h4 {
+      margin: 0;
+      font-size: 0.82rem;
+      line-height: 1.25;
+      color: #e2e8f0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 220px;
+    }
+
+    .channel-card .snippet {
+      color: var(--muted);
+      font-size: 0.7rem;
+      line-height: 1.35;
+      max-height: 36px;
+      overflow: hidden;
+    }
+
+    .channel-card .port {
+      position: absolute;
+      left: -7px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: #fbbf24;
+      border: 2px solid #020617;
+      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+    }
+
+    .rail-nav {
+      border-top: 1px solid var(--line);
+      padding: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .rail-nav button {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(2, 6, 23, 0.55);
+      color: var(--ink);
+      padding: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.79rem;
+    }
+
+    .rail-nav .index {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-family: var(--mono);
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.84rem;
+      background: rgba(2, 6, 23, 0.35);
+    }
+
+    @media (max-width: 1520px) {
+      .layout { grid-template-columns: 300px minmax(560px, 1fr) 330px; }
+    }
+
+    @media (max-width: 1240px) {
+      .controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .layout { grid-template-columns: 1fr; min-height: auto; }
+      .side, .stage { min-height: 520px; }
+      .stage-canvas { grid-template-columns: 1fr; }
+      .connector-svg { display: none; }
+      .market-card .port, .channel-card .port { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="dot-grid"></div>
+  <main class="page">
+    <section class="panel">
+      <div class="header">
+        <div>
+          <h1 class="title">Market ↔ Channel Rail Explorer</h1>
+          <p class="subtitle">Visual market-card to channel-card navigation for DB inspection. Select a market, then glide through mapped channels with smooth up/down controls.</p>
+        </div>
+        <div class="status-chip" id="statusChip">ready</div>
+      </div>
+      <div class="controls">
+        <div>
+          <label for="classification">Classification</label>
+          <select id="classification">
+            <option value="track_now">track_now</option>
+            <option value="all">all</option>
+            <option value="track_later">track_later</option>
+            <option value="ignore">ignore</option>
+            <option value="unclassified">unclassified</option>
+          </select>
+        </div>
+        <div>
+          <label for="limit">Market Limit</label>
+          <input id="limit" type="number" min="1" max="300" value="80">
+        </div>
+        <div>
+          <label for="channelsPerMarket">Channels/Market</label>
+          <input id="channelsPerMarket" type="number" min="1" max="120" value="30">
+        </div>
+        <div>
+          <label for="mappedOnly">Mapped Only</label>
+          <select id="mappedOnly">
+            <option value="false">all markets</option>
+            <option value="true" selected>has channels only</option>
+          </select>
+        </div>
+        <div>
+          <label for="search">Search</label>
+          <input id="search" type="text" placeholder="question / slug / event slug">
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button id="refreshButton" type="button">Refresh</button>
+        </div>
+      </div>
+      <div class="status-line" id="statusLine">Ready.</div>
+    </section>
+
+    <section class="layout">
+      <aside class="side">
+        <h2>Markets</h2>
+        <div class="counter-row">
+          <span id="marketVisible">0 visible</span>
+          <span id="marketTotal">0 total</span>
+        </div>
+        <div class="search-wrap">
+          <input id="marketLocalSearch" type="search" placeholder="filter loaded markets...">
+        </div>
+        <div class="list" id="marketList"></div>
+      </aside>
+
+      <section class="stage">
+        <div class="stage-top">
+          <span id="selectedMarketMeta">No market selected</span>
+          <span>Keyboard: `[` prev market, `]` next market, arrows for channels</span>
+        </div>
+        <div class="stage-canvas" id="stageCanvas">
+          <svg class="connector-svg" id="connectorSvg">
+            <path id="connectorPath" class="connector-path" d=""></path>
+          </svg>
+
+          <article class="market-card" id="marketCard">
+            <div class="empty">Select a market from the left.</div>
+          </article>
+
+          <section class="rail">
+            <div class="rail-head">
+              <span>Channel Rail</span>
+              <span id="railCount">0 channels</span>
+            </div>
+            <div class="rail-viewport" id="railViewport">
+              <div class="rail-track" id="railTrack"></div>
+            </div>
+            <div class="rail-nav">
+              <button id="prevChannel" type="button">↑ Prev</button>
+              <div class="index" id="channelIndex">0 / 0</div>
+              <button id="nextChannel" type="button">↓ Next</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <aside class="side">
+        <h2>Legend</h2>
+        <div class="counter-row">
+          <span>Signals</span>
+          <span>Live DB</span>
+        </div>
+        <div class="list">
+          <div class="chip class-track_now">track_now</div>
+          <div class="chip class-track_later">track_later</div>
+          <div class="chip class-ignore">ignore</div>
+          <div class="chip corrected">corrected/manual</div>
+          <div class="chip good">likely outcome</div>
+          <div class="chip warn">unlikely/high competition</div>
+          <div class="empty">Wheel inside channel rail, or use ↑ / ↓ for smooth channel transitions.</div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const CARD_STEP = 128;
+    const MAX_OUTCOMES = 10;
+
+    const state = {
+      markets: [],
+      filteredMarkets: [],
+      marketIndex: -1,
+      channelIndex: 0,
+      busy: false,
+    };
+
+    const el = {
+      classification: document.getElementById("classification"),
+      limit: document.getElementById("limit"),
+      channelsPerMarket: document.getElementById("channelsPerMarket"),
+      mappedOnly: document.getElementById("mappedOnly"),
+      search: document.getElementById("search"),
+      refreshButton: document.getElementById("refreshButton"),
+      statusChip: document.getElementById("statusChip"),
+      statusLine: document.getElementById("statusLine"),
+      marketList: document.getElementById("marketList"),
+      marketVisible: document.getElementById("marketVisible"),
+      marketTotal: document.getElementById("marketTotal"),
+      marketLocalSearch: document.getElementById("marketLocalSearch"),
+      selectedMarketMeta: document.getElementById("selectedMarketMeta"),
+      marketCard: document.getElementById("marketCard"),
+      railViewport: document.getElementById("railViewport"),
+      railTrack: document.getElementById("railTrack"),
+      railCount: document.getElementById("railCount"),
+      channelIndex: document.getElementById("channelIndex"),
+      prevChannel: document.getElementById("prevChannel"),
+      nextChannel: document.getElementById("nextChannel"),
+      stageCanvas: document.getElementById("stageCanvas"),
+      connectorPath: document.getElementById("connectorPath"),
+    };
+
+    function esc(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function classChip(classification) {
+      const key = String(classification || "unclassified");
+      return `<span class="chip class-${esc(key)}">${esc(key)}</span>`;
+    }
+
+    function fmtProb(value) {
+      if (value === null || value === undefined || Number.isNaN(Number(value))) return "";
+      return `${(Number(value) * 100).toFixed(1)}%`;
+    }
+
+    function fmtScore(value) {
+      if (value === null || value === undefined || Number.isNaN(Number(value))) return "n/a";
+      return Number(value).toFixed(3);
+    }
+
+    function primaryMarketRef(market) {
+      return String(market?.slug || market?.market_id || market?.event_slug || "").trim();
+    }
+
+    function buildPolymarketLink(market) {
+      const slug = String(market?.slug || "").trim();
+      return slug ? `https://polymarket.com/event/${slug}` : "";
+    }
+
+    function buildBacktestLink(market) {
+      const ref = primaryMarketRef(market);
+      return ref ? `/backtest?market_ref=${encodeURIComponent(ref)}` : "/backtest";
+    }
+
+    function buildClassifiedLink(market) {
+      const classification = String(market?.classification || "all").trim().toLowerCase();
+      const normalized = ["track_now", "track_later", "ignore", "unclassified"].includes(classification)
+        ? classification
+        : "all";
+      return `/classified-markets#classification=${encodeURIComponent(normalized)}`;
+    }
+
+    function buildTmeLink(channel) {
+      const explicit = String(channel?.tme_url || "").trim();
+      if (explicit) return explicit;
+      const username = String(channel?.username || "").trim().replace(/^@/, "");
+      return username ? `https://t.me/${username}` : "";
+    }
+
+    function activeMarket() {
+      if (!state.filteredMarkets.length || state.marketIndex < 0 || state.marketIndex >= state.filteredMarkets.length) {
+        return null;
+      }
+      return state.filteredMarkets[state.marketIndex];
+    }
+
+    function activeChannels() {
+      const market = activeMarket();
+      return Array.isArray(market?.channels) ? market.channels : [];
+    }
+
+    function renderMarketList() {
+      const items = state.filteredMarkets;
+      el.marketVisible.textContent = `${items.length} visible`;
+      el.marketTotal.textContent = `${state.markets.length} total`;
+
+      if (!items.length) {
+        el.marketList.innerHTML = `<div class="empty">No markets for this filter.</div>`;
+        return;
+      }
+
+      el.marketList.innerHTML = items.map((market, index) => {
+        const corrected = market.is_corrected ? `<span class="chip corrected">corrected</span>` : "";
+        const polyLink = buildPolymarketLink(market);
+        const backtestLink = buildBacktestLink(market);
+        const classifiedLink = buildClassifiedLink(market);
+        return (
+          `<article class="market-item ${index === state.marketIndex ? "active" : ""}" data-index="${index}">` +
+            `<div class="chips">` +
+              `${classChip(market.classification)}` +
+              `<span class="chip">score ${esc(fmtScore(market.analysis_local_score))}</span>` +
+              `<span class="chip">channels ${esc(market.mapped_channels ?? 0)}</span>` +
+              `${corrected}` +
+            `</div>` +
+            `<p class="q">${esc(market.question || market.slug || market.market_id)}</p>` +
+            `<div class="mono">${esc(market.market_id)} • ${esc(market.event_slug || "no-event")}</div>` +
+            `<div class="market-links">` +
+              (polyLink ? `<a data-stop-nav="1" href="${esc(polyLink)}" target="_blank" rel="noopener">Market</a>` : "") +
+              `<a data-stop-nav="1" href="${esc(backtestLink)}" target="_blank" rel="noopener">Backtest</a>` +
+              `<a data-stop-nav="1" href="${esc(classifiedLink)}" target="_blank" rel="noopener">Classify</a>` +
+            `</div>` +
+          `</article>`
+        );
+      }).join("");
+    }
+
+    function renderMarketCard() {
+      const market = activeMarket();
+      if (!market) {
+        el.marketCard.innerHTML = `<div class="empty">Select a market from the left.</div>`;
+        return;
+      }
+
+      const outcomes = Array.isArray(market.outcomes) ? market.outcomes.slice(0, MAX_OUTCOMES) : [];
+      const outcomeChips = outcomes.length
+        ? outcomes.map((outcome) => {
+            const label = outcome?.outcome_label || `Outcome ${outcome?.outcome_index ?? ""}`;
+            const p = fmtProb(outcome?.probability);
+            const cls = outcome?.is_likely ? "good" : (outcome?.is_unlikely ? "warn" : "");
+            return `<span class="chip ${cls}">${esc(label)}${p ? ` • ${esc(p)}` : ""}</span>`;
+          }).join("")
+        : `<span class="chip">no outcomes</span>`;
+
+      const corrected = market.is_corrected ? `<span class="chip corrected">corrected via ${esc(market.correction_source || "manual")}</span>` : "";
+      const polyLink = buildPolymarketLink(market);
+      const backtestLink = buildBacktestLink(market);
+      const classifiedLink = buildClassifiedLink(market);
+      el.selectedMarketMeta.textContent = `${market.market_id} | ${market.event_slug || "no-event"} | ${market.channels?.length || 0} channels`;
+      el.marketCard.innerHTML =
+        `<div class="chips">` +
+          `${classChip(market.classification)}` +
+          `<span class="chip">local_score ${esc(fmtScore(market.analysis_local_score))}</span>` +
+          `<span class="chip">mapped ${esc(market.mapped_channels ?? 0)}</span>` +
+          (market.high_competition ? `<span class="chip warn">high competition</span>` : ``) +
+          `${corrected}` +
+        `</div>` +
+        `<h3>${esc(market.question || market.slug || market.market_id)}</h3>` +
+        `<div class="chips">` +
+          `<span class="chip">${esc(market.market_archetype || "unknown")}</span>` +
+          `<span class="chip">${esc(market.event_slug || "no-event")}</span>` +
+        `</div>` +
+        `<div class="desc">${esc(String(market.description || market.rules_text || market.market_context || "No description."))}</div>` +
+        `<div class="chips">${outcomeChips}</div>` +
+        `<div class="actions">` +
+          (polyLink ? `<a class="action-link" href="${esc(polyLink)}" target="_blank" rel="noopener">Open market</a>` : `<span class="mono">no market link</span>`) +
+          `<a class="action-link" href="${esc(backtestLink)}" target="_blank" rel="noopener">Open backtest</a>` +
+          `<a class="action-link" href="${esc(classifiedLink)}" target="_blank" rel="noopener">Open classifier</a>` +
+          `<a class="action-link" href="/agent-lab" target="_blank" rel="noopener">Open graph</a>` +
+          `<span class="mono">${esc(market.market_id)}</span>` +
+        `</div>` +
+        `<span class="port" id="marketPort"></span>`;
+    }
+
+    function renderChannelRail() {
+      const channels = activeChannels();
+      el.railCount.textContent = `${channels.length} channels`;
+
+      if (!channels.length) {
+        el.railTrack.innerHTML = `<div class="empty">No mapped channels for this market.</div>`;
+        el.channelIndex.textContent = `0 / 0`;
+        el.railTrack.style.transform = `translateY(0px)`;
+        updateConnector();
+        return;
+      }
+
+      if (state.channelIndex >= channels.length) state.channelIndex = channels.length - 1;
+      if (state.channelIndex < 0) state.channelIndex = 0;
+
+      el.railTrack.innerHTML = channels.map((channel, idx) => {
+        const title = channel.title || channel.username || String(channel.chat_id || "");
+        const user = channel.username ? `@${channel.username}` : "no username";
+        const members = channel.member_count ?? "n/a";
+        const trust = channel.trust_weight === null || channel.trust_weight === undefined ? "n/a" : Number(channel.trust_weight).toFixed(3);
+        const snippet = channel.last_message?.text || channel.description || "";
+        const tgLink = buildTmeLink(channel);
+        return (
+          `<article class="channel-card ${idx === state.channelIndex ? "active" : ""}" data-channel-index="${idx}">` +
+            `<div class="title-row">` +
+              `<h4 title="${esc(title)}">${esc(title)}</h4>` +
+              `<span class="chip">#${esc(idx + 1)}</span>` +
+            `</div>` +
+            `<div class="chips">` +
+              `<span class="chip">${esc(user)}</span>` +
+              `<span class="chip">members ${esc(members)}</span>` +
+              `<span class="chip">trust ${esc(trust)}</span>` +
+            `</div>` +
+            `<div class="snippet">${esc(snippet || "no text preview")}</div>` +
+            `<div class="chips">` +
+              `<span class="chip">${esc(channel.link_source || "auto")}</span>` +
+              (tgLink ? `<a class="chip" data-stop-nav="1" href="${esc(tgLink)}" target="_blank" rel="noopener">Open TG</a>` : ``) +
+              `<a class="chip" data-stop-nav="1" href="${esc(buildBacktestLink(activeMarket()))}" target="_blank" rel="noopener">Backtest</a>` +
+            `</div>` +
+            `<span class="port"></span>` +
+          `</article>`
+        );
+      }).join("");
+
+      updateChannelTransform();
+      updateConnector();
+    }
+
+    function updateChannelTransform() {
+      const channels = activeChannels();
+      if (!channels.length) {
+        el.channelIndex.textContent = `0 / 0`;
+        el.railTrack.style.transform = `translateY(0px)`;
+        return;
+      }
+      const offset = -(state.channelIndex * CARD_STEP);
+      el.railTrack.style.transform = `translateY(${offset}px)`;
+      el.channelIndex.textContent = `${state.channelIndex + 1} / ${channels.length}`;
+      el.railTrack.querySelectorAll(".channel-card").forEach((node, idx) => {
+        node.classList.toggle("active", idx === state.channelIndex);
+      });
+    }
+
+    function updateConnector() {
+      const marketPort = document.getElementById("marketPort");
+      const activeChannelPort = el.railTrack.querySelector(`.channel-card[data-channel-index="${state.channelIndex}"] .port`);
+      if (!marketPort || !activeChannelPort) {
+        el.connectorPath.setAttribute("d", "");
+        return;
+      }
+      const stageRect = el.stageCanvas.getBoundingClientRect();
+      const fromRect = marketPort.getBoundingClientRect();
+      const toRect = activeChannelPort.getBoundingClientRect();
+      const x1 = fromRect.left + (fromRect.width / 2) - stageRect.left;
+      const y1 = fromRect.top + (fromRect.height / 2) - stageRect.top;
+      const x2 = toRect.left + (toRect.width / 2) - stageRect.left;
+      const y2 = toRect.top + (toRect.height / 2) - stageRect.top;
+      const c1x = x1 + Math.max(80, (x2 - x1) * 0.35);
+      const c2x = x2 - Math.max(80, (x2 - x1) * 0.35);
+      const d = `M ${x1} ${y1} C ${c1x} ${y1}, ${c2x} ${y2}, ${x2} ${y2}`;
+      el.connectorPath.setAttribute("d", d);
+    }
+
+    function setMarketIndex(index) {
+      if (!state.filteredMarkets.length) {
+        state.marketIndex = -1;
+        state.channelIndex = 0;
+      } else {
+        state.marketIndex = Math.min(Math.max(index, 0), state.filteredMarkets.length - 1);
+        state.channelIndex = 0;
+      }
+      renderMarketList();
+      renderMarketCard();
+      renderChannelRail();
+    }
+
+    function shiftChannel(step) {
+      const channels = activeChannels();
+      if (!channels.length) return;
+      const next = Math.min(Math.max(state.channelIndex + step, 0), channels.length - 1);
+      if (next === state.channelIndex) return;
+      state.channelIndex = next;
+      updateChannelTransform();
+      updateConnector();
+    }
+
+    function shiftMarket(step) {
+      if (!state.filteredMarkets.length) return;
+      const next = Math.min(Math.max(state.marketIndex + step, 0), state.filteredMarkets.length - 1);
+      if (next === state.marketIndex) return;
+      setMarketIndex(next);
+    }
+
+    function applyLocalMarketSearch() {
+      const needle = String(el.marketLocalSearch.value || "").trim().toLowerCase();
+      if (!needle) {
+        state.filteredMarkets = [...state.markets];
+      } else {
+        state.filteredMarkets = state.markets.filter((market) => {
+          const hay = [
+            market.question,
+            market.slug,
+            market.event_slug,
+            market.market_id,
+          ].join(" ").toLowerCase();
+          return hay.includes(needle);
+        });
+      }
+      setMarketIndex(0);
+    }
+
+    async function loadSnapshot() {
+      if (state.busy) return;
+      state.busy = true;
+      el.statusChip.textContent = "loading";
+      el.statusLine.textContent = "Loading market rail snapshot...";
+      try {
+        const params = new URLSearchParams();
+        params.set("classification", String(el.classification.value || "track_now"));
+        params.set("limit", String(el.limit.value || "80"));
+        params.set("channels_per_market", String(el.channelsPerMarket.value || "30"));
+        params.set("mapped_only", String(el.mappedOnly.value || "true"));
+        const search = String(el.search.value || "").trim();
+        if (search) params.set("search", search);
+
+        const response = await fetch(`/api/intel/market-rail?${params.toString()}`, {
+          headers: { Accept: "application/json" },
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload?.detail || "Failed to load market rail snapshot.");
+        state.markets = Array.isArray(payload.markets) ? payload.markets : [];
+        state.filteredMarkets = [...state.markets];
+        setMarketIndex(0);
+        el.statusChip.textContent = "loaded";
+        el.statusLine.textContent =
+          `Loaded ${payload.count_markets} markets and ${payload.count_channels_unique} unique channels.`;
+      } catch (error) {
+        const message = String(error?.message || error);
+        state.markets = [];
+        state.filteredMarkets = [];
+        setMarketIndex(0);
+        el.statusChip.textContent = "error";
+        el.statusLine.textContent = message;
+      } finally {
+        state.busy = false;
+      }
+    }
+
+    el.refreshButton.addEventListener("click", loadSnapshot);
+    el.classification.addEventListener("change", loadSnapshot);
+    el.mappedOnly.addEventListener("change", loadSnapshot);
+    el.prevChannel.addEventListener("click", () => shiftChannel(-1));
+    el.nextChannel.addEventListener("click", () => shiftChannel(1));
+    el.marketLocalSearch.addEventListener("input", applyLocalMarketSearch);
+
+    el.marketList.addEventListener("click", (event) => {
+      if (event.target.closest("a[data-stop-nav='1']")) return;
+      const card = event.target.closest(".market-item");
+      if (!card) return;
+      const index = Number(card.getAttribute("data-index"));
+      if (!Number.isFinite(index)) return;
+      setMarketIndex(index);
+    });
+
+    el.railTrack.addEventListener("click", (event) => {
+      if (event.target.closest("a[data-stop-nav='1']")) return;
+      const card = event.target.closest(".channel-card");
+      if (!card) return;
+      const index = Number(card.getAttribute("data-channel-index"));
+      if (!Number.isFinite(index)) return;
+      state.channelIndex = index;
+      updateChannelTransform();
+      updateConnector();
+    });
+
+    el.railViewport.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      if (Math.abs(event.deltaY) < 8) return;
+      shiftChannel(event.deltaY > 0 ? 1 : -1);
+    }, { passive: false });
+
+    document.addEventListener("keydown", (event) => {
+      const tag = String(event.target?.tagName || "").toLowerCase();
+      if (["input", "textarea", "select"].includes(tag)) return;
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        shiftChannel(1);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        shiftChannel(-1);
+      } else if (event.key === "[") {
+        event.preventDefault();
+        shiftMarket(-1);
+      } else if (event.key === "]") {
+        event.preventDefault();
+        shiftMarket(1);
+      }
+    });
+
+    window.addEventListener("resize", updateConnector);
+
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const hashClassification = String(hashParams.get("classification") || "").trim().toLowerCase();
+    if (["all", "track_now", "track_later", "ignore", "unclassified"].includes(hashClassification)) {
+      el.classification.value = hashClassification;
+    }
+    const hashSearch = String(hashParams.get("search") || "").trim();
+    if (hashSearch) {
+      el.search.value = hashSearch;
+    }
+
+    loadSnapshot();
+  </script>
+</body>
+</html>

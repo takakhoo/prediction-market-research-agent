@@ -1,0 +1,1385 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Saved Channel Map</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #071018;
+      --panel: rgba(11, 19, 28, 0.92);
+      --panel-2: rgba(15, 26, 37, 0.92);
+      --line: rgba(148, 163, 184, 0.14);
+      --line-strong: rgba(148, 163, 184, 0.32);
+      --ink: #e7eef6;
+      --muted: #91a4b7;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.16);
+      --good: #34d399;
+      --warn: #f59e0b;
+      --danger: #fb7185;
+      --iran: #f97316;
+      --israel: #60a5fa;
+      --middle-east: #22c55e;
+      --gaza: #f59e0b;
+      --oil: #22c55e;
+      --ukraine: #facc15;
+      --other: #94a3b8;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+      --font: "IBM Plex Sans", "Segoe UI", sans-serif;
+      --display: "Space Grotesk", "IBM Plex Sans", sans-serif;
+      --market-card-width: 256px;
+      --channel-card-width: 256px;
+      --graph-min-width: 980px;
+      --node-height: 54px;
+      --row-gap: 70px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(1200px 640px at 100% -10%, rgba(56, 189, 248, 0.15), transparent 52%),
+        radial-gradient(1000px 520px at -12% 108%, rgba(249, 115, 22, 0.14), transparent 42%),
+        var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+    }
+
+    .shell {
+      max-width: 1880px;
+      margin: 0 auto;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .header {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .kicker {
+      margin: 0 0 8px;
+      color: var(--accent);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+
+    .title {
+      margin: 0;
+      font-family: var(--display);
+      font-size: 1.76rem;
+      line-height: 1.04;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      max-width: 920px;
+      color: var(--muted);
+      line-height: 1.56;
+      font-size: 0.92rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button,
+    a.button,
+    select,
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--ink);
+      padding: 9px 12px;
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+    }
+
+    button:hover,
+    a.button:hover,
+    .pill:hover,
+    select:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .button.primary {
+      border-color: rgba(56, 189, 248, 0.45);
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.2), rgba(14, 165, 233, 0.08));
+    }
+
+    .meta-row,
+    .pill-row,
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .meta {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .summary-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .summary-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-2);
+      min-height: 106px;
+      padding: 12px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .summary-card .label {
+      color: var(--muted);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    .summary-card .value {
+      font-family: var(--display);
+      font-size: 1.6rem;
+      line-height: 1;
+    }
+
+    .summary-card .hint {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .workspace {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 360px minmax(0, 1fr) 360px;
+      align-items: start;
+      min-height: 780px;
+    }
+
+    .column {
+      min-width: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .stack-panel {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      flex-wrap: wrap;
+    }
+
+    .section-head h2,
+    .section-head h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-family: var(--display);
+    }
+
+    .section-head p,
+    .section-head .note {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .field-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+
+    input[type="search"],
+    select {
+      width: 100%;
+    }
+
+    input[type="search"] {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.24);
+      color: var(--ink);
+      padding: 10px 12px;
+      font: inherit;
+    }
+
+    input[type="search"]:focus,
+    select:focus {
+      outline: none;
+      border-color: rgba(56, 189, 248, 0.55);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.12);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .toggle-row input {
+      accent-color: var(--accent);
+    }
+
+    .pill {
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 0.76rem;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .pill.active {
+      color: var(--ink);
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(56, 189, 248, 0.13);
+    }
+
+    .list {
+      display: grid;
+      gap: 8px;
+      max-height: 840px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .list-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      cursor: pointer;
+      transition: border-color 140ms ease, transform 140ms ease, background 140ms ease;
+    }
+
+    .list-card:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+    }
+
+    .list-card.active {
+      border-color: rgba(56, 189, 248, 0.42);
+      background: rgba(56, 189, 248, 0.12);
+    }
+
+    .list-card.market.zero {
+      border-style: dashed;
+      opacity: 0.84;
+    }
+
+    .row-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .row-main h4 {
+      margin: 0;
+      font-size: 0.92rem;
+      line-height: 1.32;
+    }
+
+    .row-sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .badge.bucket {
+      color: var(--ink);
+    }
+
+    .bucket-iran { border-color: rgba(249, 115, 22, 0.45); background: rgba(249, 115, 22, 0.12); }
+    .bucket-israel { border-color: rgba(96, 165, 250, 0.45); background: rgba(96, 165, 250, 0.12); }
+    .bucket-middle-east { border-color: rgba(34, 197, 94, 0.45); background: rgba(34, 197, 94, 0.12); }
+    .bucket-gaza { border-color: rgba(245, 158, 11, 0.45); background: rgba(245, 158, 11, 0.12); }
+    .bucket-ukraine { border-color: rgba(250, 204, 21, 0.45); background: rgba(250, 204, 21, 0.12); }
+    .bucket-oil { border-color: rgba(34, 197, 94, 0.45); background: rgba(34, 197, 94, 0.12); }
+    .bucket-other { border-color: rgba(148, 163, 184, 0.45); background: rgba(148, 163, 184, 0.12); }
+
+    .graph-panel {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .graph-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .graph-toolbar .field-grid {
+      min-width: 520px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .graph-wrap {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at top, rgba(56, 189, 248, 0.08), transparent 38%),
+        rgba(7, 16, 24, 0.74);
+      overflow: auto;
+      min-height: 760px;
+      max-height: 980px;
+      position: relative;
+    }
+
+    .graph-stage {
+      position: relative;
+      min-width: var(--graph-min-width);
+    }
+
+    .graph-svg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .edge {
+      fill: none;
+      stroke: rgba(56, 189, 248, 0.18);
+      stroke-width: 1.2;
+      stroke-linecap: round;
+      transition: opacity 140ms ease, stroke-width 140ms ease;
+    }
+
+    .edge.active {
+      stroke: rgba(56, 189, 248, 0.82);
+      stroke-width: 2.4;
+    }
+
+    .edge.dim {
+      opacity: 0.08;
+    }
+
+    .graph-node {
+      position: absolute;
+      height: var(--node-height);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(11, 20, 30, 0.92);
+      padding: 10px 12px;
+      display: grid;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2);
+      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+      text-align: left;
+    }
+
+    .graph-node:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+    }
+
+    .graph-node.market {
+      width: var(--market-card-width);
+    }
+
+    .graph-node.channel {
+      width: var(--channel-card-width);
+    }
+
+    .graph-node.market.active,
+    .graph-node.channel.active {
+      border-color: rgba(56, 189, 248, 0.5);
+      background: rgba(56, 189, 248, 0.12);
+    }
+
+    .graph-node.dim {
+      opacity: 0.3;
+    }
+
+    .graph-node.zero {
+      border-style: dashed;
+      opacity: 0.78;
+    }
+
+    .graph-node .node-title {
+      margin: 0;
+      font-size: 0.78rem;
+      font-weight: 600;
+      line-height: 1.28;
+    }
+
+    .graph-node .node-meta {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.7rem;
+      line-height: 1.3;
+    }
+
+    .detail-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel-2);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail-card h3 {
+      margin: 0;
+      font-family: var(--display);
+      font-size: 1rem;
+    }
+
+    .detail-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.84rem;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 8px;
+      max-height: 420px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .detail-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      display: grid;
+      gap: 4px;
+    }
+
+    .detail-item .title-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+    }
+
+    .detail-item strong {
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .detail-item span,
+    .detail-item p {
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.42;
+      margin: 0;
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.55;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .status.error {
+      color: #fda4af;
+    }
+
+    @media (max-width: 1500px) {
+      .summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 1240px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .graph-toolbar .field-grid {
+        min-width: 0;
+        width: 100%;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .list {
+        max-height: none;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .summary-grid,
+      .field-grid,
+      .graph-toolbar .field-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .shell {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel header">
+      <div class="title-row">
+        <div>
+          <p class="kicker">Saved Graph</p>
+          <h1 class="title">Channels To Markets</h1>
+          <p class="subtitle">
+            This view reads persisted rows from <code>public.channel_market_map</code> and overlays them on the approved handpicked market universe from
+            <code>public.handpicked_market_targets</code>. The graph is the saved state for the next funnel, not a temporary model run.
+          </p>
+        </div>
+        <div class="actions">
+          <button id="btnRefresh" type="button" class="primary">Refresh</button>
+          <a id="btnJson" class="button" href="/api/intel/saved-channel-map" target="_blank" rel="noopener">Open JSON</a>
+        </div>
+      </div>
+      <div class="meta-row">
+        <span class="meta" id="metaStorage">Loading storage snapshot...</span>
+        <span class="meta" id="metaGenerated">Waiting for data...</span>
+        <span class="meta" id="metaFilter">Link source: ai_handpicked_batch_v1</span>
+      </div>
+      <div class="summary-grid" id="summaryGrid"></div>
+    </section>
+
+    <section class="workspace">
+      <div class="column">
+        <section class="panel stack-panel">
+          <div class="section-head">
+            <div>
+              <h2>Controls</h2>
+              <p>Filter the saved graph by source file, link source, bucket, and search. Nothing on this page invents new links.</p>
+            </div>
+          </div>
+          <div class="field-grid">
+            <div class="field">
+              <label for="sourceFile">Source File</label>
+              <select id="sourceFile"></select>
+            </div>
+            <div class="field">
+              <label for="linkSource">Link Source</label>
+              <select id="linkSource"></select>
+            </div>
+            <div class="field">
+              <label for="marketSearch">Market Search</label>
+              <input id="marketSearch" type="search" placeholder="Search labels, buckets, or questions">
+            </div>
+            <div class="field">
+              <label for="channelSearch">Channel Search</label>
+              <input id="channelSearch" type="search" placeholder="Search titles, handles, or tags">
+            </div>
+          </div>
+          <div class="toggle-row">
+            <input id="toggleIncludeUnlinked" type="checkbox" checked>
+            <label for="toggleIncludeUnlinked">Include approved markets with zero saved links</label>
+          </div>
+          <div class="toggle-row">
+            <input id="toggleSelectionOnly" type="checkbox">
+            <label for="toggleSelectionOnly">When a node is selected, show only its lane</label>
+          </div>
+          <div>
+            <p class="row-sub" style="margin-bottom:8px;">Bucket Filter</p>
+            <div class="pill-row" id="bucketPills"></div>
+          </div>
+          <div class="status" id="statusText">Loading saved graph...</div>
+        </section>
+
+        <section class="panel stack-panel">
+          <div class="section-head">
+            <div>
+              <h2>Markets</h2>
+              <p id="marketCountCopy">Preparing market rack...</p>
+            </div>
+          </div>
+          <div class="list" id="marketList"></div>
+        </section>
+      </div>
+
+      <div class="column">
+        <section class="panel graph-panel">
+          <div class="graph-toolbar">
+            <div class="section-head">
+              <div>
+                <h2>Saved Link Graph</h2>
+                <p id="graphCopy">Approved markets on the left, linked channels on the right. Select a node to inspect its saved connections.</p>
+              </div>
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="marketLimit">Visible Markets</label>
+                <select id="marketLimit">
+                  <option value="12">12</option>
+                  <option value="18" selected>18</option>
+                  <option value="24">24</option>
+                  <option value="32">32</option>
+                  <option value="48">48</option>
+                  <option value="999">All</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="channelLimit">Visible Channels</label>
+                <select id="channelLimit">
+                  <option value="12">12</option>
+                  <option value="18" selected>18</option>
+                  <option value="24">24</option>
+                  <option value="32">32</option>
+                  <option value="48">48</option>
+                  <option value="999">All</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="edgeMode">Edge Mode</label>
+                <select id="edgeMode">
+                  <option value="all" selected>All Visible</option>
+                  <option value="selected">Selected Only</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="graph-wrap">
+            <div id="graphStage" class="graph-stage"></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="column">
+        <section class="panel stack-panel">
+          <div class="section-head">
+            <div>
+              <h2>Selection</h2>
+              <p>Use this panel to inspect the saved reason, confidence, and counterpart nodes for the selected market or channel.</p>
+            </div>
+          </div>
+          <div id="detailCard" class="detail-card"></div>
+        </section>
+
+        <section class="panel stack-panel">
+          <div class="section-head">
+            <div>
+              <h2>Channels</h2>
+              <p id="channelCountCopy">Preparing channel rack...</p>
+            </div>
+          </div>
+          <div class="list" id="channelList"></div>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const state = {
+      payload: null,
+      selectedBucket: "all",
+      selectedNode: null,
+      marketLimit: 18,
+      channelLimit: 18,
+      sourceFile: "",
+      linkSource: "ai_handpicked_batch_v1",
+      includeUnlinked: true,
+      selectionOnly: false,
+      edgeMode: "all",
+      marketSearch: "",
+      channelSearch: "",
+    };
+
+    const el = {
+      summaryGrid: document.getElementById("summaryGrid"),
+      sourceFile: document.getElementById("sourceFile"),
+      linkSource: document.getElementById("linkSource"),
+      marketSearch: document.getElementById("marketSearch"),
+      channelSearch: document.getElementById("channelSearch"),
+      toggleIncludeUnlinked: document.getElementById("toggleIncludeUnlinked"),
+      toggleSelectionOnly: document.getElementById("toggleSelectionOnly"),
+      bucketPills: document.getElementById("bucketPills"),
+      statusText: document.getElementById("statusText"),
+      marketList: document.getElementById("marketList"),
+      marketCountCopy: document.getElementById("marketCountCopy"),
+      graphStage: document.getElementById("graphStage"),
+      graphCopy: document.getElementById("graphCopy"),
+      marketLimit: document.getElementById("marketLimit"),
+      channelLimit: document.getElementById("channelLimit"),
+      edgeMode: document.getElementById("edgeMode"),
+      channelList: document.getElementById("channelList"),
+      channelCountCopy: document.getElementById("channelCountCopy"),
+      detailCard: document.getElementById("detailCard"),
+      btnRefresh: document.getElementById("btnRefresh"),
+      btnJson: document.getElementById("btnJson"),
+      metaStorage: document.getElementById("metaStorage"),
+      metaGenerated: document.getElementById("metaGenerated"),
+      metaFilter: document.getElementById("metaFilter"),
+    };
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat().format(Number(value || 0));
+    }
+
+    function formatRelative(value) {
+      if (!value) return "n/a";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "n/a";
+      const diffMs = Date.now() - date.getTime();
+      const diffMinutes = Math.round(diffMs / 60000);
+      if (Math.abs(diffMinutes) < 60) return `${diffMinutes}m ago`;
+      const diffHours = Math.round(diffMinutes / 60);
+      if (Math.abs(diffHours) < 48) return `${diffHours}h ago`;
+      const diffDays = Math.round(diffHours / 24);
+      return `${diffDays}d ago`;
+    }
+
+    function bucketClass(label) {
+      const normalized = String(label || "other").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      if (normalized.includes("iran")) return "bucket-iran";
+      if (normalized.includes("israel")) return "bucket-israel";
+      if (normalized.includes("middle-east")) return "bucket-middle-east";
+      if (normalized.includes("gaza")) return "bucket-gaza";
+      if (normalized.includes("ukraine")) return "bucket-ukraine";
+      if (normalized.includes("oil")) return "bucket-oil";
+      return "bucket-other";
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function sortByLinkCount(items, tieKey) {
+      return [...items].sort((a, b) => {
+        const diff = Number(b.link_count || 0) - Number(a.link_count || 0);
+        if (diff !== 0) return diff;
+        return String(a[tieKey] || "").localeCompare(String(b[tieKey] || ""));
+      });
+    }
+
+    function buildSummaryCards(payload) {
+      const counts = payload.counts || {};
+      const items = [
+        { label: "Approved Markets", value: counts.approved_markets_total, hint: "Matched handpicked markets in scope." },
+        { label: "Linked Markets", value: counts.linked_markets_total, hint: "Approved markets with at least one saved channel link." },
+        { label: "Linked Channels", value: counts.linked_channels_total, hint: "Active Telegram channels currently connected to the approved scope." },
+        { label: "Saved Links", value: counts.links_total, hint: "Persisted rows in public.channel_market_map for the selected link source." },
+        { label: "Orphan Markets", value: counts.unlinked_markets_total, hint: "Approved markets still waiting for any channel connection." },
+        { label: "Unlinked Channels", value: counts.unlinked_saved_channels_total, hint: "Active saved channels that currently contribute nothing to this approved graph." },
+      ];
+      el.summaryGrid.innerHTML = items.map((item) => `
+        <article class="summary-card">
+          <span class="label">${escapeHtml(item.label)}</span>
+          <strong class="value">${formatNumber(item.value)}</strong>
+          <p class="hint">${escapeHtml(item.hint)}</p>
+        </article>
+      `).join("");
+    }
+
+    function buildLookup(payload) {
+      const marketById = new Map((payload.markets || []).map((item) => [String(item.market_id), item]));
+      const channelById = new Map((payload.channels || []).map((item) => [Number(item.chat_id), item]));
+      const edgesByMarket = new Map();
+      const edgesByChannel = new Map();
+      for (const edge of payload.edges || []) {
+        const marketId = String(edge.market_id);
+        const chatId = Number(edge.chat_id);
+        if (!edgesByMarket.has(marketId)) edgesByMarket.set(marketId, []);
+        if (!edgesByChannel.has(chatId)) edgesByChannel.set(chatId, []);
+        edgesByMarket.get(marketId).push(edge);
+        edgesByChannel.get(chatId).push(edge);
+      }
+      return { marketById, channelById, edgesByMarket, edgesByChannel };
+    }
+
+    function marketMatchesSearch(item, query) {
+      if (!query) return true;
+      const haystack = [
+        item.market_label,
+        item.bucket,
+        item.question,
+        item.group_title,
+        item.scope_label,
+      ].join(" ").toLowerCase();
+      return haystack.includes(query);
+    }
+
+    function channelMatchesSearch(item, query) {
+      if (!query) return true;
+      const haystack = [
+        item.title,
+        item.username,
+        item.description,
+        ...(Array.isArray(item.tags_json) ? item.tags_json : []),
+      ].join(" ").toLowerCase();
+      return haystack.includes(query);
+    }
+
+    function deriveView() {
+      const payload = state.payload;
+      if (!payload) return null;
+      const lookup = buildLookup(payload);
+      const marketQuery = state.marketSearch.trim().toLowerCase();
+      const channelQuery = state.channelSearch.trim().toLowerCase();
+      let markets = (payload.markets || []).filter((item) => {
+        if (state.selectedBucket !== "all" && String(item.bucket || "").toLowerCase() !== state.selectedBucket) return false;
+        return marketMatchesSearch(item, marketQuery);
+      });
+      let channels = (payload.channels || []).filter((item) => channelMatchesSearch(item, channelQuery));
+
+      if (state.selectionOnly && state.selectedNode) {
+        if (state.selectedNode.type === "market") {
+          const edges = lookup.edgesByMarket.get(String(state.selectedNode.id)) || [];
+          const chatIds = new Set(edges.map((edge) => Number(edge.chat_id)));
+          channels = channels.filter((item) => chatIds.has(Number(item.chat_id)));
+          markets = markets.filter((item) => String(item.market_id) === String(state.selectedNode.id));
+        } else if (state.selectedNode.type === "channel") {
+          const edges = lookup.edgesByChannel.get(Number(state.selectedNode.id)) || [];
+          const marketIds = new Set(edges.map((edge) => String(edge.market_id)));
+          markets = markets.filter((item) => marketIds.has(String(item.market_id)));
+          channels = channels.filter((item) => Number(item.chat_id) === Number(state.selectedNode.id));
+        }
+      }
+
+      markets = sortByLinkCount(markets, "market_label");
+      channels = sortByLinkCount(channels, "title");
+
+      const visibleMarkets = markets.slice(0, state.marketLimit);
+      const visibleChannels = channels.slice(0, state.channelLimit);
+      const marketIds = new Set(visibleMarkets.map((item) => String(item.market_id)));
+      const channelIds = new Set(visibleChannels.map((item) => Number(item.chat_id)));
+      let visibleEdges = (payload.edges || []).filter((edge) => marketIds.has(String(edge.market_id)) && channelIds.has(Number(edge.chat_id)));
+      if (state.edgeMode === "selected" && state.selectedNode) {
+        if (state.selectedNode.type === "market") {
+          visibleEdges = visibleEdges.filter((edge) => String(edge.market_id) === String(state.selectedNode.id));
+        } else {
+          visibleEdges = visibleEdges.filter((edge) => Number(edge.chat_id) === Number(state.selectedNode.id));
+        }
+      }
+
+      return {
+        lookup,
+        markets,
+        channels,
+        visibleMarkets,
+        visibleChannels,
+        visibleEdges,
+      };
+    }
+
+    function setSelectedNode(type, id) {
+      if (state.selectedNode && state.selectedNode.type === type && String(state.selectedNode.id) === String(id)) {
+        state.selectedNode = null;
+      } else {
+        state.selectedNode = { type, id };
+      }
+      render();
+    }
+
+    function renderBucketPills(payload) {
+      const buckets = [{ label: "All", key: "all", market_count: payload.counts.approved_markets_total, linked_markets: payload.counts.linked_markets_total }];
+      for (const row of payload.bucket_counts || []) {
+        buckets.push({
+          label: row.label,
+          key: String(row.label || "other").toLowerCase(),
+          market_count: row.market_count,
+          linked_markets: row.linked_markets,
+        });
+      }
+      el.bucketPills.innerHTML = buckets.map((bucket) => `
+        <button class="pill ${state.selectedBucket === bucket.key ? "active" : ""}" data-bucket="${escapeHtml(bucket.key)}" type="button">
+          ${escapeHtml(bucket.label)} · ${formatNumber(bucket.market_count)} / ${formatNumber(bucket.linked_markets)}
+        </button>
+      `).join("");
+      el.bucketPills.querySelectorAll("[data-bucket]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.selectedBucket = button.dataset.bucket || "all";
+          render();
+        });
+      });
+    }
+
+    function renderMarketList(view) {
+      el.marketCountCopy.textContent = `${formatNumber(view.markets.length)} markets after local filters. ${formatNumber(view.visibleMarkets.length)} are rendered in the graph lane.`;
+      if (!view.markets.length) {
+        el.marketList.innerHTML = '<div class="empty">No approved markets match the current filters.</div>';
+        return;
+      }
+      el.marketList.innerHTML = view.markets.map((item) => {
+        const isActive = state.selectedNode && state.selectedNode.type === "market" && String(state.selectedNode.id) === String(item.market_id);
+        return `
+          <article class="list-card market ${isActive ? "active" : ""} ${Number(item.link_count || 0) === 0 ? "zero" : ""}" data-market-id="${escapeHtml(item.market_id)}">
+            <div class="row-main">
+              <h4>${escapeHtml(item.market_label)}</h4>
+              <span class="mono">${formatNumber(item.link_count)}</span>
+            </div>
+            <p class="row-sub">${escapeHtml(item.question || item.group_title || item.scope_label || "")}</p>
+            <div class="badge-row">
+              <span class="badge bucket ${bucketClass(item.bucket)}">${escapeHtml(item.bucket)}</span>
+              <span class="badge">line ${formatNumber(item.source_line_number)}</span>
+              <span class="badge">${item.avg_confidence ? `avg ${Number(item.avg_confidence).toFixed(2)}` : "no score"}</span>
+            </div>
+          </article>
+        `;
+      }).join("");
+      el.marketList.querySelectorAll("[data-market-id]").forEach((card) => {
+        card.addEventListener("click", () => setSelectedNode("market", card.dataset.marketId));
+      });
+    }
+
+    function renderChannelList(view) {
+      el.channelCountCopy.textContent = `${formatNumber(view.channels.length)} linked channels after local filters. ${formatNumber(view.visibleChannels.length)} are rendered in the graph lane.`;
+      if (!view.channels.length) {
+        el.channelList.innerHTML = '<div class="empty">No linked channels match the current filters.</div>';
+        return;
+      }
+      el.channelList.innerHTML = view.channels.map((item) => {
+        const isActive = state.selectedNode && state.selectedNode.type === "channel" && Number(state.selectedNode.id) === Number(item.chat_id);
+        return `
+          <article class="list-card channel ${isActive ? "active" : ""}" data-chat-id="${escapeHtml(item.chat_id)}">
+            <div class="row-main">
+              <h4>${escapeHtml(item.title)}</h4>
+              <span class="mono">${formatNumber(item.link_count)}</span>
+            </div>
+            <p class="row-sub">${item.username ? `@${escapeHtml(item.username)}` : "no public handle"}${item.member_count ? ` · ${formatNumber(item.member_count)} members` : ""}</p>
+            <div class="badge-row">
+              <span class="badge">${item.best_confidence ? `best ${Number(item.best_confidence).toFixed(2)}` : "saved link"}</span>
+              <span class="badge">${Array.isArray(item.tags_json) && item.tags_json.length ? escapeHtml(item.tags_json.slice(0, 2).join(", ")) : "no tags"}</span>
+            </div>
+          </article>
+        `;
+      }).join("");
+      el.channelList.querySelectorAll("[data-chat-id]").forEach((card) => {
+        card.addEventListener("click", () => setSelectedNode("channel", card.dataset.chatId));
+      });
+    }
+
+    function renderGraph(view) {
+      const stageWidth = Math.max(el.graphStage.parentElement.clientWidth - 4, 980);
+      const nodeHeight = 54;
+      const rowGap = 70;
+      const stageHeight = Math.max(view.visibleMarkets.length, view.visibleChannels.length, 1) * rowGap + 72;
+      const leftX = 18;
+      const marketWidth = 256;
+      const channelWidth = 256;
+      const rightX = stageWidth - channelWidth - 18;
+      const top = 24;
+
+      el.graphStage.style.width = `${stageWidth}px`;
+      el.graphStage.style.height = `${stageHeight}px`;
+
+      const marketPositions = new Map();
+      const channelPositions = new Map();
+      view.visibleMarkets.forEach((item, index) => {
+        marketPositions.set(String(item.market_id), {
+          x: leftX,
+          y: top + index * rowGap,
+          width: marketWidth,
+          height: nodeHeight,
+        });
+      });
+      view.visibleChannels.forEach((item, index) => {
+        channelPositions.set(Number(item.chat_id), {
+          x: rightX,
+          y: top + index * rowGap,
+          width: channelWidth,
+          height: nodeHeight,
+        });
+      });
+
+      const selectedMarketId = state.selectedNode && state.selectedNode.type === "market" ? String(state.selectedNode.id) : null;
+      const selectedChatId = state.selectedNode && state.selectedNode.type === "channel" ? Number(state.selectedNode.id) : null;
+
+      const svgPaths = view.visibleEdges.map((edge) => {
+        const left = marketPositions.get(String(edge.market_id));
+        const right = channelPositions.get(Number(edge.chat_id));
+        if (!left || !right) return "";
+        const startX = left.x + left.width;
+        const startY = left.y + left.height / 2;
+        const endX = right.x;
+        const endY = right.y + right.height / 2;
+        const delta = Math.max(80, (endX - startX) * 0.42);
+        const active = (
+          (selectedMarketId && String(edge.market_id) === selectedMarketId) ||
+          (selectedChatId !== null && Number(edge.chat_id) === selectedChatId)
+        );
+        const dim = state.selectedNode && !active;
+        const opacity = active ? 0.92 : (edge.confidence ? Math.max(0.14, Math.min(0.34, Number(edge.confidence) * 0.42)) : 0.18);
+        return `
+          <path
+            class="edge ${active ? "active" : ""} ${dim ? "dim" : ""}"
+            d="M ${startX} ${startY} C ${startX + delta} ${startY}, ${endX - delta} ${endY}, ${endX} ${endY}"
+            stroke-opacity="${opacity}">
+          </path>
+        `;
+      }).join("");
+
+      const marketNodes = view.visibleMarkets.map((item) => {
+        const pos = marketPositions.get(String(item.market_id));
+        const active = selectedMarketId === String(item.market_id);
+        const dim = state.selectedNode && state.selectedNode.type === "channel" && !item.linked_channel_ids.includes(Number(state.selectedNode.id));
+        return `
+          <button
+            type="button"
+            class="graph-node market ${active ? "active" : ""} ${dim ? "dim" : ""} ${Number(item.link_count || 0) === 0 ? "zero" : ""}"
+            data-market-id="${escapeHtml(item.market_id)}"
+            style="left:${pos.x}px; top:${pos.y}px;">
+            <p class="node-title">${escapeHtml(item.market_label)}</p>
+            <p class="node-meta">${escapeHtml(item.bucket)} · ${formatNumber(item.link_count)} links</p>
+          </button>
+        `;
+      }).join("");
+
+      const channelNodes = view.visibleChannels.map((item) => {
+        const pos = channelPositions.get(Number(item.chat_id));
+        const active = selectedChatId !== null && selectedChatId === Number(item.chat_id);
+        const dim = state.selectedNode && state.selectedNode.type === "market" && !item.linked_market_ids.includes(String(state.selectedNode.id));
+        return `
+          <button
+            type="button"
+            class="graph-node channel ${active ? "active" : ""} ${dim ? "dim" : ""}"
+            data-chat-id="${escapeHtml(item.chat_id)}"
+            style="left:${pos.x}px; top:${pos.y}px;">
+            <p class="node-title">${escapeHtml(item.title)}</p>
+            <p class="node-meta">${item.username ? `@${escapeHtml(item.username)}` : "no handle"} · ${formatNumber(item.link_count)} links</p>
+          </button>
+        `;
+      }).join("");
+
+      el.graphStage.innerHTML = `
+        <svg class="graph-svg" width="${stageWidth}" height="${stageHeight}" viewBox="0 0 ${stageWidth} ${stageHeight}" preserveAspectRatio="none">
+          ${svgPaths}
+        </svg>
+        ${marketNodes}
+        ${channelNodes}
+      `;
+
+      el.graphStage.querySelectorAll("[data-market-id]").forEach((node) => {
+        node.addEventListener("click", () => setSelectedNode("market", node.dataset.marketId));
+      });
+      el.graphStage.querySelectorAll("[data-chat-id]").forEach((node) => {
+        node.addEventListener("click", () => setSelectedNode("channel", node.dataset.chatId));
+      });
+    }
+
+    function renderDetail(view) {
+      const payload = state.payload;
+      const lookup = view.lookup;
+      if (!state.selectedNode) {
+        const topBuckets = (payload.bucket_counts || []).slice(0, 6).map((item) => `
+          <div class="detail-item">
+            <div class="title-line">
+              <strong>${escapeHtml(item.label)}</strong>
+              <span>${formatNumber(item.links)} links</span>
+            </div>
+            <p>${formatNumber(item.linked_markets)} linked markets out of ${formatNumber(item.market_count)} approved.</p>
+          </div>
+        `).join("");
+        el.detailCard.innerHTML = `
+          <h3>No node selected</h3>
+          <p>The graph is already persisted in <code>public.channel_market_map</code>. Select a market or channel to inspect its saved edges and the exact rationale stored with the link.</p>
+          <div class="badge-row">
+            <span class="badge">source: ${escapeHtml(payload.filters.link_source || "all")}</span>
+            <span class="badge">approved: ${formatNumber(payload.counts.approved_markets_total)}</span>
+            <span class="badge">links: ${formatNumber(payload.counts.links_total)}</span>
+          </div>
+          <div class="detail-list">${topBuckets || '<div class="empty">No bucket summary available.</div>'}</div>
+        `;
+        return;
+      }
+
+      if (state.selectedNode.type === "market") {
+        const item = lookup.marketById.get(String(state.selectedNode.id));
+        const edges = sortByLinkCount((lookup.edgesByMarket.get(String(state.selectedNode.id)) || []).map((edge) => {
+          const channel = lookup.channelById.get(Number(edge.chat_id));
+          return {
+            ...edge,
+            title: channel?.title || String(edge.chat_id),
+            username: channel?.username,
+            member_count: channel?.member_count || 0,
+            link_count: channel?.link_count || 0,
+          };
+        }), "title");
+        el.detailCard.innerHTML = `
+          <h3>${escapeHtml(item?.market_label || "Unknown market")}</h3>
+          <p>${escapeHtml(item?.question || item?.group_title || item?.scope_label || "")}</p>
+          <div class="badge-row">
+            <span class="badge bucket ${bucketClass(item?.bucket)}">${escapeHtml(item?.bucket || "Other")}</span>
+            <span class="badge">${formatNumber(item?.link_count || 0)} saved channels</span>
+            <span class="badge">${item?.avg_confidence ? `avg confidence ${Number(item.avg_confidence).toFixed(2)}` : "no confidence parsed"}</span>
+          </div>
+          <div class="detail-list">
+            ${edges.length ? edges.map((edge) => `
+              <div class="detail-item">
+                <div class="title-line">
+                  <strong>${escapeHtml(edge.title)}</strong>
+                  <span>${edge.confidence ? Number(edge.confidence).toFixed(2) : "saved"}</span>
+                </div>
+                <span>${edge.username ? `@${escapeHtml(edge.username)}` : "no handle"}${edge.member_count ? ` · ${formatNumber(edge.member_count)} members` : ""}</span>
+                <p>${escapeHtml(edge.reason_short || "No stored reason")}</p>
+              </div>
+            `).join("") : '<div class="empty">This approved market currently has no saved channel links for the selected link source.</div>'}
+          </div>
+        `;
+        return;
+      }
+
+      const item = lookup.channelById.get(Number(state.selectedNode.id));
+      const edges = sortByLinkCount((lookup.edgesByChannel.get(Number(state.selectedNode.id)) || []).map((edge) => {
+        const market = lookup.marketById.get(String(edge.market_id));
+        return {
+          ...edge,
+          market_label: market?.market_label || String(edge.market_id),
+          bucket: market?.bucket || "Other",
+          question: market?.question || market?.group_title || "",
+          link_count: market?.link_count || 0,
+        };
+      }), "market_label");
+      el.detailCard.innerHTML = `
+        <h3>${escapeHtml(item?.title || "Unknown channel")}</h3>
+        <p>${escapeHtml(item?.description || "No stored description for this channel.")}</p>
+        <div class="badge-row">
+          <span class="badge">${item?.username ? `@${escapeHtml(item.username)}` : "no handle"}</span>
+          <span class="badge">${item?.member_count ? `${formatNumber(item.member_count)} members` : "member count unavailable"}</span>
+          <span class="badge">${formatNumber(item?.link_count || 0)} saved markets</span>
+        </div>
+        <div class="detail-list">
+          ${edges.length ? edges.map((edge) => `
+            <div class="detail-item">
+              <div class="title-line">
+                <strong>${escapeHtml(edge.market_label)}</strong>
+                <span>${edge.confidence ? Number(edge.confidence).toFixed(2) : "saved"}</span>
+              </div>
+              <span>${escapeHtml(edge.bucket)}${edge.priority_rank ? ` · rank ${formatNumber(edge.priority_rank)}` : ""}</span>
+              <p>${escapeHtml(edge.reason_short || edge.question || "No stored reason")}</p>
+            </div>
+          `).join("") : '<div class="empty">This channel has no saved market links in the current filtered graph.</div>'}
+        </div>
+      `;
+    }
+
+    function renderMeta(payload, view) {
+      el.metaStorage.textContent = `Storage: ${payload.storage.links_table} + ${payload.storage.targets_table}`;
+      el.metaGenerated.textContent = `Generated ${formatRelative(payload.generated_at)} · latest channel seen ${formatRelative(payload.counts.latest_channel_seen_at)}`;
+      el.metaFilter.textContent = `Link source: ${payload.filters.link_source || "all"} · source file: ${payload.filters.source_file || "all"} · visible edges: ${formatNumber(view.visibleEdges.length)}`;
+      el.graphCopy.textContent = `${formatNumber(view.visibleMarkets.length)} markets and ${formatNumber(view.visibleChannels.length)} channels are currently rendered. ${formatNumber(view.visibleEdges.length)} saved links are visible in the lane.`;
+      const params = new URLSearchParams();
+      if (state.sourceFile) params.set("source_file", state.sourceFile);
+      if (state.linkSource) params.set("link_source", state.linkSource);
+      params.set("include_unlinked", state.includeUnlinked ? "true" : "false");
+      el.btnJson.href = `/api/intel/saved-channel-map?${params.toString()}`;
+    }
+
+    function render() {
+      if (!state.payload) return;
+      buildSummaryCards(state.payload);
+      renderBucketPills(state.payload);
+      const view = deriveView();
+      renderMeta(state.payload, view);
+      renderMarketList(view);
+      renderChannelList(view);
+      renderGraph(view);
+      renderDetail(view);
+    }
+
+    function setStatus(text, isError = false) {
+      el.statusText.textContent = text;
+      el.statusText.className = isError ? "status error" : "status";
+    }
+
+    function populateControls(payload) {
+      const sourceOptions = [{ value: "", label: "All source files" }, ...(payload.source_files || []).map((row) => ({
+        value: row.source_file || "",
+        label: `${row.source_label || row.source_file} (${formatNumber(row.matched_rows || 0)} matched)`,
+      }))];
+      el.sourceFile.innerHTML = sourceOptions.map((item) => `
+        <option value="${escapeHtml(item.value)}" ${item.value === state.sourceFile ? "selected" : ""}>${escapeHtml(item.label)}</option>
+      `).join("");
+
+      const linkOptions = [{ value: "all", label: "All saved link sources" }, ...(payload.link_source_breakdown || []).map((row) => ({
+        value: row.link_source || "",
+        label: `${row.link_source || "unknown"} (${formatNumber(row.active_links || 0)})`,
+      }))];
+      const desiredLinkSource = state.linkSource || "ai_handpicked_batch_v1";
+      const hasDesiredSource = linkOptions.some((item) => item.value === desiredLinkSource);
+      if (!hasDesiredSource && desiredLinkSource !== "all") {
+        linkOptions.unshift({ value: desiredLinkSource, label: `${desiredLinkSource} (selected)` });
+      }
+      el.linkSource.innerHTML = linkOptions.map((item) => `
+        <option value="${escapeHtml(item.value)}" ${(item.value === state.linkSource || (!state.linkSource && item.value === "ai_handpicked_batch_v1")) ? "selected" : ""}>${escapeHtml(item.label)}</option>
+      `).join("");
+    }
+
+    async function loadData() {
+      setStatus("Loading saved channel map...");
+      const params = new URLSearchParams();
+      if (state.sourceFile) params.set("source_file", state.sourceFile);
+      params.set("link_source", state.linkSource || "ai_handpicked_batch_v1");
+      params.set("include_unlinked", state.includeUnlinked ? "true" : "false");
+      const response = await fetch(`/api/intel/saved-channel-map?${params.toString()}`, { headers: { Accept: "application/json" } });
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      const payload = await response.json();
+      state.payload = payload;
+      populateControls(payload);
+      setStatus(`Loaded ${formatNumber(payload.counts.links_total)} saved links from ${payload.storage.links_table}.`);
+      render();
+    }
+
+    function bindEvents() {
+      el.btnRefresh.addEventListener("click", () => {
+        loadData().catch((error) => setStatus(error.message, true));
+      });
+      el.sourceFile.addEventListener("change", () => {
+        state.sourceFile = el.sourceFile.value || "";
+        state.selectedNode = null;
+        loadData().catch((error) => setStatus(error.message, true));
+      });
+      el.linkSource.addEventListener("change", () => {
+        state.linkSource = el.linkSource.value || "all";
+        state.selectedNode = null;
+        loadData().catch((error) => setStatus(error.message, true));
+      });
+      el.toggleIncludeUnlinked.addEventListener("change", () => {
+        state.includeUnlinked = el.toggleIncludeUnlinked.checked;
+        state.selectedNode = null;
+        loadData().catch((error) => setStatus(error.message, true));
+      });
+      el.toggleSelectionOnly.addEventListener("change", () => {
+        state.selectionOnly = el.toggleSelectionOnly.checked;
+        render();
+      });
+      el.edgeMode.addEventListener("change", () => {
+        state.edgeMode = el.edgeMode.value || "all";
+        render();
+      });
+      el.marketSearch.addEventListener("input", () => {
+        state.marketSearch = el.marketSearch.value || "";
+        render();
+      });
+      el.channelSearch.addEventListener("input", () => {
+        state.channelSearch = el.channelSearch.value || "";
+        render();
+      });
+      el.marketLimit.addEventListener("change", () => {
+        state.marketLimit = Number(el.marketLimit.value || 18);
+        render();
+      });
+      el.channelLimit.addEventListener("change", () => {
+        state.channelLimit = Number(el.channelLimit.value || 18);
+        render();
+      });
+      window.addEventListener("resize", () => {
+        if (state.payload) render();
+      });
+    }
+
+    bindEvents();
+    loadData().catch((error) => setStatus(error.message, true));
+  </script>
+</body>
+</html>

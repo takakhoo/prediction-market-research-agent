@@ -1,0 +1,18 @@
+Review this Telegram channel against the candidate markets below.
+
+Decision standard:
+- Select markets the channel is plausibly a persistent source for.
+- Prefer direct topical alignment from title, username, description, tags, and notes.
+- Deadline variants of the same market family may all be relevant if the channel clearly covers that proposition family.
+- If the evidence is weak, return no match.
+
+Return:
+- matches: only the candidate IDs you believe are relevant
+- confidence: 0.0 to 1.0
+- reason_short: one short sentence grounded in the channel metadata
+
+CHANNEL_JSON:
+{{CHANNEL_JSON}}
+
+CANDIDATE_MARKETS_JSON:
+{{MARKETS_JSON}}

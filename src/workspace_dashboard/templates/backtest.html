@@ -1,0 +1,1945 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Telegram Backtest</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #151b23;
+      --panel-2: #11161d;
+      --line: #2a3442;
+      --ink: #e6edf3;
+      --muted: #96a5b8;
+      --accent: #2f81f7;
+      --accent-2: #0e5fc7;
+      --danger: #fb7185;
+      --font: "IBM Plex Sans", "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--ink);
+      background: var(--bg);
+    }
+    .page {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      gap: 14px;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+      padding: 14px;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset;
+    }
+    h1, h2, h3, h4 { margin: 0; }
+    .subtitle {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .col-3 { grid-column: span 3; }
+    .col-4 { grid-column: span 4; }
+    .col-6 { grid-column: span 6; }
+    .col-12 { grid-column: span 12; }
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+      resize: vertical;
+    }
+    textarea { min-height: 120px; }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .actions.end {
+      justify-content: flex-end;
+    }
+    button {
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 600;
+    }
+    button.primary {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: transparent;
+    }
+    button.primary:hover {
+      background: var(--accent-2);
+    }
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .status {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+    }
+    .status.error {
+      color: #ffd4dd;
+      border-color: rgba(251, 113, 133, 0.45);
+      background: rgba(190, 24, 93, 0.18);
+    }
+    .live-panel {
+      display: grid;
+      gap: 10px;
+    }
+    .live-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .live-card {
+      border: 1px solid var(--line);
+      background: #10161d;
+      border-radius: 10px;
+      padding: 10px;
+      display: grid;
+      gap: 5px;
+    }
+    .live-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .live-value {
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+    .live-chip {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      width: fit-content;
+      background: #10161d;
+      color: var(--muted);
+    }
+    .live-chip.idle {
+      color: #c3d0df;
+      border-color: var(--line);
+    }
+    .live-chip.running {
+      color: #d9ecff;
+      border-color: rgba(47, 129, 247, 0.65);
+      background: rgba(47, 129, 247, 0.16);
+    }
+    .live-chip.success {
+      color: #d8fce8;
+      border-color: rgba(46, 160, 67, 0.65);
+      background: rgba(46, 160, 67, 0.16);
+    }
+    .live-chip.error {
+      color: #ffd4dd;
+      border-color: rgba(251, 113, 133, 0.65);
+      background: rgba(190, 24, 93, 0.16);
+    }
+    .live-log {
+      border: 1px solid var(--line);
+      background: #0f151c;
+      border-radius: 10px;
+      padding: 8px 10px;
+      max-height: 190px;
+      overflow: auto;
+      margin: 0;
+      list-style: none;
+      display: grid;
+      gap: 6px;
+    }
+    .live-log li {
+      color: #c8d8eb;
+      font-size: 12px;
+      line-height: 1.4;
+      border-bottom: 1px dashed rgba(150, 165, 184, 0.2);
+      padding-bottom: 4px;
+    }
+    .live-log li:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .live-log .ts {
+      color: var(--muted);
+      margin-right: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .stage-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .stage-head-main {
+      display: grid;
+      gap: 4px;
+    }
+    .stage-title {
+      font-size: 20px;
+      color: #d8e9ff;
+    }
+    .stage-subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      max-width: 900px;
+    }
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      background: #10161d;
+    }
+    .stage-body {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-2);
+      padding: 12px;
+      overflow: auto;
+      max-height: 58vh;
+    }
+    .stage-trail {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .stage-trail-help {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .stage-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      background: #10161d;
+      cursor: pointer;
+    }
+    .stage-pill.active {
+      color: #ffffff;
+      background: var(--accent);
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+    .stage-pill.done {
+      color: #c7ddff;
+      border-color: rgba(47, 129, 247, 0.45);
+      background: rgba(47, 129, 247, 0.15);
+    }
+    .stage-pill.warn {
+      border-color: rgba(245, 158, 11, 0.6);
+      color: #f9d49d;
+      background: rgba(245, 158, 11, 0.12);
+    }
+    .stage-pill.error {
+      border-color: rgba(251, 113, 133, 0.6);
+      color: #ffc9d5;
+      background: rgba(190, 24, 93, 0.16);
+    }
+    .trail-badge {
+      margin-left: 6px;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      padding: 0 6px;
+      font-size: 10px;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+    .mini-stats {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .mini-stat {
+      border: 1px solid var(--line);
+      background: #10161d;
+      border-radius: 10px;
+      padding: 7px 10px;
+      font-size: 12px;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mini-stat-icon {
+      width: 18px;
+      height: 18px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #c9d8ea;
+      background: #0d141c;
+      line-height: 1;
+      font-weight: 700;
+    }
+    .mini-stat strong {
+      color: var(--ink);
+      display: inline-block;
+      margin-left: 6px;
+      font-size: 13px;
+    }
+    details.advanced {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #10161d;
+      padding: 10px;
+    }
+    details.advanced summary {
+      cursor: pointer;
+      list-style: none;
+      font-weight: 700;
+      color: #d8e9ff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    details.advanced summary::-webkit-details-marker {
+      display: none;
+    }
+    .advanced-copy {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .advanced-grid {
+      margin-top: 12px;
+    }
+    details.raw-json {
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #10161d;
+      padding: 8px 10px;
+    }
+    details.raw-json summary {
+      cursor: pointer;
+      color: #d3e5ff;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .code-card {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #10161d;
+      overflow: hidden;
+    }
+    .code-card summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: #d3e5ff;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: #0f151c;
+    }
+    .code-card summary::-webkit-details-marker {
+      display: none;
+    }
+    .code-meta {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+    .code-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      padding: 6px 8px;
+      border-bottom: 1px dashed rgba(150, 165, 184, 0.25);
+      background: #0d141c;
+    }
+    .copy-btn {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #10161d;
+      color: #cce0f8;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+    .copy-btn:hover {
+      border-color: rgba(47, 129, 247, 0.6);
+      color: #f2f8ff;
+    }
+    .kvs {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 8px;
+      font-size: 14px;
+    }
+    .k { color: var(--muted); }
+    .v { color: var(--ink); word-break: break-word; }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: pre;
+      overflow-wrap: normal;
+      font-size: 12.5px;
+      line-height: 1.58;
+      background: #0c1218;
+      border: 0;
+      border-radius: 0;
+      padding: 12px;
+      margin: 0;
+      overflow: auto;
+      max-height: 420px;
+      tab-size: 2;
+      color: #dce8f6;
+    }
+    .mono.code-prompt,
+    .mono.code-text {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      background: #0c131c;
+    }
+    .mono.code-json {
+      background: #0b1220;
+    }
+    .json-key { color: #8ab4ff; }
+    .json-string { color: #9dd4a7; }
+    .json-number { color: #f4c97d; }
+    .json-bool { color: #d6a7ff; }
+    .json-null { color: #ff9aa6; font-style: italic; }
+    .empty-note {
+      color: var(--muted);
+      font-style: italic;
+    }
+    .callout {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 8px 0 10px;
+      background: #0f151c;
+      color: #d8e3ef;
+      font-size: 13px;
+    }
+    .callout.warn {
+      border-color: rgba(245, 158, 11, 0.5);
+      background: rgba(245, 158, 11, 0.1);
+      color: #ffe2b8;
+    }
+    .callout.error {
+      border-color: rgba(251, 113, 133, 0.5);
+      background: rgba(190, 24, 93, 0.14);
+      color: #ffd6df;
+    }
+    .pill-section {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    .pill-title {
+      margin: 0;
+      color: #d8e9ff;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+    }
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      color: #d3e5ff;
+      background: #0f151c;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .pill.query {
+      border-color: rgba(47, 129, 247, 0.55);
+      background: rgba(47, 129, 247, 0.14);
+      color: #d9ecff;
+    }
+    .pill.candidate {
+      border-color: rgba(120, 146, 178, 0.5);
+      background: rgba(120, 146, 178, 0.12);
+      color: #d7e4f2;
+    }
+    .pill.ok {
+      border-color: rgba(46, 160, 67, 0.55);
+      background: rgba(46, 160, 67, 0.14);
+      color: #d8fce8;
+    }
+    .pill.warn {
+      border-color: rgba(245, 158, 11, 0.55);
+      background: rgba(245, 158, 11, 0.14);
+      color: #ffe2b8;
+    }
+    .pill.error {
+      border-color: rgba(251, 113, 133, 0.55);
+      background: rgba(190, 24, 93, 0.14);
+      color: #ffd6df;
+    }
+    .pill .pill-mini {
+      opacity: 0.9;
+      margin-left: 6px;
+      font-size: 11px;
+      color: inherit;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 6px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { color: var(--muted); font-weight: 600; }
+    a { color: #8cc8ff; text-decoration: none; }
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .decision-row {
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #10161d;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .decision-pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #d5e6fb;
+      background: #0f151c;
+    }
+    .decision-pill.track_now {
+      color: #d8fce8;
+      border-color: rgba(46, 160, 67, 0.6);
+      background: rgba(46, 160, 67, 0.16);
+    }
+    .decision-pill.track_later {
+      color: #ffe2b8;
+      border-color: rgba(245, 158, 11, 0.6);
+      background: rgba(245, 158, 11, 0.14);
+    }
+    .decision-pill.ignore {
+      color: #ffd4dd;
+      border-color: rgba(251, 113, 133, 0.6);
+      background: rgba(190, 24, 93, 0.14);
+    }
+    .decision-meta {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .overview-card {
+      border: 1px solid var(--line);
+      background: #10161d;
+      border-radius: 12px;
+      padding: 10px;
+      display: grid;
+      gap: 6px;
+      min-height: 80px;
+    }
+    .overview-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .overview-icon {
+      width: 20px;
+      height: 20px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #0d141c;
+      color: #d1e4ff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .overview-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    .overview-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    @media (max-width: 980px) {
+      .col-3, .col-4, .col-6 { grid-column: span 12; }
+      .kvs { grid-template-columns: 120px 1fr; }
+      .overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .live-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    {% include "backtest/_header_panel.html" %}
+    {% include "backtest/_controls_panel.html" %}
+    {% include "backtest/_live_status_panel.html" %}
+    {% include "backtest/_prompt_overrides_panel.html" %}
+    {% include "backtest/_overview_panel.html" %}
+    {% include "backtest/_stage_viewer_panel.html" %}
+  </main>
+
+  <script>
+    let codeCardSeq = 0;
+    const STORAGE_FORM_KEY = "telegram_backtest_form_v1";
+    const STORAGE_LAST_RUN_KEY = "telegram_backtest_last_run_id_v1";
+
+    const state = {
+      payload: null,
+      stages: [],
+      stageIndex: 0,
+      loading: false,
+      currentRunId: null,
+      live: {
+        status: "idle",
+        step: "Waiting for run",
+        result: "None yet",
+        startMs: null,
+        elapsedTimer: null,
+        phaseTimer: null,
+        logs: [],
+      },
+    };
+
+    const el = {
+      marketRef: document.getElementById("marketRef"),
+      targetChannels: document.getElementById("targetChannels"),
+      maxQueries: document.getElementById("maxQueries"),
+      minMembers: document.getElementById("minMembers"),
+      maxReviewChannels: document.getElementById("maxReviewChannels"),
+      reviewMessageLimit: document.getElementById("reviewMessageLimit"),
+      sessionRunId: document.getElementById("sessionRunId"),
+      loadLatestButton: document.getElementById("loadLatestButton"),
+      loadRunButton: document.getElementById("loadRunButton"),
+      clearSessionButton: document.getElementById("clearSessionButton"),
+      currentSessionChip: document.getElementById("currentSessionChip"),
+      runButton: document.getElementById("runButton"),
+      rerunPromptButton: document.getElementById("rerunPromptButton"),
+      prevButton: document.getElementById("prevButton"),
+      nextButton: document.getElementById("nextButton"),
+      stageChip: document.getElementById("stageChip"),
+      stageTitle: document.getElementById("stageTitle"),
+      stageSubtitle: document.getElementById("stageSubtitle"),
+      stageTrail: document.getElementById("stageTrail"),
+      stageMiniStats: document.getElementById("stageMiniStats"),
+      localDecisionRow: document.getElementById("localDecisionRow"),
+      overviewCards: document.getElementById("overviewCards"),
+      stageBody: document.getElementById("stageBody"),
+      localSystemPrompt: document.getElementById("localSystemPrompt"),
+      localUserPrompt: document.getElementById("localUserPrompt"),
+      plannerSystemPrompt: document.getElementById("plannerSystemPrompt"),
+      plannerUserPrompt: document.getElementById("plannerUserPrompt"),
+      reviewerSystemPrompt: document.getElementById("reviewerSystemPrompt"),
+      reviewerUserPrompt: document.getElementById("reviewerUserPrompt"),
+      status: document.getElementById("status"),
+      liveState: document.getElementById("liveState"),
+      liveElapsed: document.getElementById("liveElapsed"),
+      liveStep: document.getElementById("liveStep"),
+      liveResult: document.getElementById("liveResult"),
+      liveLog: document.getElementById("liveLog"),
+    };
+
+    function setCurrentSession(runId) {
+      const normalized = Number.isFinite(Number(runId)) && Number(runId) > 0 ? Number(runId) : null;
+      state.currentRunId = normalized;
+      if (normalized) {
+        localStorage.setItem(STORAGE_LAST_RUN_KEY, String(normalized));
+        el.currentSessionChip.textContent = `Session: #${normalized}`;
+        el.sessionRunId.value = String(normalized);
+      } else {
+        localStorage.removeItem(STORAGE_LAST_RUN_KEY);
+        el.currentSessionChip.textContent = "Session: none";
+      }
+    }
+
+    function collectFormState() {
+      return {
+        marketRef: el.marketRef.value,
+        targetChannels: el.targetChannels.value,
+        maxQueries: el.maxQueries.value,
+        minMembers: el.minMembers.value,
+        maxReviewChannels: el.maxReviewChannels.value,
+        reviewMessageLimit: el.reviewMessageLimit.value,
+        sessionRunId: el.sessionRunId.value,
+        localSystemPrompt: el.localSystemPrompt.value,
+        localUserPrompt: el.localUserPrompt.value,
+        plannerSystemPrompt: el.plannerSystemPrompt.value,
+        plannerUserPrompt: el.plannerUserPrompt.value,
+        reviewerSystemPrompt: el.reviewerSystemPrompt.value,
+        reviewerUserPrompt: el.reviewerUserPrompt.value,
+      };
+    }
+
+    function persistFormState() {
+      try {
+        localStorage.setItem(STORAGE_FORM_KEY, JSON.stringify(collectFormState()));
+      } catch {
+        // no-op
+      }
+    }
+
+    function restoreFormState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_FORM_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== "object") return;
+        if (parsed.marketRef) el.marketRef.value = parsed.marketRef;
+        if (parsed.targetChannels) el.targetChannels.value = parsed.targetChannels;
+        if (parsed.maxQueries) el.maxQueries.value = parsed.maxQueries;
+        if (parsed.minMembers) el.minMembers.value = parsed.minMembers;
+        if (parsed.maxReviewChannels) el.maxReviewChannels.value = parsed.maxReviewChannels;
+        if (parsed.reviewMessageLimit) el.reviewMessageLimit.value = parsed.reviewMessageLimit;
+        if (parsed.sessionRunId) el.sessionRunId.value = parsed.sessionRunId;
+        if (parsed.localSystemPrompt) el.localSystemPrompt.value = parsed.localSystemPrompt;
+        if (parsed.localUserPrompt) el.localUserPrompt.value = parsed.localUserPrompt;
+        if (parsed.plannerSystemPrompt) el.plannerSystemPrompt.value = parsed.plannerSystemPrompt;
+        if (parsed.plannerUserPrompt) el.plannerUserPrompt.value = parsed.plannerUserPrompt;
+        if (parsed.reviewerSystemPrompt) el.reviewerSystemPrompt.value = parsed.reviewerSystemPrompt;
+        if (parsed.reviewerUserPrompt) el.reviewerUserPrompt.value = parsed.reviewerUserPrompt;
+      } catch {
+        // no-op
+      }
+    }
+
+    function esc(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function fmtJson(value) {
+      try {
+        return JSON.stringify(value ?? {}, null, 2);
+      } catch {
+        return String(value ?? "");
+      }
+    }
+
+    function highlightJson(raw) {
+      const safe = String(raw ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+      return safe.replace(
+        /("(\\u[\da-fA-F]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+        (match) => {
+          let cls = "json-number";
+          if (match.startsWith('"')) {
+            cls = match.endsWith(":") ? "json-key" : "json-string";
+          } else if (match === "true" || match === "false") {
+            cls = "json-bool";
+          } else if (match === "null") {
+            cls = "json-null";
+          }
+          return `<span class="${cls}">${match}</span>`;
+        }
+      );
+    }
+
+    function renderCodeCard(title, content, opts = {}) {
+      const kind = opts.kind || "text"; // text | prompt | json
+      const open = opts.open !== false;
+      const raw = String(content ?? "");
+      const lines = raw ? raw.split(/\r?\n/).length : 0;
+      const chars = raw.length;
+      const id = `code-card-${++codeCardSeq}`;
+      const bodyHtml = kind === "json" ? highlightJson(raw) : esc(raw);
+      const body = bodyHtml || `<span class="empty-note">[empty]</span>`;
+      return (
+        `<details class="code-card"${open ? " open" : ""}>` +
+        `<summary><span>${esc(title || "Code")}</span><span class="code-meta">${lines} lines | ${chars} chars</span></summary>` +
+        `<div class="code-toolbar"><button type="button" class="copy-btn" data-copy-target="${id}">Copy</button></div>` +
+        `<pre id="${id}" class="mono code-${esc(kind)}">${body}</pre>` +
+        `</details>`
+      );
+    }
+
+    function shorten(value, maxLen = 96) {
+      const text = String(value ?? "").trim();
+      if (text.length <= maxLen) return text;
+      return `${text.slice(0, Math.max(1, maxLen - 1))}…`;
+    }
+
+    function renderPillList(title, items, opts = {}) {
+      const variant = opts.variant || "";
+      const max = Number.isFinite(opts.max) ? Number(opts.max) : 24;
+      const values = Array.isArray(items) ? items.filter((x) => String(x ?? "").trim()) : [];
+      const shown = values.slice(0, max);
+      const extra = values.length - shown.length;
+      const pillHtml = shown.map((item) => (
+        `<span class="pill ${esc(variant)}" title="${esc(String(item))}">${esc(shorten(item, 96))}</span>`
+      )).join("");
+      const more = extra > 0 ? `<span class="pill ${esc(variant)}">+${extra} more</span>` : "";
+      const empty = !shown.length ? `<span class="pill warn">none</span>` : "";
+      return (
+        `<div class="pill-section">` +
+        `<h4 class="pill-title">${esc(title)}</h4>` +
+        `<div class="pill-list">${pillHtml}${more}${empty}</div>` +
+        `</div>`
+      );
+    }
+
+    function renderQueryOutputPills(search, similar) {
+      const searchItems = (search || []).map((item, index) => {
+        const status = String(item?.status || "ok").toLowerCase();
+        const results = Array.isArray(item?.results) ? item.results.length : Number(item?.result_count || 0);
+        const accepted = Array.isArray(item?.results)
+          ? item.results.filter((r) => r && r.accepted).length
+          : Number(item?.accepted_count || 0);
+        const label = `Q${index + 1} ${shorten(item?.query || "-", 58)}`;
+        const variant = status === "error" ? "error" : (results === 0 ? "warn" : "ok");
+        const suffix = `<span class="pill-mini">status=${status} • results=${results} • accepted=${accepted}</span>`;
+        return `<span class="pill ${variant}" title="${esc(item?.query || "")}">${esc(label)}${suffix}</span>`;
+      });
+
+      const similarItems = (similar || []).map((item, index) => {
+        const status = String(item?.status || "ok").toLowerCase();
+        const results = Number(item?.result_count || 0);
+        const accepted = Number(item?.accepted_count || 0);
+        const seed = item?.seed_title || item?.seed_chat_id || "-";
+        const label = `M${index + 1} ${shorten(seed, 44)}`;
+        const variant = status === "error" ? "error" : (results === 0 ? "warn" : "ok");
+        const suffix = `<span class="pill-mini">status=${status} • results=${results} • accepted=${accepted}</span>`;
+        return `<span class="pill ${variant}" title="${esc(String(seed))}">${esc(label)}${suffix}</span>`;
+      });
+
+      const searchEmpty = searchItems.length ? "" : `<span class="pill warn">no search runs</span>`;
+      const similarEmpty = similarItems.length ? "" : `<span class="pill warn">no similar runs</span>`;
+      return (
+        `<div class="pill-section">` +
+        `<h4 class="pill-title">Search Output Pills</h4>` +
+        `<div class="pill-list">${searchItems.join("")}${searchEmpty}</div>` +
+        `</div>` +
+        `<div class="pill-section">` +
+        `<h4 class="pill-title">Similar Output Pills</h4>` +
+        `<div class="pill-list">${similarItems.join("")}${similarEmpty}</div>` +
+        `</div>`
+      );
+    }
+
+    function extractHandles(text) {
+      const raw = String(text ?? "");
+      const matches = raw.match(/@[A-Za-z0-9_]{3,}/g) || [];
+      return _dedupe_keep_order(matches.map((item) => item.trim()));
+    }
+
+    function extractHandlesFromMany(values) {
+      const out = [];
+      (values || []).forEach((value) => {
+        out.push(...extractHandles(value));
+      });
+      return _dedupe_keep_order(out);
+    }
+
+    function _dedupe_keep_order(items) {
+      const seen = new Set();
+      const ordered = [];
+      (items || []).forEach((item) => {
+        const key = String(item ?? "").trim();
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        ordered.push(key);
+      });
+      return ordered;
+    }
+
+    function setStatus(message, isError = false) {
+      el.status.textContent = message;
+      el.status.classList.toggle("error", Boolean(isError));
+    }
+
+    function hhmmss(ms) {
+      const total = Math.max(0, Math.floor(ms / 1000));
+      const mm = String(Math.floor(total / 60)).padStart(2, "0");
+      const ss = String(total % 60).padStart(2, "0");
+      return `${mm}:${ss}`;
+    }
+
+    function nowLabel() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      return `${hh}:${mm}:${ss}`;
+    }
+
+    function pushLiveLog(message) {
+      state.live.logs.unshift({ ts: nowLabel(), message: String(message || "") });
+      state.live.logs = state.live.logs.slice(0, 24);
+      el.liveLog.innerHTML = state.live.logs
+        .map((row) => `<li><span class="ts">${esc(row.ts)}</span>${esc(row.message)}</li>`)
+        .join("");
+    }
+
+    function renderLiveStatus() {
+      el.liveState.className = `live-chip ${state.live.status}`;
+      el.liveState.textContent = state.live.status;
+      el.liveStep.textContent = state.live.step;
+      el.liveResult.textContent = state.live.result;
+      if (!state.live.startMs) {
+        el.liveElapsed.textContent = "00:00";
+      }
+    }
+
+    function stopLiveTimers() {
+      if (state.live.elapsedTimer) {
+        clearInterval(state.live.elapsedTimer);
+        state.live.elapsedTimer = null;
+      }
+      if (state.live.phaseTimer) {
+        clearInterval(state.live.phaseTimer);
+        state.live.phaseTimer = null;
+      }
+    }
+
+    function startLiveRun(marketRef) {
+      stopLiveTimers();
+      state.live.status = "running";
+      state.live.step = "Preparing request payload";
+      state.live.result = "In progress";
+      state.live.startMs = Date.now();
+      state.live.logs = [];
+      pushLiveLog(`Run started for market_ref: ${marketRef}`);
+      renderLiveStatus();
+
+      el.liveElapsed.textContent = "00:00";
+      state.live.elapsedTimer = setInterval(() => {
+        if (!state.live.startMs) return;
+        el.liveElapsed.textContent = hhmmss(Date.now() - state.live.startMs);
+      }, 1000);
+
+      const phaseSteps = [
+        "Submitting backtest request to API",
+        "Fetching market metadata from Polymarket",
+        "Running local-market AI classification",
+        "Running telegram keyword planner",
+        "Searching telegram channels",
+        "Running channel review queue",
+        "Assembling stages and saving run",
+      ];
+      let idx = 0;
+      state.live.phaseTimer = setInterval(() => {
+        if (state.live.status !== "running") return;
+        idx = Math.min(idx + 1, phaseSteps.length - 1);
+        state.live.step = phaseSteps[idx];
+        pushLiveLog(phaseSteps[idx]);
+        renderLiveStatus();
+      }, 2500);
+    }
+
+    function finishLiveRun(status, resultMessage) {
+      state.live.status = status;
+      state.live.result = resultMessage;
+      state.live.step = status === "success" ? "Run completed" : "Run failed";
+      renderLiveStatus();
+      stopLiveTimers();
+    }
+
+    function setLoading(loading) {
+      state.loading = loading;
+      el.runButton.disabled = loading;
+      el.rerunPromptButton.disabled = loading;
+      el.loadLatestButton.disabled = loading;
+      el.loadRunButton.disabled = loading;
+      el.clearSessionButton.disabled = loading;
+      el.prevButton.disabled = loading || state.stageIndex <= 0;
+      el.nextButton.disabled = loading || state.stages.length === 0 || state.stageIndex >= state.stages.length - 1;
+    }
+
+    function renderKvs(rows) {
+      const lines = rows.map(([k, v]) => (
+        `<div class="k">${esc(k)}</div><div class="v">${esc(v)}</div>`
+      ));
+      return `<div class="kvs">${lines.join("")}</div>`;
+    }
+
+    function renderMiniStats(rows) {
+      const items = (rows || [])
+        .filter((item) => item && item.label)
+        .map((item) => (
+          `<span class="mini-stat"><span class="mini-stat-icon">${esc(iconForLabel(item.label))}</span>${esc(item.label)}<strong>${esc(item.value ?? "n/a")}</strong></span>`
+        ));
+      return items.join("");
+    }
+
+    function iconForLabel(label) {
+      const value = String(label || "").toLowerCase();
+      if (value.includes("query")) return "Q";
+      if (value.includes("review")) return "R";
+      if (value.includes("selected") || value.includes("accepted")) return "S";
+      if (value.includes("score")) return "%";
+      if (value.includes("model")) return "M";
+      if (value.includes("runtime")) return "T";
+      if (value.includes("saved")) return "D";
+      if (value.includes("local")) return "L";
+      return "I";
+    }
+
+    function renderOverview(payload) {
+      if (!payload) {
+        if (el.localDecisionRow) {
+          el.localDecisionRow.innerHTML =
+            `<span class="decision-pill">Local Decision: n/a</span>` +
+            `<span class="decision-meta">Run backtest to see classification, is_local, and score.</span>`;
+        }
+        el.overviewCards.innerHTML = [
+          ["market", "-", "select market ref then run"],
+          ["queries", "-", "planner output"],
+          ["search hits", "-", "raw channel candidates"],
+          ["reviews", "-", "AI channel checks"],
+          ["selected", "-", "final picked channels"],
+          ["saved", "-", "backtest run persistence"],
+        ].map(([label, value, sub]) => (
+          `<div class="overview-card">` +
+          `<div class="overview-head"><span class="overview-icon">${esc(iconForLabel(label))}</span>${esc(label)}</div>` +
+          `<div class="overview-value">${esc(value)}</div>` +
+          `<div class="overview-sub">${esc(sub)}</div>` +
+          `</div>`
+        )).join("");
+        return;
+      }
+
+      const market = payload.market || {};
+      const planner = payload.planner || {};
+      const summary = payload.summary || {};
+      const meta = payload.meta || {};
+      const localReview = payload?.local_market_review?.result || {};
+      const search = payload?.stages?.search || [];
+      const similar = payload?.stages?.similar || [];
+      const finalChannels = payload?.stages?.final?.selected_channels || [];
+      const searchErrors = search.filter((item) => String(item?.status || "").toLowerCase() === "error" || item?.error).length;
+      const similarErrors = similar.filter((item) => String(item?.status || "").toLowerCase() === "error" || item?.error).length;
+      const rawHits = search.reduce((acc, item) => acc + Number(item?.result_count || 0), 0)
+        + similar.reduce((acc, item) => acc + Number(item?.result_count || 0), 0);
+
+      const localClass = String(
+        localReview.classification || payload?.market?.classification || "unknown"
+      ).toLowerCase();
+      const localScore = localReview.local_score ?? payload?.market?.local_score ?? "n/a";
+      const localFlag = localReview.is_local;
+      if (el.localDecisionRow) {
+        el.localDecisionRow.innerHTML =
+          `<span class="decision-pill ${esc(localClass)}">Local Decision: ${esc(localClass)}</span>` +
+          `<span class="decision-pill">is_local: ${esc(typeof localFlag === "boolean" ? String(localFlag) : "n/a")}</span>` +
+          `<span class="decision-pill">score: ${esc(localScore)}</span>` +
+          `<span class="decision-meta">From local-market classifier output.</span>`;
+      }
+
+      const cards = [
+        {
+          label: "market",
+          value: market.slug || market.market_id || "n/a",
+          sub: market.question ? market.question.slice(0, 54) : "market loaded",
+        },
+        {
+          label: "queries",
+          value: Number((planner.queries || []).length || 0),
+          sub: `intent: ${(planner.query_intent || "n/a").slice(0, 34)}`,
+        },
+        {
+          label: "search hits",
+          value: rawHits,
+          sub: `search ${search.length} | similar ${similar.length} | err ${searchErrors + similarErrors}`,
+        },
+        {
+          label: "reviews",
+          value: Number(summary.reviewed_channels || 0),
+          sub: `queued ${Number(payload?.stages?.channel_reviews?.length || 0)}`,
+        },
+        {
+          label: "selected",
+          value: finalChannels.length,
+          sub: `target ${Number(summary.target_channels || meta.target_channels || 0)}`,
+        },
+        {
+          label: "saved",
+          value: meta.backtest_saved ? `yes (#${meta.backtest_run_id ?? "?"})` : "no",
+          sub: meta.backtest_saved ? "stored in DB" : "save failed / disabled",
+        },
+      ];
+      el.overviewCards.innerHTML = cards.map((card) => (
+        `<div class="overview-card">` +
+        `<div class="overview-head"><span class="overview-icon">${esc(iconForLabel(card.label))}</span>${esc(card.label)}</div>` +
+        `<div class="overview-value">${esc(card.value)}</div>` +
+        `<div class="overview-sub">${esc(card.sub)}</div>` +
+        `</div>`
+      )).join("");
+    }
+
+    function renderRawJsonDetails(title, value) {
+      return renderCodeCard(title || "Raw JSON", fmtJson(value || {}), { kind: "json", open: false });
+    }
+
+    function buildStages(payload) {
+      const planner = payload?.planner || {};
+      const plannerPrompt = planner.prompt_debug || {};
+      const localReview = payload?.local_market_review || {};
+      const localResult = localReview.result || {};
+      const localPrompt = localReview.prompt_debug || {};
+      const market = payload?.market || {};
+      const search = payload?.stages?.search || [];
+      const similar = payload?.stages?.similar || [];
+      const channelReviews = payload?.stages?.channel_reviews || [];
+      const firstReviewPrompt = (channelReviews[0] && channelReviews[0].review && channelReviews[0].review.prompt_debug) || {};
+      const reviewerSystemPrompt = firstReviewPrompt.system_prompt || (el.reviewerSystemPrompt ? el.reviewerSystemPrompt.value : "") || "";
+      const reviewerUserPrompt = firstReviewPrompt.user_prompt || (el.reviewerUserPrompt ? el.reviewerUserPrompt.value : "") || "";
+      const reviewerPromptText = (reviewerSystemPrompt || reviewerUserPrompt)
+        ? ((reviewerSystemPrompt || "") + "\n\n" + (reviewerUserPrompt || ""))
+        : "[Reviewer prompt appears after at least one channel reaches review stage, or when you fill reviewer prompt override fields.]";
+      const finalStage = payload?.stages?.final || {};
+      const summary = payload?.summary || {};
+      const meta = payload?.meta || {};
+      const searchErrors = search.filter((item) => String(item?.status || "").toLowerCase() === "error" || item?.error);
+      const similarErrors = similar.filter((item) => String(item?.status || "").toLowerCase() === "error" || item?.error);
+      const hasAuthDup = [...searchErrors, ...similarErrors].some((item) =>
+        String(item?.error || "").toUpperCase().includes("AUTH_KEY_DUPLICATED")
+      );
+
+      const stages = [];
+
+      stages.push({
+        title: "0. Prompt Snapshot (Full)",
+        subtitle: "Complete prompt text for all AI layers used in this backtest run.",
+        stats: [
+          { label: "local chars", value: (localPrompt.system_prompt || "").length + (localPrompt.user_prompt || "").length },
+          { label: "planner chars", value: (plannerPrompt.system_prompt || "").length + (plannerPrompt.user_prompt || "").length },
+          { label: "reviewer chars", value: reviewerSystemPrompt.length + reviewerUserPrompt.length },
+        ],
+        html: (
+          renderCodeCard(
+            "Local Classifier Prompt (System + User)",
+            (localPrompt.system_prompt || "") + "\n\n" + (localPrompt.user_prompt || ""),
+            { kind: "prompt", open: true }
+          ) +
+          renderCodeCard(
+            "Telegram Query Planner Prompt (System + User)",
+            (plannerPrompt.system_prompt || "") + "\n\n" + (plannerPrompt.user_prompt || ""),
+            { kind: "prompt", open: true }
+          ) +
+          renderCodeCard(
+            "Telegram Channel Reviewer Prompt (System + User)",
+            reviewerPromptText,
+            { kind: "prompt", open: true }
+          )
+        ),
+      });
+
+      stages.push({
+        title: "1. Local Market Classifier Prompt",
+        subtitle: "Exact AI prompt used to decide if the market is local and speed-sensitive.",
+        stats: [
+          { label: "runtime", value: localPrompt.runtime_mode || "n/a" },
+          { label: "model", value: localPrompt.model || "n/a" },
+          { label: "editable", value: String(Boolean(localPrompt.editable)) },
+        ],
+        html: (
+          renderKvs([
+            ["Runtime", localPrompt.runtime_mode || ""],
+            ["Model", localPrompt.model || "n/a"],
+            ["Editable", String(Boolean(localPrompt.editable))],
+          ]) +
+          renderCodeCard("System Prompt", localPrompt.system_prompt || "", { kind: "prompt", open: true }) +
+          renderCodeCard("User Prompt", localPrompt.user_prompt || "", { kind: "prompt", open: true }) +
+          renderRawJsonDetails("Prompt Input Materials", localPrompt.input_materials || {})
+        ),
+      });
+
+      stages.push({
+        title: "2. Local Market Classifier Output",
+        subtitle: "AI decision and reasoning for local-market fit.",
+        stats: [
+          { label: "classification", value: localResult.classification || market.classification || "n/a" },
+          { label: "is_local", value: String(Boolean(localResult.is_local)) },
+          { label: "score", value: localResult.local_score ?? market.local_score ?? "n/a" },
+        ],
+        html: (
+          renderKvs([
+            ["Classification", localResult.classification || market.classification || ""],
+            ["Is Local", String(Boolean(localResult.is_local))],
+            ["Local Score", localResult.local_score ?? market.local_score ?? ""],
+            ["Market", market.slug || ""],
+          ]) +
+          renderCodeCard("Reason JSON", fmtJson(localResult.reason_json || {}), { kind: "json", open: true }) +
+          renderCodeCard("Raw Model Output", fmtJson(localPrompt.output_json || {}), { kind: "json", open: true })
+        ),
+      });
+
+      stages.push({
+        title: "3. Telegram Keyword Planner Prompt",
+        subtitle: "Prompt used to generate multilingual keyword/query plan before Telegram search.",
+        stats: [
+          { label: "runtime", value: meta.planner_runtime_mode || "n/a" },
+          { label: "editable", value: String(Boolean(meta.planner_prompt_editable)) },
+          { label: "override", value: String(Boolean(plannerPrompt.override_applied)) },
+        ],
+        html: (
+          renderKvs([
+            ["Planner Runtime", meta.planner_runtime_mode || ""],
+            ["Prompt Editable", String(Boolean(meta.planner_prompt_editable))],
+            ["Model", plannerPrompt.model || "n/a"],
+            ["Override Applied", String(Boolean(plannerPrompt.override_applied))],
+          ]) +
+          renderCodeCard("System Prompt", plannerPrompt.system_prompt || "", { kind: "prompt", open: true }) +
+          renderCodeCard("User Prompt", plannerPrompt.user_prompt || "", { kind: "prompt", open: true }) +
+          renderRawJsonDetails("Prompt Input Materials", plannerPrompt.input_materials || {})
+        ),
+      });
+
+      stages.push({
+        title: "4. Telegram Keyword Planner Output",
+        subtitle: "Generated keyword bundles and query list that feed channel discovery.",
+        trail_label: "4.Planner",
+        status: (planner.queries || []).length ? "ok" : "warn",
+        stats: [
+          { label: "intent", value: planner.query_intent || "n/a" },
+          { label: "queries", value: (planner.queries || []).length },
+          { label: "candidates", value: (planner.query_candidates || []).length },
+          { label: "google", value: (planner.google_queries || []).length },
+        ],
+        html: (
+          (() => {
+            const plannerGoogleQueries = Array.isArray(planner.google_queries)
+              ? planner.google_queries
+              : [];
+            const keywordTerms = (planner.keyword_groups || []).flatMap((group) => {
+              const lang = String(group?.language_code || "").trim() || "xx";
+              return (group?.query_terms || []).map((term) => `${lang}: ${term}`);
+            });
+            const officialHandles = _dedupe_keep_order(
+              (planner.official_targets || []).flatMap((target) =>
+                (target?.handles || []).map((handle) => String(handle || "").trim())
+              ).filter(Boolean)
+            );
+            const derivedGoogleQueries = _dedupe_keep_order(
+              [
+                ...officialHandles.map((handle) => `site:t.me ${String(handle).replace(/^@/, "").trim()}`),
+                ...(planner.queries || []).map((query) => `site:t.me ${query}`),
+                ...(planner.query_candidates || []).slice(0, 20).map((query) => `site:t.me ${query}`),
+              ]
+                .map((value) => String(value || "").replace(/\s+/g, " ").trim())
+                .filter(Boolean)
+            );
+            const googleQueries = plannerGoogleQueries.length ? plannerGoogleQueries : derivedGoogleQueries;
+            const handlesInQueryText = extractHandlesFromMany([
+              ...(planner.queries || []),
+              ...(planner.query_candidates || []),
+            ]);
+            const numberedQueries = (planner.queries || [])
+              .map((query, index) => `${index + 1}. ${query}`)
+              .join("\n");
+            return (
+          renderKvs([
+            ["Query Intent", planner.query_intent || ""],
+            ["Selected Queries", (planner.queries || []).length],
+            ["Candidates", (planner.query_candidates || []).length],
+            ["Google Queries (site:t.me)", googleQueries.length],
+          ]) +
+          renderPillList("Selected Query Pills", planner.queries || [], { variant: "query", max: 24 }) +
+          renderPillList("Google Query Pills (site:t.me)", googleQueries, { variant: "candidate", max: 48 }) +
+          renderPillList("Candidate Query Pills", planner.query_candidates || [], { variant: "candidate", max: 36 }) +
+          renderPillList("Keyword Term Pills", keywordTerms, { variant: "candidate", max: 40 }) +
+          renderPillList("Official Handle Pills (Planner)", officialHandles, { variant: "query", max: 30 }) +
+          renderPillList("Handle Mentions In Query Text", handlesInQueryText, { variant: "query", max: 30 }) +
+          renderPillList("Priority Language Pills", planner.priority_languages || [], { variant: "candidate", max: 12 }) +
+          renderCodeCard("Google Search Queries (site:t.me)", googleQueries.join("\n"), { kind: "text", open: true }) +
+          renderCodeCard("AI Generated Queries (Numbered)", numberedQueries, { kind: "text", open: true }) +
+          renderCodeCard("Queries", (planner.queries || []).join("\n"), { kind: "text", open: true }) +
+          renderCodeCard("Raw Planner Output JSON", fmtJson(plannerPrompt.output_json || planner), { kind: "json", open: true })
+            );
+          })()
+        ),
+      });
+
+      stages.push({
+        title: "5. Discovery Search + Similar Summary",
+        subtitle: "High-level totals before drilling into per-channel decisions.",
+        trail_label: "5.Summary",
+        status: searchErrors.length || similarErrors.length ? "warn" : "ok",
+        stats: [
+          { label: "search queries", value: search.length },
+          { label: "similar seeds", value: similar.length },
+          { label: "review queue", value: channelReviews.length },
+        ],
+        html: (() => {
+          const guideHtml =
+            `<div class="callout">` +
+            `<strong>How to read this:</strong> ` +
+            `Q1..Qn are generated search-query traces. ` +
+            `M1..Mn are similar-channel seed traces. ` +
+            `Step 6 is the AI review queue. ` +
+            `Step 7 is final channel selection.` +
+            `</div>`;
+          const authHtml = hasAuthDup
+            ? (
+              `<div class="callout error">` +
+              `<strong>Telegram session conflict detected:</strong> AUTH_KEY_DUPLICATED. ` +
+              `Usually this means multiple processes are using the same TDLib session folder. ` +
+              `Keep one dashboard process and re-run bootstrap, then retry.` +
+              `</div>`
+            )
+            : "";
+          const searchRows = search.map((item) => {
+            const q = item.query || "";
+            const type = item.query_type || "unknown";
+            const count = Array.isArray(item.results) ? item.results.length : 0;
+            const accepted = Array.isArray(item.results) ? item.results.filter((r) => r.accepted).length : 0;
+            const status = String(item.status || "ok");
+            const err = String(item.error || "");
+            return `<tr><td>${esc(q)}</td><td>${esc(type)}</td><td>${esc(status)}</td><td>${count}</td><td>${accepted}</td><td>${esc(err || "-")}</td></tr>`;
+          }).join("");
+          const similarRows = similar.map((item) => {
+            return `<tr><td>${esc(item.seed_title || item.seed_chat_id || "")}</td><td>${esc(item.status || "")}</td><td>${esc(item.result_count || 0)}</td><td>${esc(item.accepted_count || 0)}</td><td>${esc(item.error || "-")}</td></tr>`;
+          }).join("");
+          const foundHandlesFromResults = _dedupe_keep_order([
+            ...search.flatMap((item) =>
+              (item?.results || []).flatMap((decision) => {
+                const username = String(decision?.channel?.username || "").trim();
+                return username ? [`@${username}`] : [];
+              })
+            ),
+            ...similar.flatMap((item) =>
+              (item?.results || []).flatMap((decision) => {
+                const username = String(decision?.channel?.username || "").trim();
+                return username ? [`@${username}`] : [];
+              })
+            ),
+          ]);
+          return (
+            guideHtml +
+            authHtml +
+            renderQueryOutputPills(search, similar) +
+            renderPillList("Handles Found In Search Results", foundHandlesFromResults, { variant: "ok", max: 50 }) +
+            `<h4 style="margin:0 0 8px;">Search</h4>` +
+            `<table><thead><tr><th>Query</th><th>Type</th><th>Status</th><th>Results</th><th>Accepted</th><th>Error</th></tr></thead><tbody>${searchRows}</tbody></table>` +
+            `<h4 style="margin:14px 0 8px;">Similar</h4>` +
+            `<table><thead><tr><th>Seed</th><th>Status</th><th>Results</th><th>Accepted</th><th>Error</th></tr></thead><tbody>${similarRows}</tbody></table>` +
+            renderRawJsonDetails("Stage Payload", payload?.stages || {})
+          );
+        })(),
+      });
+
+      search.forEach((item, searchIndex) => {
+        const results = Array.isArray(item.results) ? item.results : [];
+        const acceptedCount = results.filter((decision) => decision.accepted).length;
+        const hasError = Boolean(item.error) || String(item.status || "").toLowerCase() === "error";
+        const rows = results.map((decision) => {
+          const channel = decision.channel || {};
+          const username = channel.username ? `@${channel.username}` : "";
+          const link = channel.public_link || (channel.username ? `https://t.me/${channel.username}` : "");
+          const linkCell = link ? `<a href="${esc(link)}" target="_blank" rel="noopener">open</a>` : "";
+          return (
+            `<tr>` +
+            `<td>${esc(channel.title || decision.title || "")}</td>` +
+            `<td>${esc(username)}</td>` +
+            `<td>${esc(channel.member_count || decision.member_count || "")}</td>` +
+            `<td>${esc(String(Boolean(decision.accepted)))}</td>` +
+            `<td>${esc(decision.decision_code || "")}</td>` +
+            `<td>${esc(decision.decision_reason || "")}</td>` +
+            `<td>${linkCell}</td>` +
+            `</tr>`
+          );
+        }).join("");
+        const emptyRow = !rows
+          ? `<tr><td colspan="7" class="empty-note">No channel candidates returned for this query.</td></tr>`
+          : "";
+
+        stages.push({
+          title: `5.Q${searchIndex + 1} Query Decision Trace: ${item.query || ""}`,
+          trail_label: `5.Q${searchIndex + 1}`,
+          status: hasError ? "error" : (results.length ? "ok" : "warn"),
+          subtitle: "Per-channel decisions for one generated query.",
+          stats: [
+            { label: "query", value: item.query || "" },
+            { label: "results", value: results.length },
+            { label: "accepted", value: acceptedCount },
+          ],
+          html: (
+            (hasError
+              ? `<div class="callout error"><strong>Query failed:</strong> ${esc(item.error || "Unknown search error")}</div>`
+              : "") +
+            renderKvs([
+              ["Query", item.query || ""],
+              ["Query Type", item.query_type || ""],
+              ["Status", item.status || (hasError ? "error" : "ok")],
+              ["Error", item.error || "-"],
+              ["Result Count", results.length],
+              ["Accepted", acceptedCount],
+            ]) +
+            `<h4 style="margin:14px 0 8px;">Per-channel decisions</h4>` +
+            `<table><thead><tr><th>Channel</th><th>Handle</th><th>Members</th><th>Accepted</th><th>Code</th><th>Reason</th><th>Link</th></tr></thead><tbody>${rows}${emptyRow}</tbody></table>` +
+            renderRawJsonDetails("Query Result JSON", item)
+          ),
+        });
+      });
+
+      similar.forEach((item, similarIndex) => {
+        const results = Array.isArray(item.results) ? item.results : [];
+        const acceptedCount = results.filter((decision) => decision.accepted).length;
+        const hasError = Boolean(item.error) || String(item.status || "").toLowerCase() === "error";
+        const rows = results.map((decision) => {
+          const channel = decision.channel || {};
+          const username = channel.username ? `@${channel.username}` : "";
+          const link = channel.public_link || (channel.username ? `https://t.me/${channel.username}` : "");
+          const linkCell = link ? `<a href="${esc(link)}" target="_blank" rel="noopener">open</a>` : "";
+          return (
+            `<tr>` +
+            `<td>${esc(channel.title || decision.title || "")}</td>` +
+            `<td>${esc(username)}</td>` +
+            `<td>${esc(channel.member_count || decision.member_count || "")}</td>` +
+            `<td>${esc(String(Boolean(decision.accepted)))}</td>` +
+            `<td>${esc(decision.decision_code || "")}</td>` +
+            `<td>${esc(decision.decision_reason || "")}</td>` +
+            `<td>${linkCell}</td>` +
+            `</tr>`
+          );
+        }).join("");
+        const emptyRow = !rows
+          ? `<tr><td colspan="7" class="empty-note">No similar channels returned for this seed.</td></tr>`
+          : "";
+
+        stages.push({
+          title: `5.M${similarIndex + 1} Similar Seed Trace: ${item.seed_title || item.seed_chat_id || ""}`,
+          trail_label: `5.M${similarIndex + 1}`,
+          status: hasError ? "error" : (results.length ? "ok" : "warn"),
+          subtitle: "Per-channel decisions for one similar-channel expansion seed.",
+          stats: [
+            { label: "seed", value: item.seed_title || item.seed_chat_id || "n/a" },
+            { label: "results", value: results.length },
+            { label: "accepted", value: acceptedCount },
+          ],
+          html: (
+            (hasError
+              ? `<div class="callout error"><strong>Similar seed failed:</strong> ${esc(item.error || "Unknown similar search error")}</div>`
+              : "") +
+            renderKvs([
+              ["Seed Channel", item.seed_title || item.seed_chat_id || ""],
+              ["Status", item.status || ""],
+              ["Error", item.error || "-"],
+              ["Result Count", results.length],
+              ["Accepted", acceptedCount],
+            ]) +
+            `<h4 style="margin:14px 0 8px;">Per-channel decisions</h4>` +
+            `<table><thead><tr><th>Channel</th><th>Handle</th><th>Members</th><th>Accepted</th><th>Code</th><th>Reason</th><th>Link</th></tr></thead><tbody>${rows}${emptyRow}</tbody></table>` +
+            renderRawJsonDetails("Similar Result JSON", item)
+          ),
+        });
+      });
+
+      if (!channelReviews.length) {
+        const blockedByApiErrors = (searchErrors.length + similarErrors.length) > 0;
+        const reasonText = blockedByApiErrors
+          ? "No channels reached review because search/similar stages returned API errors."
+          : "No discovery candidates passed to review pipeline.";
+        const tipText = blockedByApiErrors
+          ? "Fix TDLib/session issue first, then rerun."
+          : "Lower member/relevance filters or try another market.";
+        stages.push({
+          title: "6. Channel Review Queue",
+          trail_label: "6.Review",
+          status: "warn",
+          subtitle: "No channels were queued for AI relevance review in this run.",
+          stats: [
+            { label: "queued", value: 0 },
+            { label: "tip", value: "adjust filters" },
+          ],
+          html: (
+            `<p style="margin:0 0 10px;color:var(--muted);">No channels were queued for per-channel AI review in this run.</p>` +
+            (blockedByApiErrors
+              ? `<div class="callout error"><strong>Blocked:</strong> upstream API errors prevented channel queue creation.</div>`
+              : "") +
+            renderKvs([
+              ["Reason", reasonText],
+              ["Tip", tipText],
+            ])
+          ),
+        });
+      }
+
+      channelReviews.forEach((item, idx) => {
+        const username = item.username ? `@${item.username}` : "";
+        const link = item.public_link || (item.username ? `https://t.me/${item.username}` : "");
+        const source = item.source || {};
+        const review = item.review || {};
+        const prompt = review.prompt_debug || {};
+        const messages = (item.recent_messages || []).map((m) => {
+          return `[${m.posted_at || ""}] ${m.text || ""}`.trim();
+        }).join("\n\n");
+        stages.push({
+          title: `6.${idx + 1} Channel Review ${idx + 1}/${channelReviews.length}`,
+          trail_label: `6.R${idx + 1}`,
+          status: "ok",
+          subtitle: "Single-channel relevance check using market context and recent messages.",
+          stats: [
+            { label: "decision", value: review.decision || "n/a" },
+            { label: "relevant", value: String(Boolean(review.is_relevant)) },
+            { label: "members", value: item.member_count ?? "n/a" },
+          ],
+          html: (
+            renderKvs([
+              ["Title", item.title || ""],
+              ["Handle", username],
+              ["Members", item.member_count || ""],
+              ["Verified", String(Boolean(item.is_verified))],
+              ["Source", source.source || ""],
+              ["From Query", source.source_query || ""],
+              ["From Similar Seed", source.source_seed_title || source.source_seed_chat_id || ""],
+              ["AI Decision", `${review.decision || ""} (relevant=${String(Boolean(review.is_relevant))})`],
+              ["Reason", review.reason_short || ""],
+            ]) +
+            (link ? `<p style="margin:10px 0 0;"><a href="${esc(link)}" target="_blank" rel="noopener">Open Channel Link</a></p>` : "") +
+            renderCodeCard("Recent Messages", messages || "[no recent messages]", { kind: "text", open: true }) +
+            renderCodeCard("Reviewer Prompt (System + User)", (prompt.system_prompt || "") + "\n\n" + (prompt.user_prompt || ""), { kind: "prompt", open: true }) +
+            renderCodeCard("Reviewer Output JSON", fmtJson(prompt.output_json || review), { kind: "json", open: true }) +
+            renderRawJsonDetails("Channel Review Payload", item)
+          ),
+        });
+      });
+
+      stages.push({
+        title: "7. Final Selected Channels + Summary",
+        trail_label: "7.Final",
+        status: (finalStage.selected_channels || []).length ? "ok" : "warn",
+        subtitle: "Final channel set this run would keep, with summary + persistence metadata.",
+        stats: [
+          { label: "selected", value: (finalStage.selected_channels || []).length },
+          { label: "reviewed", value: summary.reviewed_channels || 0 },
+          { label: "saved", value: String(Boolean(meta.backtest_saved)) },
+        ],
+        html: (() => {
+          const selected = finalStage.selected_channels || [];
+          const rows = selected.map((item) => {
+            const username = item.username ? `@${item.username}` : "";
+            const link = item.public_link || (item.username ? `https://t.me/${item.username}` : "");
+            const anchor = link ? `<a href="${esc(link)}" target="_blank" rel="noopener">open</a>` : "";
+            return `<tr><td>${esc(item.title || item.chat_id || "")}</td><td>${esc(username)}</td><td>${esc(item.member_count || "")}</td><td>${esc(item.discovery_relevance_score ?? "")}</td><td>${anchor}</td></tr>`;
+          }).join("");
+          return (
+            `<div class="callout">` +
+            `<strong>Accepted Candidates</strong> = channels that passed discovery filters (` +
+            `member threshold + dedupe + basic relevance gates) before final AI review/selection.` +
+            `</div>` +
+            renderKvs([
+              ["Accepted Candidates", finalStage.accepted_candidates || 0],
+              ["Target Channels", finalStage.target_channels || 0],
+              ["Selected", selected.length],
+              ["Reviewed Channels", summary.reviewed_channels || 0],
+            ]) +
+            `<h4 style="margin:14px 0 8px;">Channels</h4>` +
+            `<table><thead><tr><th>Title</th><th>Handle</th><th>Members</th><th>Relevance</th><th>Link</th></tr></thead><tbody>${rows}</tbody></table>` +
+            renderCodeCard("Meta", fmtJson(meta), { kind: "json", open: true })
+          );
+        })(),
+      });
+
+      return stages;
+    }
+
+    function renderStage() {
+      if (!state.stages.length) {
+        el.stageTitle.textContent = "No backtest loaded";
+        el.stageSubtitle.textContent = "Run a market backtest, then move one stage at a time with Next/Prev.";
+        el.stageTrail.innerHTML = "";
+        el.stageMiniStats.innerHTML = "";
+        el.stageBody.innerHTML = "";
+        el.stageChip.textContent = "Stage 0 / 0";
+        renderOverview(null);
+        el.prevButton.disabled = true;
+        el.nextButton.disabled = true;
+        return;
+      }
+      const stage = state.stages[state.stageIndex];
+      el.stageTitle.textContent = stage.title;
+      el.stageSubtitle.textContent = stage.subtitle || "Step-by-step trace output.";
+      el.stageMiniStats.innerHTML = renderMiniStats(stage.stats || []);
+      el.stageTrail.innerHTML = state.stages.map((item, index) => {
+        const status = String(item.status || "").toLowerCase();
+        const cls = [
+          "stage-pill",
+          status === "error" ? "error" : "",
+          status === "warn" ? "warn" : "",
+          index === state.stageIndex ? "active" : "",
+          index < state.stageIndex ? "done" : "",
+        ].join(" ").trim();
+        const label = item.trail_label || item.title;
+        const badge = status === "error"
+          ? `<span class="trail-badge">ERR</span>`
+          : (status === "warn" ? `<span class="trail-badge">WARN</span>` : "");
+        return `<button type="button" class="${cls}" data-stage-index="${index}" title="${esc(item.title)}">${esc(label)}${badge}</button>`;
+      }).join("");
+      el.stageBody.innerHTML = stage.html;
+      el.stageChip.textContent = `Stage ${state.stageIndex + 1} / ${state.stages.length}`;
+      renderOverview(state.payload);
+      el.prevButton.disabled = state.loading || state.stageIndex <= 0;
+      el.nextButton.disabled = state.loading || state.stageIndex >= state.stages.length - 1;
+    }
+
+    function applyBacktestPayload(payload) {
+      state.payload = payload;
+      state.stages = buildStages(payload);
+      state.stageIndex = 0;
+      const localPromptDebug = payload?.local_market_review?.prompt_debug || {};
+      const promptDebug = payload?.planner?.prompt_debug || {};
+      const firstReviewPrompt = (payload?.stages?.channel_reviews || [])[0]?.review?.prompt_debug || {};
+      if (localPromptDebug.system_prompt) el.localSystemPrompt.value = localPromptDebug.system_prompt;
+      if (localPromptDebug.user_prompt) el.localUserPrompt.value = localPromptDebug.user_prompt;
+      if (promptDebug.system_prompt) el.plannerSystemPrompt.value = promptDebug.system_prompt;
+      if (promptDebug.user_prompt) el.plannerUserPrompt.value = promptDebug.user_prompt;
+      if (firstReviewPrompt.system_prompt) el.reviewerSystemPrompt.value = firstReviewPrompt.system_prompt;
+      if (firstReviewPrompt.user_prompt) el.reviewerUserPrompt.value = firstReviewPrompt.user_prompt;
+      renderStage();
+
+      const runId = payload?.meta?.backtest_run_id || payload?.run_record?.run_id || null;
+      if (runId) {
+        setCurrentSession(runId);
+      }
+      persistFormState();
+      return { runId: runId ? Number(runId) : null };
+    }
+
+    async function loadRunById(runId) {
+      const normalized = Number(runId);
+      if (!Number.isFinite(normalized) || normalized <= 0) {
+        throw new Error("Enter a valid saved run ID first.");
+      }
+      try {
+        setLoading(true);
+        startLiveRun(`saved_run_${normalized}`);
+        state.live.step = `Loading saved run #${normalized}`;
+        pushLiveLog(`Loading saved run #${normalized}`);
+        const response = await fetch(`/api/intel/telegram-backtest/runs/${normalized}`);
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload?.detail || `Run #${normalized} not found.`);
+        }
+        applyBacktestPayload(payload);
+        setCurrentSession(normalized);
+        setStatus(`Loaded saved run #${normalized}.`);
+        pushLiveLog(`Loaded run #${normalized}`);
+        finishLiveRun("success", `Loaded #${normalized}`);
+      } catch (error) {
+        const message = String(error?.message || error);
+        setStatus(message, true);
+        pushLiveLog(`Error loading run: ${message}`);
+        finishLiveRun("error", message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function loadLatestSavedRun() {
+      try {
+        setLoading(true);
+        const marketRef = el.marketRef.value.trim();
+        const params = new URLSearchParams({ limit: "1" });
+        if (marketRef) {
+          params.set("market_ref", marketRef);
+        }
+        const response = await fetch(`/api/intel/telegram-backtest/runs?${params.toString()}`);
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload?.detail || "Could not load latest saved run.");
+        }
+        const items = Array.isArray(payload?.items) ? payload.items : [];
+        if (!items.length) {
+          throw new Error("No saved runs found yet.");
+        }
+        const runId = Number(items[0]?.run_id || 0);
+        if (!Number.isFinite(runId) || runId <= 0) {
+          throw new Error("Latest run ID is invalid.");
+        }
+        el.sessionRunId.value = String(runId);
+      } finally {
+        setLoading(false);
+      }
+      await loadRunById(Number(el.sessionRunId.value));
+    }
+
+    async function runBacktest(usePromptOverride = false) {
+      const marketRef = el.marketRef.value.trim();
+      if (!marketRef) {
+        setStatus("Enter a market link, slug, or ID first.", true);
+        return;
+      }
+      const body = {
+        market_ref: marketRef,
+        target_channels: Number(el.targetChannels.value || 25),
+        max_queries: Number(el.maxQueries.value || 6),
+        min_channel_members: Number(el.minMembers.value || 25000),
+        min_channel_relevance: 0,
+        max_review_channels: Number(el.maxReviewChannels.value || 20),
+        review_message_limit: Number(el.reviewMessageLimit.value || 10),
+        local_system_prompt: el.localSystemPrompt.value,
+        local_user_prompt: el.localUserPrompt.value,
+        planner_system_prompt: el.plannerSystemPrompt.value,
+        planner_user_prompt: el.plannerUserPrompt.value,
+        reviewer_system_prompt: el.reviewerSystemPrompt.value,
+        reviewer_user_prompt: el.reviewerUserPrompt.value,
+        use_prompt_override: Boolean(usePromptOverride),
+        use_local_prompt_override: Boolean(usePromptOverride),
+        use_reviewer_prompt_override: Boolean(usePromptOverride),
+      };
+      try {
+        persistFormState();
+        setLoading(true);
+        startLiveRun(marketRef);
+        setStatus("Running backtest...");
+        const response = await fetch("/api/intel/telegram-backtest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload?.detail || "Backtest failed.");
+        }
+        state.live.step = "Rendering response";
+        pushLiveLog("API response received");
+        const applied = applyBacktestPayload(payload);
+        const runId = applied.runId;
+        const saved = Boolean(payload?.meta?.backtest_saved);
+        if (saved && runId) {
+          setStatus(`Backtest complete and saved as run #${runId}. Move with Next/Prev.`);
+          pushLiveLog(`Run saved in DB as #${runId}`);
+          finishLiveRun("success", `Saved #${runId}`);
+        } else if (!saved) {
+          const err = payload?.meta?.backtest_save_error || "unknown_save_error";
+          setStatus(`Backtest complete but save failed: ${err}`, true);
+          pushLiveLog(`Run completed but save failed: ${err}`);
+          finishLiveRun("error", "Completed with save error");
+        } else {
+          setStatus("Backtest complete. Move with Next/Prev.");
+          pushLiveLog("Run completed");
+          finishLiveRun("success", "Completed");
+        }
+      } catch (error) {
+        const message = String(error?.message || error);
+        setStatus(message, true);
+        pushLiveLog(`Error: ${message}`);
+        finishLiveRun("error", message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function init() {
+      document.addEventListener("click", async (event) => {
+        const button = event.target.closest(".copy-btn");
+        if (!button) return;
+        const targetId = button.getAttribute("data-copy-target");
+        if (!targetId) return;
+        const target = document.getElementById(targetId);
+        if (!target) return;
+        const text = target.textContent || "";
+        try {
+          await navigator.clipboard.writeText(text);
+          const previous = button.textContent;
+          button.textContent = "Copied";
+          setTimeout(() => {
+            button.textContent = previous || "Copy";
+          }, 1100);
+        } catch {
+          button.textContent = "Copy failed";
+          setTimeout(() => {
+            button.textContent = "Copy";
+          }, 1200);
+        }
+      });
+
+      el.runButton.addEventListener("click", () => runBacktest(false));
+      el.rerunPromptButton.addEventListener("click", () => runBacktest(true));
+      el.loadLatestButton.addEventListener("click", () => {
+        loadLatestSavedRun().catch((error) => {
+          const message = String(error?.message || error);
+          setStatus(message, true);
+          pushLiveLog(`Error loading latest run: ${message}`);
+        });
+      });
+      el.loadRunButton.addEventListener("click", () => {
+        loadRunById(el.sessionRunId.value).catch((error) => {
+          const message = String(error?.message || error);
+          setStatus(message, true);
+          pushLiveLog(`Error loading run id: ${message}`);
+        });
+      });
+      el.clearSessionButton.addEventListener("click", () => {
+        setCurrentSession(null);
+        setStatus("Session cleared. You can still run or load any saved run.");
+        pushLiveLog("Session cleared");
+      });
+      el.prevButton.addEventListener("click", () => {
+        if (state.stageIndex > 0) {
+          state.stageIndex -= 1;
+          renderStage();
+        }
+      });
+      el.nextButton.addEventListener("click", () => {
+        if (state.stageIndex < state.stages.length - 1) {
+          state.stageIndex += 1;
+          renderStage();
+        }
+      });
+      el.stageTrail.addEventListener("click", (event) => {
+        const target = event.target.closest("[data-stage-index]");
+        if (!target || state.loading) return;
+        const idx = Number(target.getAttribute("data-stage-index"));
+        if (!Number.isFinite(idx)) return;
+        if (idx < 0 || idx >= state.stages.length) return;
+        state.stageIndex = idx;
+        renderStage();
+      });
+
+      const persistFields = [
+        el.marketRef,
+        el.targetChannels,
+        el.maxQueries,
+        el.minMembers,
+        el.maxReviewChannels,
+        el.reviewMessageLimit,
+        el.sessionRunId,
+        el.localSystemPrompt,
+        el.localUserPrompt,
+        el.plannerSystemPrompt,
+        el.plannerUserPrompt,
+        el.reviewerSystemPrompt,
+        el.reviewerUserPrompt,
+      ];
+      persistFields.forEach((field) => {
+        if (!field) return;
+        field.addEventListener("input", () => persistFormState());
+        field.addEventListener("change", () => persistFormState());
+      });
+
+      const params = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+      restoreFormState();
+      const marketRef = params.get("market_ref");
+      if (marketRef) {
+        el.marketRef.value = marketRef;
+      }
+      const marketRefFromHash = hashParams.get("market_ref");
+      if (marketRefFromHash) {
+        el.marketRef.value = marketRefFromHash;
+      }
+      const runIdParam = params.get("run_id");
+      const rememberedRunId = localStorage.getItem(STORAGE_LAST_RUN_KEY);
+      if (rememberedRunId && !runIdParam) {
+        setCurrentSession(rememberedRunId);
+      }
+      pushLiveLog("UI loaded and ready");
+      renderLiveStatus();
+      renderStage();
+
+      if (runIdParam) {
+        setCurrentSession(runIdParam);
+        loadRunById(runIdParam).catch((error) => {
+          const message = String(error?.message || error);
+          setStatus(message, true);
+          pushLiveLog(`Auto-load run_id failed: ${message}`);
+        });
+      } else if (rememberedRunId) {
+        loadRunById(rememberedRunId).catch((error) => {
+          const message = String(error?.message || error);
+          setStatus(`Could not auto-restore last run: ${message}`, true);
+          pushLiveLog(`Auto-restore failed: ${message}`);
+        });
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

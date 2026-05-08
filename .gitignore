@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Local secrets and env files
+.env
+.env.*
+!.env.example
+configs/sources/*.env
+!configs/sources/*.template.env
+
+# Runtime/session artifacts
+.runtime/
+
+# Data and logs (keep directories, not local payloads)
+data/raw/*
+data/normalized/*
+data/derived/*
+logs/*
+
+# Keep placeholders
+!data/raw/.gitkeep
+!data/normalized/.gitkeep
+!data/derived/.gitkeep
+!logs/.gitkeep

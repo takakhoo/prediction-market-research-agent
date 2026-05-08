@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Classified Markets</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --ink: #0f172a;
+      --muted: #475569;
+      --line: #dbe5f0;
+      --accent: #1d4ed8;
+      --track-now: #047857;
+      --track-later: #b45309;
+      --ignore: #b91c1c;
+      --unclassified: #475569;
+      --mono: "IBM Plex Mono", Menlo, monospace;
+      --sans: "IBM Plex Sans", "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    .page {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .title { margin: 0; font-size: 24px; }
+    .subtitle { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+
+    .controls {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 180px 120px 140px 1fr 130px;
+      align-items: end;
+    }
+
+    .bulk-controls {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 1fr 160px 200px 120px;
+      align-items: end;
+      margin-top: 8px;
+    }
+
+    label {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 10px;
+      font: inherit;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    textarea { min-height: 78px; resize: vertical; font-family: var(--mono); font-size: 12px; }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    button.secondary {
+      background: #0f172a;
+      color: #f8fafc;
+    }
+
+    button.ghost {
+      background: #f8fafc;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .stats {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 9px;
+      background: #fbfdff;
+    }
+
+    .stat .k { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat .v { font-weight: 700; font-size: 19px; }
+
+    .status-line {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .swipe-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: minmax(380px, 540px) 1fr;
+      align-items: start;
+    }
+
+    .swipe-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+      display: grid;
+      gap: 8px;
+      min-height: 310px;
+    }
+
+    .swipe-title {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.25;
+    }
+
+    .swipe-actions {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-top: 4px;
+    }
+
+    .swipe-actions button { padding: 10px 6px; font-size: 13px; }
+
+    .swipe-kbd {
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.55;
+      background: #fcfdff;
+    }
+
+    .cards {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      display: grid;
+      gap: 7px;
+      background: #fff;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.3;
+    }
+
+    .row { display: flex; align-items: center; gap: 6px; justify-content: space-between; }
+    .meta, .outcomes, .buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .chip {
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #f8fafc;
+      color: #0f172a;
+      padding: 3px 8px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .chip.class-track_now { background: var(--track-now); color: #ecfdf5; border-color: var(--track-now); }
+    .chip.class-track_later { background: var(--track-later); color: #fffbeb; border-color: var(--track-later); }
+    .chip.class-ignore { background: var(--ignore); color: #fef2f2; border-color: var(--ignore); }
+    .chip.class-unclassified { background: var(--unclassified); color: #f8fafc; border-color: var(--unclassified); }
+    .chip.good { border-color: #86efac; background: #f0fdf4; color: #166534; }
+    .chip.warn { border-color: #fcd34d; background: #fffbeb; color: #92400e; }
+
+    .small { color: var(--muted); font-size: 12px; }
+    .mono { color: #334155; font-family: var(--mono); font-size: 12px; }
+
+    .btn-small {
+      width: auto;
+      padding: 5px 9px;
+      font-size: 12px;
+      border-radius: 999px;
+    }
+
+    .btn-track-now { background: var(--track-now); }
+    .btn-track-later { background: var(--track-later); }
+    .btn-ignore { background: var(--ignore); }
+    .btn-open { background: #0f172a; }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 8px;
+      background: #fbfdff;
+    }
+
+    details summary {
+      cursor: pointer;
+      color: #1e293b;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    pre {
+      margin: 8px 0 0;
+      padding: 8px;
+      border-radius: 6px;
+      background: #0f172a;
+      color: #e2e8f0;
+      overflow: auto;
+      max-height: 170px;
+      font-size: 12px;
+      line-height: 1.35;
+      font-family: var(--mono);
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 18px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    @media (max-width: 1500px) {
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .swipe-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 900px) {
+      .controls { grid-template-columns: 1fr 1fr; }
+      .bulk-controls { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .swipe-actions { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="panel">
+      <h1 class="title">Market Classification Fixer</h1>
+      <p class="subtitle">Review all classified/unclassified open markets, fix decisions fast with swipe hotkeys, and write updates directly to the DB.</p>
+    </section>
+
+    <section class="panel">
+      <div class="controls">
+        <div>
+          <label for="classification">Classification Filter</label>
+          <select id="classification">
+            <option value="all">all</option>
+            <option value="track_now">track_now</option>
+            <option value="track_later">track_later</option>
+            <option value="ignore">ignore</option>
+            <option value="unclassified">unclassified</option>
+          </select>
+        </div>
+        <div>
+          <label for="limit">Limit</label>
+          <input id="limit" type="number" min="1" max="500" value="220">
+        </div>
+        <div>
+          <label for="minLocalScore">Min Score</label>
+          <input id="minLocalScore" type="number" min="0" max="1" step="0.01" placeholder="optional">
+        </div>
+        <div>
+          <label for="searchText">Search</label>
+          <input id="searchText" type="text" placeholder="question / slug / event slug">
+        </div>
+        <div>
+          <button id="refreshButton" type="button">Refresh</button>
+        </div>
+      </div>
+
+      <div class="bulk-controls">
+        <div>
+          <label for="sourceUrls">Bulk Source URLs (one per line)</label>
+          <textarea id="sourceUrls">https://polymarket.com/geopolitics
+https://polymarket.com/predictions/israel
+https://polymarket.com/search?_q=iran</textarea>
+        </div>
+        <div>
+          <label for="bulkClassification">Bulk Classify As</label>
+          <select id="bulkClassification">
+            <option value="track_now">track_now</option>
+            <option value="track_later">track_later</option>
+            <option value="ignore">ignore</option>
+          </select>
+        </div>
+        <div>
+          <label for="bulkNote">Bulk Note</label>
+          <input id="bulkNote" type="text" placeholder="manual source push">
+        </div>
+        <div>
+          <button id="bulkApplyButton" class="secondary" type="button">Apply Bulk</button>
+        </div>
+      </div>
+      <div id="status" class="status-line">Ready.</div>
+    </section>
+
+    <section class="panel">
+      <div id="stats" class="stats"></div>
+    </section>
+
+    <section class="panel">
+      <div class="swipe-grid">
+        <div>
+          <div id="swipeCard" class="swipe-card">
+            <div class="empty">Load markets first.</div>
+          </div>
+          <div class="swipe-actions">
+            <button id="btnIgnore" class="btn-ignore" type="button">← Ignore</button>
+            <button id="btnTrackLater" class="btn-track-later" type="button">↑ Track Later</button>
+            <button id="btnTrackNow" class="btn-track-now" type="button">→ Track Now</button>
+            <button id="btnSkip" class="ghost" type="button">Space Skip</button>
+          </div>
+        </div>
+        <div class="swipe-kbd">
+          <div><strong>Hotkeys</strong></div>
+          <div>`→` = track_now</div>
+          <div>`↑` = track_later</div>
+          <div>`←` = ignore</div>
+          <div>`space` = skip to next</div>
+          <div>`o` = open current market on Polymarket</div>
+          <div>`r` = refresh list</div>
+          <div style="margin-top:8px;">Tip: set filter to `unclassified` and run through the queue quickly.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div id="cards" class="cards"></div>
+    </section>
+  </main>
+
+  <script>
+    const el = {
+      classification: document.getElementById("classification"),
+      limit: document.getElementById("limit"),
+      minLocalScore: document.getElementById("minLocalScore"),
+      searchText: document.getElementById("searchText"),
+      refreshButton: document.getElementById("refreshButton"),
+      status: document.getElementById("status"),
+      stats: document.getElementById("stats"),
+      cards: document.getElementById("cards"),
+      swipeCard: document.getElementById("swipeCard"),
+      btnIgnore: document.getElementById("btnIgnore"),
+      btnTrackLater: document.getElementById("btnTrackLater"),
+      btnTrackNow: document.getElementById("btnTrackNow"),
+      btnSkip: document.getElementById("btnSkip"),
+      sourceUrls: document.getElementById("sourceUrls"),
+      bulkClassification: document.getElementById("bulkClassification"),
+      bulkNote: document.getElementById("bulkNote"),
+      bulkApplyButton: document.getElementById("bulkApplyButton"),
+    };
+
+    const state = {
+      markets: [],
+      cursor: 0,
+      counts: {},
+      busy: false,
+      lastPayload: null,
+    };
+
+    function esc(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function classChip(classification) {
+      const key = String(classification || "unclassified");
+      return `<span class="chip class-${esc(key)}">${esc(key)}</span>`;
+    }
+
+    function fmtProbability(probability) {
+      if (probability === null || probability === undefined || Number.isNaN(Number(probability))) {
+        return "";
+      }
+      return `${(Number(probability) * 100).toFixed(1)}%`;
+    }
+
+    function fmtScore(score) {
+      if (score === null || score === undefined || Number.isNaN(Number(score))) {
+        return "n/a";
+      }
+      return Number(score).toFixed(3);
+    }
+
+    function fmtJson(value) {
+      try {
+        return JSON.stringify(value || {}, null, 2);
+      } catch (error) {
+        return "{}";
+      }
+    }
+
+    function renderStats(payload) {
+      const counts = payload?.counts || {};
+      const total = Number(payload?.count_returned || 0);
+      const current = total > 0 ? Math.min(state.cursor + 1, total) : 0;
+      const stats = [
+        ["Returned", total],
+        ["Open Total", payload?.total_open_markets ?? 0],
+        ["Queue Index", `${current}/${total}`],
+        ["track_now", counts.track_now ?? 0],
+        ["track_later", counts.track_later ?? 0],
+        ["ignore", counts.ignore ?? 0],
+        ["unclassified", counts.unclassified ?? 0],
+        ["Filter", payload?.classification_filter ?? "all"],
+      ];
+      el.stats.innerHTML = stats.map(([k, v]) =>
+        `<div class="stat"><span class="k">${esc(k)}</span><span class="v">${esc(v)}</span></div>`
+      ).join("");
+    }
+
+    function polyLinkForMarket(market) {
+      const slug = String(market?.slug || "").trim();
+      if (!slug) return "";
+      return `https://polymarket.com/event/${slug}`;
+    }
+
+    function renderSwipeCard() {
+      if (!state.markets.length) {
+        el.swipeCard.innerHTML = `<div class="empty">No markets in current filter.</div>`;
+        return;
+      }
+      if (state.cursor >= state.markets.length) {
+        el.swipeCard.innerHTML = `<div class="empty">Reached end of queue. Press refresh or change filters.</div>`;
+        return;
+      }
+      const market = state.markets[state.cursor];
+      const outcomes = Array.isArray(market.outcomes) ? market.outcomes : [];
+      const outcomeChips = outcomes.slice(0, 8).map((outcome) => {
+        const label = outcome?.outcome_label || `Outcome ${outcome?.outcome_index ?? ""}`;
+        const prob = fmtProbability(outcome?.probability);
+        const cls = outcome?.is_likely ? "good" : (outcome?.is_unlikely ? "warn" : "");
+        const flag = outcome?.is_likely ? "likely" : (outcome?.is_unlikely ? "unlikely" : "");
+        return `<span class="chip ${cls}">${esc(label)}${prob ? ` • ${esc(prob)}` : ""}${flag ? ` • ${esc(flag)}` : ""}</span>`;
+      }).join("");
+      const reasonJson = fmtJson(market.reason_json || {});
+      const link = polyLinkForMarket(market);
+      el.swipeCard.innerHTML =
+        `<div class="row">` +
+          `${classChip(market.classification)}` +
+          `<span class="chip">score ${esc(fmtScore(market.analysis_local_score))}</span>` +
+          `<span class="chip">mapped ${esc(market.mapped_channels ?? 0)}</span>` +
+        `</div>` +
+        `<h2 class="swipe-title">${esc(market.question || market.slug || market.market_id)}</h2>` +
+        `<div class="meta">` +
+          `<span class="chip">${esc(market.market_archetype || "unknown")}</span>` +
+          `<span class="chip">event ${esc(market.event_slug || "n/a")}</span>` +
+          `<span class="chip">id ${esc(market.market_id || "")}</span>` +
+          (market.high_competition ? `<span class="chip warn">high competition</span>` : ``) +
+        `</div>` +
+        `<div class="outcomes">${outcomeChips || `<span class="chip">no outcomes</span>`}</div>` +
+        `<div class="small">${esc(String(market.description || "").slice(0, 420))}</div>` +
+        `<details><summary>Reason JSON</summary><pre>${esc(reasonJson)}</pre></details>` +
+        `<div class="row">` +
+          `<span class="mono">${esc(market.market_id || "")}</span>` +
+          (link ? `<a href="${esc(link)}" target="_blank" rel="noopener">Open</a>` : `<span class="small">no slug</span>`) +
+        `</div>`;
+    }
+
+    function renderCards() {
+      if (!state.markets.length) {
+        el.cards.innerHTML = `<div class="empty">No markets for this filter.</div>`;
+        return;
+      }
+      el.cards.innerHTML = state.markets.map((market) => {
+        const outcomes = Array.isArray(market.outcomes) ? market.outcomes : [];
+        const link = polyLinkForMarket(market);
+        const outcomeChips = outcomes.slice(0, 8).map((outcome) => {
+          const label = outcome?.outcome_label || `Outcome ${outcome?.outcome_index ?? ""}`;
+          const prob = fmtProbability(outcome?.probability);
+          const cls = outcome?.is_likely ? "good" : (outcome?.is_unlikely ? "warn" : "");
+          return `<span class="chip ${cls}">${esc(label)}${prob ? ` • ${esc(prob)}` : ""}</span>`;
+        }).join("");
+        return (
+          `<article class="card" data-market-id="${esc(market.market_id || "")}">` +
+            `<div class="row">${classChip(market.classification)}<span class="chip">score ${esc(fmtScore(market.analysis_local_score))}</span></div>` +
+            `<h3>${esc(market.question || market.slug || market.market_id)}</h3>` +
+            `<div class="meta">` +
+              `<span class="chip">${esc(market.market_archetype || "unknown")}</span>` +
+              `<span class="chip">event ${esc(market.event_slug || "n/a")}</span>` +
+              `<span class="chip">mapped ${esc(market.mapped_channels ?? 0)}</span>` +
+            `</div>` +
+            `<div class="outcomes">${outcomeChips || `<span class="chip">no outcomes</span>`}</div>` +
+            `<div class="buttons">` +
+              `<button class="btn-small btn-track-now" data-action="classify" data-classification="track_now">Track now</button>` +
+              `<button class="btn-small btn-track-later" data-action="classify" data-classification="track_later">Track later</button>` +
+              `<button class="btn-small btn-ignore" data-action="classify" data-classification="ignore">Ignore</button>` +
+              (link ? `<a class="btn-small btn-open" data-action="open" href="${esc(link)}" target="_blank" rel="noopener">Open</a>` : ``) +
+            `</div>` +
+            `<details><summary>Details</summary>` +
+              `<div class="small" style="margin-top:8px;">${esc(String(market.description || "").slice(0, 420))}</div>` +
+              `<pre>${esc(fmtJson(market.reason_json || {}))}</pre>` +
+            `</details>` +
+            `<div class="mono">${esc(market.market_id || "")}</div>` +
+          `</article>`
+        );
+      }).join("");
+    }
+
+    function parseSourceUrls() {
+      return String(el.sourceUrls.value || "")
+        .split(/\r?\n/g)
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+    }
+
+    async function refresh() {
+      const params = new URLSearchParams();
+      params.set("classification", String(el.classification.value || "all"));
+      params.set("limit", String(el.limit.value || "220"));
+      const minLocalScore = String(el.minLocalScore.value || "").trim();
+      if (minLocalScore !== "") params.set("min_local_score", minLocalScore);
+      const searchText = String(el.searchText.value || "").trim();
+      if (searchText !== "") params.set("search", searchText);
+
+      el.status.textContent = "Loading...";
+      try {
+        const response = await fetch(`/api/intel/classified-markets?${params.toString()}`, {
+          headers: { Accept: "application/json" },
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload?.detail || "Failed to load classified markets");
+        state.lastPayload = payload;
+        state.markets = Array.isArray(payload.markets) ? payload.markets : [];
+        state.cursor = 0;
+        renderStats(payload);
+        renderSwipeCard();
+        renderCards();
+        el.status.textContent = `Loaded ${payload.count_returned} markets.`;
+      } catch (error) {
+        const msg = String(error?.message || error);
+        el.status.textContent = msg;
+        state.markets = [];
+        state.cursor = 0;
+        renderStats({ counts: {}, count_returned: 0, total_open_markets: 0, classification_filter: "error" });
+        renderSwipeCard();
+        el.cards.innerHTML = `<div class="empty">${esc(msg)}</div>`;
+      }
+    }
+
+    function findMarketIndex(marketId) {
+      return state.markets.findIndex((item) => String(item.market_id) === String(marketId));
+    }
+
+    async function setClassification(marketId, classification, { fromSwipe = false } = {}) {
+      if (!marketId || !classification || state.busy) return;
+      state.busy = true;
+      el.status.textContent = `Updating ${marketId} → ${classification}...`;
+      try {
+        const response = await fetch(`/api/intel/classified-markets/${encodeURIComponent(marketId)}/classification`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            classification,
+            note: "manual tinder swipe / card action",
+          }),
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload?.detail || "Failed to update classification");
+        const idx = findMarketIndex(marketId);
+        if (idx >= 0) {
+          state.markets[idx] = {
+            ...state.markets[idx],
+            classification: classification,
+            analysis_local_score: payload?.local_score,
+            reason_json: {
+              ...(state.markets[idx].reason_json || {}),
+              source: "manual_swipe",
+              classification,
+              note: "manual tinder swipe / card action",
+            },
+          };
+        }
+        if (fromSwipe) {
+          state.cursor = Math.min(state.cursor + 1, Math.max(state.markets.length - 1, 0));
+        }
+        renderStats(state.lastPayload || {});
+        renderSwipeCard();
+        renderCards();
+        el.status.textContent = `Updated ${marketId} → ${classification}`;
+      } catch (error) {
+        el.status.textContent = String(error?.message || error);
+      } finally {
+        state.busy = false;
+      }
+    }
+
+    function skipCurrent() {
+      if (!state.markets.length) return;
+      state.cursor += 1;
+      if (state.cursor >= state.markets.length) state.cursor = state.markets.length;
+      renderStats(state.lastPayload || {});
+      renderSwipeCard();
+      el.status.textContent = `Skipped to ${Math.min(state.cursor + 1, state.markets.length)}/${state.markets.length}`;
+    }
+
+    function openCurrent() {
+      if (!state.markets.length || state.cursor >= state.markets.length) return;
+      const link = polyLinkForMarket(state.markets[state.cursor]);
+      if (link) window.open(link, "_blank", "noopener");
+    }
+
+    async function applyBulkSourceClassification() {
+      if (state.busy) return;
+      const sourceUrls = parseSourceUrls();
+      if (!sourceUrls.length) {
+        el.status.textContent = "Add at least one source URL.";
+        return;
+      }
+      state.busy = true;
+      el.status.textContent = "Applying bulk source classification...";
+      try {
+        const response = await fetch("/api/intel/classified-markets/bulk-source-classification", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            source_urls: sourceUrls,
+            classification: String(el.bulkClassification.value || "track_now"),
+            note: String(el.bulkNote.value || "").trim() || "manual source bulk",
+            dry_run: false,
+          }),
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload?.detail || "Bulk source classification failed");
+        el.status.textContent =
+          `Bulk updated ${payload.updated_markets} markets as ${payload.classification} from ${payload.source_urls.length} source URLs.`;
+        await refresh();
+      } catch (error) {
+        el.status.textContent = String(error?.message || error);
+      } finally {
+        state.busy = false;
+      }
+    }
+
+    el.cards.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (target.dataset.action !== "classify") return;
+      const classification = String(target.dataset.classification || "").trim();
+      const card = target.closest(".card");
+      const marketId = card?.getAttribute("data-market-id") || "";
+      if (!marketId || !classification) return;
+      setClassification(marketId, classification, { fromSwipe: false });
+    });
+
+    document.addEventListener("keydown", (event) => {
+      const tag = String(event.target?.tagName || "").toLowerCase();
+      if (["input", "textarea", "select"].includes(tag)) return;
+      if (state.busy) return;
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        const market = state.markets[state.cursor];
+        if (market) setClassification(market.market_id, "track_now", { fromSwipe: true });
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        const market = state.markets[state.cursor];
+        if (market) setClassification(market.market_id, "track_later", { fromSwipe: true });
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        const market = state.markets[state.cursor];
+        if (market) setClassification(market.market_id, "ignore", { fromSwipe: true });
+      } else if (event.key === " " || event.code === "Space") {
+        event.preventDefault();
+        skipCurrent();
+      } else if (event.key.toLowerCase() === "o") {
+        event.preventDefault();
+        openCurrent();
+      } else if (event.key.toLowerCase() === "r") {
+        event.preventDefault();
+        refresh();
+      }
+    });
+
+    el.refreshButton.addEventListener("click", refresh);
+    el.classification.addEventListener("change", refresh);
+    el.btnTrackNow.addEventListener("click", () => {
+      const market = state.markets[state.cursor];
+      if (market) setClassification(market.market_id, "track_now", { fromSwipe: true });
+    });
+    el.btnTrackLater.addEventListener("click", () => {
+      const market = state.markets[state.cursor];
+      if (market) setClassification(market.market_id, "track_later", { fromSwipe: true });
+    });
+    el.btnIgnore.addEventListener("click", () => {
+      const market = state.markets[state.cursor];
+      if (market) setClassification(market.market_id, "ignore", { fromSwipe: true });
+    });
+    el.btnSkip.addEventListener("click", skipCurrent);
+    el.bulkApplyButton.addEventListener("click", applyBulkSourceClassification);
+
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const hashClassification = String(hashParams.get("classification") || "").trim().toLowerCase();
+    if (["all", "track_now", "track_later", "ignore", "unclassified"].includes(hashClassification)) {
+      el.classification.value = hashClassification;
+    }
+
+    refresh();
+  </script>
+</body>
+</html>

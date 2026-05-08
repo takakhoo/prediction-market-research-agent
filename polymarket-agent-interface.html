@@ -1,0 +1,3624 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Polymarket Agent Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #071016;
+      --bg-soft: #0e1821;
+      --panel: rgba(12, 23, 32, 0.86);
+      --line: rgba(255, 255, 255, 0.1);
+      --line-strong: rgba(255, 255, 255, 0.18);
+      --text: #e7edf3;
+      --muted: #95a6b6;
+      --accent: #0ea5a2;
+      --accent-soft: rgba(14, 165, 162, 0.16);
+      --warn: #f59e0b;
+      --danger: #ef4444;
+      --market: #22d3ee;
+      --channel: #fbbf24;
+      --shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --scene-width: 2200px;
+      --scene-height: 1300px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: radial-gradient(1250px 600px at 96% -20%, rgba(14, 165, 162, 0.18), transparent 55%),
+        radial-gradient(1000px 600px at -10% 100%, rgba(251, 191, 36, 0.12), transparent 45%),
+        var(--bg);
+      color: var(--text);
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+    }
+
+    .shell {
+      max-width: 1800px;
+      margin: 0 auto;
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .header {
+      padding: 14px 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 1.25rem;
+      font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+      letter-spacing: 0.01em;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .status-chip {
+      font-size: 0.78rem;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .status-chip.ok {
+      color: #7ae3ca;
+      border-color: rgba(122, 227, 202, 0.4);
+      background: rgba(20, 83, 67, 0.3);
+    }
+
+    .status-chip.warn {
+      color: #ffd28c;
+      border-color: rgba(245, 158, 11, 0.5);
+      background: rgba(120, 53, 15, 0.3);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(11, minmax(0, 1fr));
+      gap: 8px;
+      align-items: end;
+    }
+
+    .control {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .control label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+    }
+
+    .control input,
+    .control select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.28);
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 0.88rem;
+    }
+
+    .control input:focus,
+    .control select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(14, 165, 162, 0.16);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+    }
+
+    button:hover {
+      border-color: var(--line-strong);
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateY(-1px);
+    }
+
+    button.primary {
+      border-color: rgba(14, 165, 162, 0.6);
+      background: linear-gradient(180deg, rgba(45, 212, 191, 0.2), rgba(20, 184, 166, 0.08));
+    }
+
+    button.primary:hover {
+      border-color: rgba(45, 212, 191, 0.9);
+      background: linear-gradient(180deg, rgba(45, 212, 191, 0.28), rgba(20, 184, 166, 0.16));
+    }
+
+    button.ghost {
+      border-style: dashed;
+    }
+
+    button.warn {
+      border-color: rgba(245, 158, 11, 0.55);
+      color: #ffd28c;
+    }
+
+    button.danger {
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #fecaca;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: 340px minmax(580px, 1fr) 360px;
+      gap: 12px;
+      min-height: 680px;
+    }
+
+    .side {
+      min-height: 680px;
+      max-height: calc(100vh - 290px);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+    }
+
+    .markets-side,
+    .channels-side {
+      grid-template-rows: auto auto auto auto 1fr;
+    }
+
+    .side h2 {
+      font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+      margin: 0;
+      padding: 14px 14px 10px;
+      font-size: 0.98rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .side .search-wrap {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .side input[type="search"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(0, 0, 0, 0.26);
+      color: var(--text);
+      padding: 8px 10px;
+      font-size: 0.87rem;
+    }
+
+    .counter-row {
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .list {
+      overflow: auto;
+      padding: 8px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      padding: 10px 10px 12px;
+      display: grid;
+      gap: 8px;
+      min-height: 150px;
+    }
+
+    .item.focus {
+      border-color: var(--line-strong);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .row-main {
+      display: flex;
+      gap: 8px;
+      align-items: start;
+      justify-content: space-between;
+      min-width: 0;
+    }
+
+    .row-main > button {
+      flex: 0 0 auto;
+    }
+
+    .item-title {
+      margin: 0;
+      font-size: 0.85rem;
+      line-height: 1.25;
+      font-weight: 600;
+      color: var(--text) !important;
+      -webkit-text-fill-color: var(--text) !important;
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .item-title small {
+      color: var(--muted) !important;
+      -webkit-text-fill-color: var(--muted) !important;
+      font-size: 0.76rem;
+      display: inline-block;
+      margin-top: 2px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 0.7rem;
+      color: var(--muted);
+      white-space: nowrap;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chip.market {
+      border-color: rgba(34, 211, 238, 0.5);
+      color: #8ae8f8;
+      background: rgba(8, 145, 178, 0.2);
+    }
+
+    .chip.channel {
+      border-color: rgba(251, 191, 36, 0.45);
+      color: #fde68a;
+      background: rgba(180, 83, 9, 0.2);
+    }
+
+    .chip.warn {
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #fcd34d;
+      background: rgba(120, 53, 15, 0.3);
+    }
+
+    .detail-body {
+      border-top: 1px dashed var(--line);
+      padding: 8px 0 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .side-inspector {
+      margin: 10px 14px 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background:
+        radial-gradient(220px 120px at 0% 0%, rgba(251, 191, 36, 0.08), transparent 60%),
+        rgba(0, 0, 0, 0.22);
+      display: grid;
+      gap: 10px;
+    }
+
+    .side-inspector.market {
+      background:
+        radial-gradient(220px 120px at 0% 0%, rgba(34, 211, 238, 0.08), transparent 60%),
+        rgba(0, 0, 0, 0.22);
+    }
+
+    .side-inspector.empty {
+      border-style: dashed;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .inspector-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .inspector-top button {
+      flex: 0 0 auto;
+    }
+
+    .inspector-kicker {
+      margin: 0 0 4px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .inspector-title {
+      margin: 0;
+      font-size: 0.96rem;
+      line-height: 1.2;
+      font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+    }
+
+    .inspector-handle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.76rem;
+      line-height: 1.3;
+    }
+
+    .inspector-link {
+      color: #9ae6d8;
+      font-size: 0.75rem;
+      text-decoration: none;
+      width: fit-content;
+    }
+
+    .inspector-link:hover {
+      text-decoration: underline;
+    }
+
+    .inspector-section {
+      display: grid;
+      gap: 6px;
+    }
+
+    .relation-list {
+      display: grid;
+      gap: 8px;
+      max-height: 210px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .relation-empty {
+      margin: 0;
+      padding: 10px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 0.74rem;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .relation-row {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.025);
+      padding: 9px 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .relation-row-title {
+      margin: 0;
+      font-size: 0.76rem;
+      line-height: 1.28;
+      font-weight: 600;
+      color: var(--text);
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .relation-row-sub {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 0.68rem;
+      line-height: 1.3;
+    }
+
+    .relation-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .relation-actions button {
+      font-size: 0.68rem;
+      padding: 4px 7px;
+    }
+
+    .inspector-label {
+      margin: 0;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.67rem;
+      font-weight: 700;
+    }
+
+    .inspector-text {
+      margin: 0;
+      font-size: 0.77rem;
+      line-height: 1.4;
+      color: var(--text);
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .detail-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.75rem;
+      line-height: 1.35;
+      white-space: normal;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 4;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .item-actions button {
+      font-size: 0.72rem;
+      padding: 5px 8px;
+    }
+
+    .canvas-panel {
+      min-height: 680px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      overflow: hidden;
+    }
+
+    .canvas-toolbar {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .canvas-toolbar .left,
+    .canvas-toolbar .right {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .canvas-stat {
+      font-size: 0.77rem;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .zoom-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 4px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .zoom-controls button {
+      min-width: 34px;
+      padding: 6px 8px;
+      line-height: 1;
+    }
+
+    .zoom-value {
+      min-width: 58px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      overflow: auto;
+      background:
+        radial-gradient(circle at 1px 1px, rgba(141, 160, 179, 0.12) 1px, transparent 0);
+      background-size: 24px 24px;
+      background-color: rgba(1, 9, 14, 0.4);
+    }
+
+    .scene {
+      width: var(--scene-width);
+      height: var(--scene-height);
+      position: relative;
+      animation: scene-reveal 380ms ease-out both;
+    }
+
+    @keyframes scene-reveal {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .edges {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: auto;
+    }
+
+    .edge {
+      fill: none;
+      stroke: rgba(148, 163, 184, 0.35);
+      stroke-width: 1.8;
+      pointer-events: stroke;
+      cursor: pointer;
+      transition: stroke 130ms ease, stroke-width 130ms ease, opacity 130ms ease;
+    }
+
+    .edge:hover {
+      stroke: rgba(148, 163, 184, 0.85);
+      stroke-width: 2.3;
+    }
+
+    .edge.focus {
+      stroke: rgba(45, 212, 191, 0.9);
+      stroke-width: 2.6;
+      opacity: 1;
+    }
+
+    .edge.selected {
+      stroke: rgba(251, 191, 36, 0.95);
+      stroke-width: 2.8;
+      opacity: 1;
+    }
+
+    .node-layer {
+      position: absolute;
+      inset: 0;
+    }
+
+    .node {
+      position: absolute;
+      width: 236px;
+      min-height: 88px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(8, 18, 26, 0.94);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
+      padding: 9px 10px;
+      cursor: grab;
+      user-select: none;
+      transform: translate3d(0, 0, 0);
+      transition: border-color 130ms ease, box-shadow 130ms ease;
+      animation: node-in 230ms ease both;
+    }
+
+    @keyframes node-in {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .node:active {
+      cursor: grabbing;
+    }
+
+    .node.market {
+      border-color: rgba(34, 211, 238, 0.35);
+    }
+
+    .node.channel {
+      width: 236px;
+      min-height: 38px;
+      border-radius: 999px;
+      padding: 5px 9px 5px 7px;
+      border-color: rgba(251, 191, 36, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      background: rgba(18, 24, 30, 0.96);
+      transition: border-color 130ms ease, box-shadow 130ms ease, width 140ms ease, min-height 140ms ease, border-radius 140ms ease;
+    }
+
+    .node.channel:hover,
+    .node.channel.focus,
+    .node.channel.selected {
+      width: 270px;
+      min-height: 54px;
+      border-radius: 18px;
+    }
+
+    .channel-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .channel-dot-stack {
+      display: inline-flex;
+      align-items: center;
+      flex: 0 0 auto;
+      margin-right: 1px;
+    }
+
+    .channel-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+      margin-left: -4px;
+    }
+
+    .channel-dot:first-child {
+      margin-left: 0;
+    }
+
+    .channel-dot.one {
+      background: linear-gradient(145deg, rgba(15, 23, 42, 1), rgba(8, 18, 26, 1));
+      border-color: rgba(45, 212, 191, 0.45);
+    }
+
+    .channel-dot.two {
+      background: linear-gradient(145deg, rgba(12, 74, 110, 0.92), rgba(15, 118, 110, 0.85));
+    }
+
+    .channel-dot.three {
+      background: linear-gradient(145deg, rgba(120, 53, 15, 0.92), rgba(146, 64, 14, 0.85));
+    }
+
+    .node.channel .node-head {
+      min-width: 0;
+      flex: 1 1 auto;
+      align-items: center;
+    }
+
+    .node.channel .node-head > div {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .node.channel .node-title {
+      font-size: 0.76rem;
+      line-height: 1.15;
+      max-height: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0.01em;
+    }
+
+    .node.channel .node-sub {
+      display: none;
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .node.channel:hover .node-sub,
+    .node.channel.focus .node-sub,
+    .node.channel.selected .node-sub {
+      display: block;
+    }
+
+    .node.channel .node-meta {
+      margin-top: 0;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 3px;
+      justify-content: flex-end;
+    }
+
+    .node.channel .node-meta span {
+      font-size: 0.56rem;
+      padding: 1px 6px;
+      letter-spacing: 0.01em;
+    }
+
+    .node.focus {
+      border-color: rgba(45, 212, 191, 0.9);
+      box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.28), 0 18px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    .node.selected {
+      border-color: rgba(251, 191, 36, 0.9);
+      box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.27), 0 18px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    .node-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .node-title {
+      margin: 0;
+      font-size: 0.78rem;
+      line-height: 1.25;
+      font-weight: 650;
+      max-height: 2.65em;
+      overflow: hidden;
+    }
+
+    .node-sub {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 0.67rem;
+    }
+
+    .node-meta {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .node-meta span {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 0.64rem;
+      padding: 2px 7px;
+      color: var(--muted);
+    }
+
+    .node-market-tag {
+      color: #87ebfb !important;
+      border-color: rgba(34, 211, 238, 0.5) !important;
+      background: rgba(8, 145, 178, 0.22);
+    }
+
+    .node-channel-tag {
+      color: #fde68a !important;
+      border-color: rgba(251, 191, 36, 0.45) !important;
+      background: rgba(180, 83, 9, 0.2);
+    }
+
+    .queue-panel {
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .backtest-panel {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .backtest-controls {
+      display: grid;
+      grid-template-columns: minmax(260px, 2.2fr) repeat(5, minmax(120px, 0.8fr));
+      gap: 8px;
+      align-items: end;
+    }
+
+    .backtest-editor {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      display: grid;
+      gap: 10px;
+    }
+
+    .backtest-editor-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .backtest-editor textarea {
+      min-height: 180px;
+      resize: vertical;
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.22);
+      color: var(--text);
+      padding: 10px 12px;
+      font: inherit;
+      line-height: 1.45;
+      box-sizing: border-box;
+    }
+
+    .backtest-editor-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .backtest-json-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .backtest-stagebar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .backtest-steps {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .backtest-step {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.73rem;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .backtest-step.done {
+      border-color: rgba(45, 212, 191, 0.35);
+      color: #9ce9db;
+      background: rgba(20, 184, 166, 0.12);
+    }
+
+    .backtest-step.active {
+      border-color: rgba(251, 191, 36, 0.55);
+      color: #fde68a;
+      background: rgba(180, 83, 9, 0.18);
+    }
+
+    .backtest-stage-wrap {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.2);
+      display: grid;
+      gap: 10px;
+    }
+
+    .backtest-title {
+      margin: 0;
+      font-size: 1rem;
+      font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+    }
+
+    .backtest-subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.45;
+    }
+
+    .backtest-content {
+      display: grid;
+      gap: 10px;
+    }
+
+    .backtest-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .backtest-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .backtest-card h4,
+    .backtest-card h5 {
+      margin: 0;
+      font-size: 0.84rem;
+      font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+    }
+
+    .backtest-card p {
+      margin: 0;
+    }
+
+    .backtest-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .backtest-row {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: rgba(255, 255, 255, 0.025);
+      display: grid;
+      gap: 6px;
+    }
+
+    .backtest-row.accepted {
+      border-color: rgba(45, 212, 191, 0.35);
+      background: rgba(20, 184, 166, 0.08);
+    }
+
+    .backtest-row.rejected {
+      border-color: rgba(148, 163, 184, 0.2);
+    }
+
+    .backtest-row.error {
+      border-color: rgba(239, 68, 68, 0.45);
+      background: rgba(127, 29, 29, 0.16);
+    }
+
+    .backtest-row-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .backtest-row-title {
+      margin: 0;
+      font-size: 0.79rem;
+      font-weight: 600;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    .backtest-row-sub {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 0.7rem;
+      line-height: 1.35;
+    }
+
+    .backtest-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .backtest-actions button {
+      font-size: 0.68rem;
+      padding: 4px 7px;
+    }
+
+    .backtest-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+    }
+
+    .backtest-stat {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 8px 9px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .backtest-stat-label {
+      font-size: 0.63rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .backtest-stat-value {
+      font-size: 0.96rem;
+      font-weight: 600;
+      font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+      color: var(--text);
+    }
+
+    .backtest-inline-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .backtest-inline-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: rgba(255, 255, 255, 0.02);
+      display: grid;
+      gap: 7px;
+    }
+
+    .backtest-inline-item strong {
+      font-size: 0.78rem;
+      line-height: 1.35;
+    }
+
+    .backtest-inline-item .meta {
+      font-size: 0.69rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .backtest-query-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .backtest-query-list {
+      display: grid;
+      gap: 7px;
+      max-height: 320px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .backtest-query-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.02);
+      display: grid;
+      gap: 6px;
+    }
+
+    .backtest-query-item .query {
+      font-size: 0.76rem;
+      line-height: 1.38;
+      overflow-wrap: anywhere;
+    }
+
+    .backtest-evidence {
+      display: grid;
+      gap: 4px;
+    }
+
+    .backtest-evidence-line {
+      font-size: 0.68rem;
+      line-height: 1.35;
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .code-block {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.22);
+      padding: 8px 10px;
+      font-size: 0.74rem;
+      color: #c9d5df;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .queue-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .queue-top h3 {
+      margin: 0;
+      font-size: 0.95rem;
+      font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+    }
+
+    .selection-line {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin: 0;
+    }
+
+    .queue-table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 560px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      padding: 8px 10px;
+      font-size: 0.77rem;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.68rem;
+      background: rgba(255, 255, 255, 0.03);
+      position: sticky;
+      top: 0;
+    }
+
+    td code {
+      color: #d1f9ff;
+      font-size: 0.72rem;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-align: center;
+      padding: 18px 10px;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius-sm);
+    }
+
+    .tiny {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .fade-enter {
+      animation: fade-enter 280ms ease both;
+    }
+
+    @keyframes fade-enter {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1400px) {
+      .controls {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+      .backtest-controls {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .main {
+        grid-template-columns: 320px minmax(460px, 1fr);
+      }
+      .channels-side {
+        grid-column: 1 / -1;
+        min-height: 420px;
+        max-height: 420px;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .shell {
+        padding: 10px;
+      }
+      .controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .main {
+        grid-template-columns: 1fr;
+        min-height: 0;
+      }
+      .side {
+        max-height: 360px;
+        min-height: 360px;
+      }
+      .canvas-panel {
+        min-height: 560px;
+      }
+      .queue-panel {
+        margin-bottom: 10px;
+      }
+      .backtest-controls,
+      .backtest-grid,
+      .backtest-editor-grid,
+      .backtest-json-grid {
+        grid-template-columns: 1fr;
+      }
+      table {
+        min-width: 500px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="panel header fade-enter">
+      <div class="title-row">
+        <div>
+          <h1 class="title">Polymarket Agent Lab</h1>
+          <p class="subtitle">
+            Interactive map for <strong>markets</strong> and <strong>Telegram channels</strong>.
+            Drag nodes, inspect details, and queue mapping actions.
+          </p>
+        </div>
+        <div id="statusChip" class="status-chip">idle</div>
+      </div>
+
+      <div class="controls">
+        <div class="control" style="grid-column: span 2;">
+          <label for="apiBase">API Base</label>
+          <input id="apiBase" type="text" placeholder="http://127.0.0.1:8020">
+        </div>
+        <div class="control">
+          <label for="marketLimit">Markets</label>
+          <input id="marketLimit" type="number" min="1" max="500" value="80">
+        </div>
+        <div class="control">
+          <label for="channelLimit">Channels</label>
+          <input id="channelLimit" type="number" min="1" max="1000" value="220">
+        </div>
+        <div class="control">
+          <label for="edgeLimit">Edges</label>
+          <input id="edgeLimit" type="number" min="1" max="15000" value="3000">
+        </div>
+        <div class="control">
+          <label for="minChannelMembers">Min Members</label>
+          <input id="minChannelMembers" type="number" min="0" max="10000000" value="1000">
+        </div>
+        <div class="control">
+          <label for="minChannelRelevance">Relevance Floor</label>
+          <input id="minChannelRelevance" type="number" min="0" max="1" step="0.01" value="0.18">
+        </div>
+        <div class="control">
+          <label for="trackNow">Market Class</label>
+          <select id="trackNow">
+            <option value="true" selected>track_now only</option>
+            <option value="false">all active</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="autoRefresh">Auto Refresh</label>
+          <select id="autoRefresh">
+            <option value="0" selected>off</option>
+            <option value="15">15s</option>
+            <option value="30">30s</option>
+            <option value="60">60s</option>
+          </select>
+        </div>
+        <div class="actions">
+          <button id="loadButton" class="primary" type="button">Load Graph</button>
+          <button id="sampleButton" class="ghost" type="button">Use Sample</button>
+          <button id="arrangeButton" type="button">Re-Arrange</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="main">
+      <aside class="panel side markets-side">
+        <h2>Markets</h2>
+        <div id="marketInspector" class="side-inspector market empty">
+          <div class="inspector-top">
+            <div>
+              <p class="inspector-kicker">Selected Market</p>
+              <h3 id="marketInspectorTitle" class="inspector-title">No market selected</h3>
+              <p id="marketInspectorHandle" class="inspector-handle">Click a Polymarket node or market card to inspect it here.</p>
+              <a id="marketInspectorLink" class="inspector-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Open market page</a>
+            </div>
+            <button id="marketInspectorOpen" type="button" disabled>Open Link</button>
+          </div>
+          <div id="marketInspectorChips" class="chips"></div>
+          <div class="inspector-section">
+            <p class="inspector-label">Rules / Context</p>
+            <p id="marketInspectorRules" class="inspector-text">No market selected yet.</p>
+          </div>
+          <div class="inspector-section">
+            <p class="inspector-label">Linked Channels</p>
+            <div id="marketInspectorLinks" class="relation-list"></div>
+          </div>
+        </div>
+        <div class="search-wrap">
+          <input id="marketSearch" type="search" placeholder="Search market question, slug, archetype...">
+        </div>
+        <div class="counter-row">
+          <span id="marketVisibleCounter">0 visible</span>
+          <span id="marketTotalCounter">0 total</span>
+        </div>
+        <div id="marketList" class="list"></div>
+      </aside>
+
+      <section class="panel canvas-panel">
+        <div class="canvas-toolbar">
+          <div class="left">
+            <span id="metaMarkets" class="canvas-stat">markets: 0</span>
+            <span id="metaChannels" class="canvas-stat">channels: 0</span>
+            <span id="metaEdges" class="canvas-stat">edges: 0</span>
+            <span id="metaGenerated" class="canvas-stat">generated: n/a</span>
+          </div>
+          <div class="right">
+            <button id="focusResetButton" type="button">Reset Focus</button>
+            <button id="queueSelectedButton" class="primary" type="button" disabled>Queue Link</button>
+            <button id="queueUnlinkButton" class="warn" type="button" disabled>Queue Unlink</button>
+            <div class="zoom-controls" aria-label="Zoom controls">
+              <button id="zoomOutButton" type="button" title="Zoom out">-</button>
+              <span id="zoomValue" class="zoom-value">100%</span>
+              <button id="zoomInButton" type="button" title="Zoom in">+</button>
+              <button id="zoomResetButton" type="button" title="Reset zoom">Fit</button>
+            </div>
+          </div>
+        </div>
+        <div id="canvasWrap" class="canvas-wrap">
+          <div id="scene" class="scene">
+            <svg id="edgeLayer" class="edges"></svg>
+            <div id="nodeLayer" class="node-layer"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel side channels-side">
+        <h2>Channels</h2>
+        <div id="channelInspector" class="side-inspector empty">
+          <div class="inspector-top">
+            <div>
+              <p class="inspector-kicker">Selected Channel</p>
+              <h3 id="channelInspectorTitle" class="inspector-title">No channel selected</h3>
+              <p id="channelInspectorHandle" class="inspector-handle">Click a Telegram node or channel card to inspect it here.</p>
+              <a id="channelInspectorLink" class="inspector-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Open public channel</a>
+            </div>
+            <button id="channelInspectorOpen" type="button" disabled>Open Link</button>
+          </div>
+          <div id="channelInspectorChips" class="chips"></div>
+          <div class="inspector-section">
+            <p class="inspector-label">Notes</p>
+            <p id="channelInspectorNotes" class="inspector-text">No channel selected yet.</p>
+          </div>
+          <div class="inspector-section">
+            <p class="inspector-label">Latest Message</p>
+            <p id="channelInspectorLastMessage" class="inspector-text">Select a channel to inspect recent text and metadata.</p>
+          </div>
+          <div class="inspector-section">
+            <p class="inspector-label">Linked Markets</p>
+            <div id="channelInspectorLinks" class="relation-list"></div>
+          </div>
+        </div>
+        <div class="search-wrap">
+          <input id="channelSearch" type="search" placeholder="Search channel title, @username, notes...">
+        </div>
+        <div class="counter-row">
+          <span id="channelVisibleCounter">0 visible</span>
+          <span id="channelTotalCounter">0 total</span>
+        </div>
+        <div id="channelList" class="list"></div>
+      </aside>
+    </section>
+
+    <section class="panel queue-panel">
+      <div class="queue-top">
+        <div>
+          <h3>Action Queue (manual assignments)</h3>
+          <p id="selectionLine" class="selection-line">Select one market and one channel, then queue a link.</p>
+        </div>
+        <div class="actions">
+          <button id="exportQueueButton" type="button">Export JSON</button>
+          <button id="clearQueueButton" class="danger" type="button">Clear Queue</button>
+        </div>
+      </div>
+
+      <div class="queue-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Action</th>
+              <th>Market</th>
+              <th>Channel</th>
+              <th>Created At (UTC)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="queueTableBody"></tbody>
+        </table>
+      </div>
+      <div id="queueEmpty" class="empty">Queue is empty. Use “Queue Link” or “Queue Unlink” to stage actions.</div>
+      <div class="tiny">
+        Note: queue items are local to this browser page for now. You can export and apply later from backend jobs.
+      </div>
+    </section>
+
+    <section class="panel backtest-panel">
+      <div class="queue-top">
+        <div>
+          <h3>Telegram Discovery Backtest</h3>
+          <p class="selection-line">Manual stage runner for one market. Load a market, inspect the planner prompt and output, edit the prompt, and rerun.</p>
+        </div>
+        <div class="actions">
+          <button id="backtestUseSelectedButton" type="button">Use Selected Market</button>
+          <button id="backtestRunButton" class="primary" type="button">Run Backtest</button>
+        </div>
+      </div>
+
+      <div class="backtest-controls">
+        <div class="control">
+          <label for="backtestMarketRef">Market Ref</label>
+          <input id="backtestMarketRef" type="text" placeholder="Polymarket link, slug, or market id">
+        </div>
+        <div class="control">
+          <label for="backtestTargetChannels">Target Channels</label>
+          <input id="backtestTargetChannels" type="number" min="1" max="100" value="25">
+        </div>
+        <div class="control">
+          <label for="backtestQueryResults">Query Hits</label>
+          <input id="backtestQueryResults" type="number" min="1" max="50" value="20">
+        </div>
+        <div class="control">
+          <label for="backtestMaxQueries">Max Queries</label>
+          <input id="backtestMaxQueries" type="number" min="1" max="12" value="6">
+        </div>
+        <div class="control">
+          <label for="backtestSimilarSeeds">Similar Seeds</label>
+          <input id="backtestSimilarSeeds" type="number" min="0" max="10" value="3">
+        </div>
+        <div class="control">
+          <label for="backtestSimilarPerSeed">Similar / Seed</label>
+          <input id="backtestSimilarPerSeed" type="number" min="0" max="25" value="10">
+        </div>
+      </div>
+
+      <div class="backtest-editor">
+        <div class="backtest-editor-meta">
+          <div>
+            <h4 style="margin:0;">Planner Prompt Editor</h4>
+            <p id="backtestPromptStatus" class="backtest-subtitle">Run a backtest first to load the exact planner prompt, input materials, and output JSON.</p>
+          </div>
+          <div class="actions">
+            <button id="backtestPromptResetButton" type="button">Reset Prompt</button>
+            <button id="backtestPromptRunButton" class="primary" type="button">Rerun With Edited Prompt</button>
+          </div>
+        </div>
+        <div class="backtest-editor-grid">
+          <div class="control">
+            <label for="backtestPlannerSystemPrompt">Planner System Prompt</label>
+            <textarea id="backtestPlannerSystemPrompt" spellcheck="false" placeholder="System prompt will load here after a backtest run."></textarea>
+          </div>
+          <div class="control">
+            <label for="backtestPlannerUserPrompt">Planner User Prompt</label>
+            <textarea id="backtestPlannerUserPrompt" spellcheck="false" placeholder="Rendered user prompt will load here after a backtest run."></textarea>
+          </div>
+        </div>
+        <div class="backtest-json-grid">
+          <div class="control">
+            <label for="backtestPlannerInput">Planner Input Materials</label>
+            <div id="backtestPlannerInput" class="code-block">No planner input loaded yet.</div>
+          </div>
+          <div class="control">
+            <label for="backtestPlannerOutput">Planner Output JSON</label>
+            <div id="backtestPlannerOutput" class="code-block">No planner output captured yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="backtest-stagebar">
+        <div id="backtestSteps" class="backtest-steps"></div>
+        <div class="actions">
+          <button id="backtestPrevButton" type="button">Prev</button>
+          <button id="backtestNextButton" class="primary" type="button">Next</button>
+        </div>
+      </div>
+
+      <div class="backtest-stage-wrap">
+        <div>
+          <p id="backtestSummaryLine" class="selection-line">No backtest loaded.</p>
+          <h3 id="backtestStageTitle" class="backtest-title">Select a market and run the backtest</h3>
+          <p id="backtestStageSub" class="backtest-subtitle">Paste a Polymarket event URL/slug/id or use the selected market from the graph.</p>
+        </div>
+        <div id="backtestContent" class="backtest-content">
+          <div class="empty">The backtest will show: market context, query planning, raw Telegram hits, relevance filtering, similar-channel expansion, and final selected channels.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    "use strict";
+
+    const state = {
+      data: { markets: [], channels: [], edges: [], meta: {} },
+      positions: { market: {}, channel: {} },
+      layout: {
+        worldWidth: 2200,
+        worldHeight: 1300,
+        marketNodeWidth: 236,
+        channelNodeWidth: 236,
+        marketAnchorY: 24,
+        channelAnchorY: 22,
+      },
+      viewport: { scale: 1, min: 0.7, max: 2.2, step: 0.15 },
+      hiddenMarkets: new Set(),
+      hiddenChannels: new Set(),
+      focus: { kind: null, id: null },
+      selected: { marketId: null, chatId: null },
+      selectedEdgeKey: null,
+      queue: [],
+      backtest: { payload: null, stepIndex: 0, error: "", loading: false },
+      autoRefreshTimer: null,
+      dragging: null,
+    };
+
+    const elements = {
+      statusChip: document.getElementById("statusChip"),
+      apiBase: document.getElementById("apiBase"),
+      marketLimit: document.getElementById("marketLimit"),
+      channelLimit: document.getElementById("channelLimit"),
+      edgeLimit: document.getElementById("edgeLimit"),
+      minChannelMembers: document.getElementById("minChannelMembers"),
+      minChannelRelevance: document.getElementById("minChannelRelevance"),
+      trackNow: document.getElementById("trackNow"),
+      autoRefresh: document.getElementById("autoRefresh"),
+      loadButton: document.getElementById("loadButton"),
+      sampleButton: document.getElementById("sampleButton"),
+      arrangeButton: document.getElementById("arrangeButton"),
+      marketSearch: document.getElementById("marketSearch"),
+      channelSearch: document.getElementById("channelSearch"),
+      marketList: document.getElementById("marketList"),
+      channelList: document.getElementById("channelList"),
+      marketInspector: document.getElementById("marketInspector"),
+      marketInspectorTitle: document.getElementById("marketInspectorTitle"),
+      marketInspectorHandle: document.getElementById("marketInspectorHandle"),
+      marketInspectorLink: document.getElementById("marketInspectorLink"),
+      marketInspectorChips: document.getElementById("marketInspectorChips"),
+      marketInspectorRules: document.getElementById("marketInspectorRules"),
+      marketInspectorLinks: document.getElementById("marketInspectorLinks"),
+      marketInspectorOpen: document.getElementById("marketInspectorOpen"),
+      channelInspector: document.getElementById("channelInspector"),
+      channelInspectorTitle: document.getElementById("channelInspectorTitle"),
+      channelInspectorHandle: document.getElementById("channelInspectorHandle"),
+      channelInspectorLink: document.getElementById("channelInspectorLink"),
+      channelInspectorChips: document.getElementById("channelInspectorChips"),
+      channelInspectorNotes: document.getElementById("channelInspectorNotes"),
+      channelInspectorLastMessage: document.getElementById("channelInspectorLastMessage"),
+      channelInspectorLinks: document.getElementById("channelInspectorLinks"),
+      channelInspectorOpen: document.getElementById("channelInspectorOpen"),
+      edgeLayer: document.getElementById("edgeLayer"),
+      nodeLayer: document.getElementById("nodeLayer"),
+      scene: document.getElementById("scene"),
+      canvasWrap: document.getElementById("canvasWrap"),
+      metaMarkets: document.getElementById("metaMarkets"),
+      metaChannels: document.getElementById("metaChannels"),
+      metaEdges: document.getElementById("metaEdges"),
+      metaGenerated: document.getElementById("metaGenerated"),
+      marketVisibleCounter: document.getElementById("marketVisibleCounter"),
+      marketTotalCounter: document.getElementById("marketTotalCounter"),
+      channelVisibleCounter: document.getElementById("channelVisibleCounter"),
+      channelTotalCounter: document.getElementById("channelTotalCounter"),
+      focusResetButton: document.getElementById("focusResetButton"),
+      queueSelectedButton: document.getElementById("queueSelectedButton"),
+      queueUnlinkButton: document.getElementById("queueUnlinkButton"),
+      zoomInButton: document.getElementById("zoomInButton"),
+      zoomOutButton: document.getElementById("zoomOutButton"),
+      zoomResetButton: document.getElementById("zoomResetButton"),
+      zoomValue: document.getElementById("zoomValue"),
+      selectionLine: document.getElementById("selectionLine"),
+      queueTableBody: document.getElementById("queueTableBody"),
+      queueEmpty: document.getElementById("queueEmpty"),
+      exportQueueButton: document.getElementById("exportQueueButton"),
+      clearQueueButton: document.getElementById("clearQueueButton"),
+      backtestUseSelectedButton: document.getElementById("backtestUseSelectedButton"),
+      backtestRunButton: document.getElementById("backtestRunButton"),
+      backtestPromptRunButton: document.getElementById("backtestPromptRunButton"),
+      backtestPromptResetButton: document.getElementById("backtestPromptResetButton"),
+      backtestPrevButton: document.getElementById("backtestPrevButton"),
+      backtestNextButton: document.getElementById("backtestNextButton"),
+      backtestMarketRef: document.getElementById("backtestMarketRef"),
+      backtestTargetChannels: document.getElementById("backtestTargetChannels"),
+      backtestQueryResults: document.getElementById("backtestQueryResults"),
+      backtestMaxQueries: document.getElementById("backtestMaxQueries"),
+      backtestSimilarSeeds: document.getElementById("backtestSimilarSeeds"),
+      backtestSimilarPerSeed: document.getElementById("backtestSimilarPerSeed"),
+      backtestSteps: document.getElementById("backtestSteps"),
+      backtestSummaryLine: document.getElementById("backtestSummaryLine"),
+      backtestStageTitle: document.getElementById("backtestStageTitle"),
+      backtestStageSub: document.getElementById("backtestStageSub"),
+      backtestContent: document.getElementById("backtestContent"),
+      backtestPromptStatus: document.getElementById("backtestPromptStatus"),
+      backtestPlannerSystemPrompt: document.getElementById("backtestPlannerSystemPrompt"),
+      backtestPlannerUserPrompt: document.getElementById("backtestPlannerUserPrompt"),
+      backtestPlannerInput: document.getElementById("backtestPlannerInput"),
+      backtestPlannerOutput: document.getElementById("backtestPlannerOutput"),
+    };
+
+    function init() {
+      elements.apiBase.value = guessApiBase();
+      updateZoomLabel();
+      wireEvents();
+      useSampleData("sample preview loaded before first fetch");
+      loadGraph();
+    }
+
+    function wireEvents() {
+      elements.loadButton.addEventListener("click", () => loadGraph());
+      elements.sampleButton.addEventListener("click", () => useSampleData("manually switched to sample data"));
+      elements.arrangeButton.addEventListener("click", () => {
+        layoutNodes(true);
+        renderGraph();
+      });
+      elements.marketSearch.addEventListener("input", () => renderMarketsList());
+      elements.channelSearch.addEventListener("input", () => renderChannelsList());
+      elements.focusResetButton.addEventListener("click", resetFocusAndSelection);
+      elements.queueSelectedButton.addEventListener("click", queueLinkFromSelection);
+      elements.queueUnlinkButton.addEventListener("click", queueUnlinkFromSelectedEdge);
+      elements.zoomInButton.addEventListener("click", () => setZoom(state.viewport.scale + state.viewport.step));
+      elements.zoomOutButton.addEventListener("click", () => setZoom(state.viewport.scale - state.viewport.step));
+      elements.zoomResetButton.addEventListener("click", () => setZoom(1));
+      elements.exportQueueButton.addEventListener("click", exportQueue);
+      elements.clearQueueButton.addEventListener("click", () => {
+        state.queue = [];
+        renderQueue();
+      });
+      elements.backtestUseSelectedButton.addEventListener("click", populateBacktestMarketRefFromSelection);
+      elements.backtestRunButton.addEventListener("click", () => loadBacktest({ usePromptOverride: false }));
+      elements.backtestPromptRunButton.addEventListener("click", () => loadBacktest({ usePromptOverride: true }));
+      elements.backtestPromptResetButton.addEventListener("click", resetBacktestPromptEditor);
+      elements.backtestPrevButton.addEventListener("click", () => stepBacktest(-1));
+      elements.backtestNextButton.addEventListener("click", () => stepBacktest(1));
+      elements.channelInspectorOpen.addEventListener("click", () => {
+        const channel = getInspectorChannel();
+        if (!channel) return;
+        openChannelLink(channel);
+      });
+      elements.marketInspectorOpen.addEventListener("click", () => {
+        const market = getInspectorMarket();
+        if (!market) return;
+        openMarketLink(market);
+      });
+      elements.backtestContent.addEventListener("click", handleBacktestContentClick);
+      elements.marketInspector.addEventListener("click", handleMarketInspectorClick);
+      elements.channelInspector.addEventListener("click", handleChannelInspectorClick);
+      elements.autoRefresh.addEventListener("change", applyAutoRefresh);
+      elements.canvasWrap.addEventListener("wheel", handleCanvasWheel, { passive: false });
+      window.addEventListener("resize", () => {
+        layoutNodes(true);
+        renderGraph();
+      });
+    }
+
+    function guessApiBase() {
+      if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+        return window.location.origin;
+      }
+      return "http://127.0.0.1:8020";
+    }
+
+    function setStatus(text, mode = "idle") {
+      elements.statusChip.textContent = text;
+      elements.statusChip.classList.remove("ok", "warn");
+      if (mode === "ok") {
+        elements.statusChip.classList.add("ok");
+      } else if (mode === "warn") {
+        elements.statusChip.classList.add("warn");
+      }
+    }
+
+    function updateZoomLabel() {
+      elements.zoomValue.textContent = `${Math.round(state.viewport.scale * 100)}%`;
+    }
+
+    function handleCanvasWheel(event) {
+      // Keep normal scrolling by default; hold Cmd/Ctrl to zoom.
+      if (!(event.metaKey || event.ctrlKey)) return;
+      event.preventDefault();
+      const direction = event.deltaY < 0 ? 1 : -1;
+      const nextScale = state.viewport.scale + direction * state.viewport.step;
+      setZoom(nextScale, { clientX: event.clientX, clientY: event.clientY });
+    }
+
+    function setZoom(nextScale, anchor = null) {
+      const prevScale = state.viewport.scale;
+      const clampedScale = clamp(nextScale, state.viewport.min, state.viewport.max);
+      if (Math.abs(clampedScale - prevScale) < 0.0001) return;
+
+      const rect = elements.canvasWrap.getBoundingClientRect();
+      const anchorClientX = anchor?.clientX ?? (rect.left + rect.width / 2);
+      const anchorClientY = anchor?.clientY ?? (rect.top + rect.height / 2);
+      const localX = clamp(anchorClientX - rect.left, 0, rect.width);
+      const localY = clamp(anchorClientY - rect.top, 0, rect.height);
+
+      const worldX = (elements.canvasWrap.scrollLeft + localX) / prevScale;
+      const worldY = (elements.canvasWrap.scrollTop + localY) / prevScale;
+
+      state.viewport.scale = clampedScale;
+      updateZoomLabel();
+      refreshSceneSize();
+      renderGraph();
+
+      const nextScrollLeft = worldX * clampedScale - localX;
+      const nextScrollTop = worldY * clampedScale - localY;
+      const maxLeft = Math.max(elements.scene.scrollWidth - elements.canvasWrap.clientWidth, 0);
+      const maxTop = Math.max(elements.scene.scrollHeight - elements.canvasWrap.clientHeight, 0);
+      elements.canvasWrap.scrollLeft = clamp(nextScrollLeft, 0, maxLeft);
+      elements.canvasWrap.scrollTop = clamp(nextScrollTop, 0, maxTop);
+    }
+
+    function centerWorldPoint(worldX, worldY, smooth = true) {
+      const scale = state.viewport.scale;
+      const targetLeft = worldX * scale - elements.canvasWrap.clientWidth / 2;
+      const targetTop = worldY * scale - elements.canvasWrap.clientHeight / 2;
+      const maxLeft = Math.max(elements.scene.scrollWidth - elements.canvasWrap.clientWidth, 0);
+      const maxTop = Math.max(elements.scene.scrollHeight - elements.canvasWrap.clientHeight, 0);
+      elements.canvasWrap.scrollTo({
+        left: clamp(targetLeft, 0, maxLeft),
+        top: clamp(targetTop, 0, maxTop),
+        behavior: smooth ? "smooth" : "auto",
+      });
+    }
+
+    function zoomToNode(kind, id, withZoom = true) {
+      const pos = state.positions[kind]?.[String(id)];
+      if (!pos) return;
+      if (withZoom && state.viewport.scale < 1.2) {
+        setZoom(1.2);
+      }
+      const nodeWidth = kind === "channel" ? state.layout.channelNodeWidth : state.layout.marketNodeWidth;
+      const nodeAnchorY = kind === "channel" ? state.layout.channelAnchorY : state.layout.marketAnchorY;
+      const centerX = pos.x + nodeWidth / 2;
+      const centerY = pos.y + nodeAnchorY + 16;
+      centerWorldPoint(centerX, centerY, true);
+    }
+
+    function refreshSceneSize() {
+      const scale = state.viewport.scale;
+      const width = Math.round(state.layout.worldWidth * scale);
+      const height = Math.round(state.layout.worldHeight * scale);
+      elements.scene.style.width = `${width}px`;
+      elements.scene.style.height = `${height}px`;
+      elements.scene.style.setProperty("--scene-height", `${height}px`);
+      elements.scene.style.setProperty("--scene-width", `${width}px`);
+    }
+
+    async function loadGraph() {
+      const apiBase = normalizeBase(elements.apiBase.value);
+      const marketLimit = clampInt(elements.marketLimit.value, 1, 500, 80);
+      const channelLimit = clampInt(elements.channelLimit.value, 1, 1000, 220);
+      const edgeLimit = clampInt(elements.edgeLimit.value, 1, 15000, 3000);
+      const minChannelMembers = clampInt(elements.minChannelMembers.value, 0, 10000000, 1000);
+      const minChannelRelevance = clampFloat(elements.minChannelRelevance.value, 0, 1, 0.18);
+      const trackNowOnly = String(elements.trackNow.value || "true") === "true";
+
+      const url = `${apiBase}/api/intel/graph?market_limit=${marketLimit}&channel_limit=${channelLimit}&edge_limit=${edgeLimit}&track_now_only=${trackNowOnly}&min_channel_members=${minChannelMembers}&min_channel_relevance=${minChannelRelevance}`;
+      setStatus("loading graph...", "warn");
+      elements.loadButton.disabled = true;
+
+      try {
+        const response = await fetch(url, { headers: { "Accept": "application/json" } });
+        if (!response.ok) {
+          const bodyText = await response.text();
+          throw new Error(`HTTP ${response.status}: ${bodyText.slice(0, 180)}`);
+        }
+        const payload = await response.json();
+        applyGraphData(payload, `live data from ${apiBase}`);
+        setStatus("live graph loaded", "ok");
+      } catch (error) {
+        useSampleData(`live fetch failed, sample fallback (${error.message})`);
+        setStatus("sample fallback (live fetch failed)", "warn");
+      } finally {
+        elements.loadButton.disabled = false;
+      }
+    }
+
+    function useSampleData(reason) {
+      const minChannelMembers = clampInt(elements.minChannelMembers.value, 0, 10000000, 1000);
+      const minChannelRelevance = clampFloat(elements.minChannelRelevance.value, 0, 1, 0.18);
+      applyGraphData(buildSampleGraph(minChannelMembers, minChannelRelevance), reason || "sample data loaded");
+      setStatus("sample graph loaded", "warn");
+    }
+
+    function applyGraphData(rawPayload, reason) {
+      const payload = normalizePayload(rawPayload);
+      state.data = payload;
+      preservePositionMap(payload.markets, "market", "market_id");
+      preservePositionMap(payload.channels, "channel", "chat_id");
+      layoutNodes(true);
+      trimSelectionState();
+      renderEverything();
+      updateMeta(reason);
+    }
+
+    function normalizePayload(rawPayload) {
+      const payload = rawPayload || {};
+      const markets = Array.isArray(payload.markets) ? payload.markets : [];
+      const channels = Array.isArray(payload.channels) ? payload.channels : [];
+      const edges = Array.isArray(payload.edges) ? payload.edges : [];
+      const meta = payload.meta || {};
+      return { markets, channels, edges, meta };
+    }
+
+    function preservePositionMap(items, kind, idKey) {
+      const current = state.positions[kind];
+      const next = {};
+      for (const item of items) {
+        const id = String(item[idKey]);
+        if (current[id]) {
+          next[id] = current[id];
+        }
+      }
+      state.positions[kind] = next;
+    }
+
+    function layoutNodes(forceReset) {
+      const markets = state.data.markets;
+      const channels = state.data.channels;
+      const marketGap = 110;
+      const channelGap = 76;
+      const marketSpan = Math.max(markets.length, 8) * marketGap;
+      const channelSpan = Math.max(channels.length, 8) * channelGap;
+      const worldHeight = Math.max(1080, Math.max(marketSpan, channelSpan) + 180);
+      const viewportWorldWidth = Math.max(((elements.canvasWrap.clientWidth || 0) / state.viewport.scale) - 16, 980);
+      const marketX = 48;
+      const marketColumnWidth = state.layout.marketNodeWidth + 12;
+      const channelColumnWidth = state.layout.channelNodeWidth + 12;
+      const middleGap = clamp(viewportWorldWidth - marketColumnWidth - channelColumnWidth - 160, 220, 860);
+      const channelX = marketX + marketColumnWidth + middleGap;
+      const worldWidth = Math.max(channelX + channelColumnWidth + 64, viewportWorldWidth);
+      const maxMarketX = Math.max(worldWidth - state.layout.marketNodeWidth - 24, marketX);
+      const maxChannelX = Math.max(worldWidth - state.layout.channelNodeWidth - 24, marketX);
+      const maxY = Math.max(worldHeight - 72, 48);
+
+      state.layout.worldWidth = worldWidth;
+      state.layout.worldHeight = worldHeight;
+      refreshSceneSize();
+
+      markets.forEach((market, index) => {
+        const id = String(market.market_id);
+        const existing = state.positions.market[id];
+        if (forceReset || !existing) {
+          state.positions.market[id] = { x: marketX, y: 50 + index * marketGap };
+          return;
+        }
+        state.positions.market[id] = {
+          x: clamp(existing.x, 12, maxMarketX),
+          y: clamp(existing.y, 12, maxY),
+        };
+      });
+
+      channels.forEach((channel, index) => {
+        const id = String(channel.chat_id);
+        const existing = state.positions.channel[id];
+        if (forceReset || !existing) {
+          state.positions.channel[id] = { x: channelX, y: 50 + index * channelGap };
+          return;
+        }
+        state.positions.channel[id] = {
+          x: clamp(existing.x, 12, maxChannelX),
+          y: clamp(existing.y, 12, maxY),
+        };
+      });
+    }
+
+    function trimSelectionState() {
+      const marketIds = new Set(state.data.markets.map((item) => String(item.market_id)));
+      const channelIds = new Set(state.data.channels.map((item) => String(item.chat_id)));
+      if (!marketIds.has(String(state.selected.marketId))) {
+        state.selected.marketId = null;
+      }
+      if (!channelIds.has(String(state.selected.chatId))) {
+        state.selected.chatId = null;
+      }
+
+      if (state.focus.kind === "market" && !marketIds.has(String(state.focus.id))) {
+        state.focus = { kind: null, id: null };
+      }
+      if (state.focus.kind === "channel" && !channelIds.has(String(state.focus.id))) {
+        state.focus = { kind: null, id: null };
+      }
+      if (state.focus.kind === "edge") {
+        const edgeExists = state.data.edges.some((edge) => edgeKey(edge) === String(state.focus.id));
+        if (!edgeExists) {
+          state.focus = { kind: null, id: null };
+        }
+      }
+      if (state.selectedEdgeKey) {
+        const edgeExists = state.data.edges.some((edge) => edgeKey(edge) === state.selectedEdgeKey);
+        if (!edgeExists) {
+          state.selectedEdgeKey = null;
+        }
+      }
+    }
+
+    function findChannelById(chatId) {
+      return state.data.channels.find((item) => String(item.chat_id) === String(chatId)) || null;
+    }
+
+    function findMarketById(marketId) {
+      return state.data.markets.find((item) => String(item.market_id) === String(marketId)) || null;
+    }
+
+    function getInspectorMarket() {
+      return findMarketById(state.selected.marketId)
+        || (state.focus.kind === "market" ? findMarketById(state.focus.id) : null);
+    }
+
+    function getInspectorChannel() {
+      return findChannelById(state.selected.chatId)
+        || (state.focus.kind === "channel" ? findChannelById(state.focus.id) : null);
+    }
+
+    function marketPublicUrl(market) {
+      if (!market || !market.slug) return null;
+      return `https://polymarket.com/event/${market.slug}`;
+    }
+
+    function channelPublicUrl(channel) {
+      if (!channel || !channel.username) return null;
+      return `https://t.me/${channel.username}`;
+    }
+
+    function openMarketLink(market) {
+      const url = marketPublicUrl(market);
+      if (!url) {
+        alert(`market ${market?.market_id ?? "unknown"} has no public slug yet.`);
+        return;
+      }
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    function openChannelLink(channel) {
+      const url = channelPublicUrl(channel);
+      if (!url) {
+        alert(`chat_id ${channel?.chat_id ?? "unknown"} has no public username yet.`);
+        return;
+      }
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+
+    function renderEverything() {
+      renderMarketsList();
+      renderChannelsList();
+      renderMarketInspector();
+      renderChannelInspector();
+      renderGraph();
+      renderSelectionLine();
+      renderQueueButtons();
+      renderQueue();
+      renderBacktest();
+    }
+
+    function getLinkedChannelsForMarket(marketId) {
+      return state.data.edges
+        .filter((edge) => String(edge.market_id) === String(marketId))
+        .sort((a, b) => toInt(a.priority_rank || 999) - toInt(b.priority_rank || 999))
+        .map((edge) => ({ edge, channel: findChannelById(edge.chat_id) }))
+        .filter((item) => item.channel);
+    }
+
+    function getLinkedMarketsForChannel(chatId) {
+      return state.data.edges
+        .filter((edge) => String(edge.chat_id) === String(chatId))
+        .sort((a, b) => toInt(a.priority_rank || 999) - toInt(b.priority_rank || 999))
+        .map((edge) => ({ edge, market: findMarketById(edge.market_id) }))
+        .filter((item) => item.market);
+    }
+
+    function renderLinkedChannelsHtml(items) {
+      if (!items.length) {
+        return '<p class="relation-empty">No channels linked to this market yet.</p>';
+      }
+      return items.map(({ edge, channel }) => `
+        <div class="relation-row">
+          <div>
+            <p class="relation-row-title">${escapeHtml(channel.title || "(untitled channel)")}</p>
+            <p class="relation-row-sub">${escapeHtml(channel.username ? `@${channel.username}` : `chat_id ${channel.chat_id}`)}</p>
+          </div>
+          <div class="chips">
+            <span class="chip channel">rank ${toInt(edge.priority_rank)}</span>
+            <span class="chip">${escapeHtml(edge.link_source || "linked")}</span>
+            <span class="chip">${escapeHtml(edge.relevance_label || "fit n/a")}</span>
+            <span class="chip">rel ${formatScore(edge.relevance_score)}</span>
+          </div>
+          <p class="relation-row-sub">${escapeHtml(edge.relevance_reason || "No relevance reason stored.")}</p>
+          <div class="relation-actions">
+            <button type="button" data-role="inspect-linked-channel" data-id="${escapeAttr(channel.chat_id)}">Inspect</button>
+            <button type="button" data-role="open-linked-channel" data-id="${escapeAttr(channel.chat_id)}">Open</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderLinkedMarketsHtml(items) {
+      if (!items.length) {
+        return '<p class="relation-empty">No markets linked to this channel yet.</p>';
+      }
+      return items.map(({ edge, market }) => `
+        <div class="relation-row">
+          <div>
+            <p class="relation-row-title">${escapeHtml(market.question || "(untitled market)")}</p>
+            <p class="relation-row-sub">${escapeHtml(market.slug || market.market_id)}</p>
+          </div>
+          <div class="chips">
+            <span class="chip market">rank ${toInt(edge.priority_rank)}</span>
+            <span class="chip">${escapeHtml(edge.link_source || "linked")}</span>
+            <span class="chip">${escapeHtml(edge.relevance_label || "fit n/a")}</span>
+            <span class="chip">rel ${formatScore(edge.relevance_score)}</span>
+          </div>
+          <p class="relation-row-sub">${escapeHtml(edge.relevance_reason || "No relevance reason stored.")}</p>
+          <div class="relation-actions">
+            <button type="button" data-role="inspect-linked-market" data-id="${escapeAttr(market.market_id)}">Inspect</button>
+            <button type="button" data-role="open-linked-market" data-id="${escapeAttr(market.market_id)}">Open</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderMarketInspector() {
+      const market = getInspectorMarket();
+      if (!market) {
+        elements.marketInspector.classList.add("empty");
+        elements.marketInspectorTitle.textContent = "No market selected";
+        elements.marketInspectorHandle.textContent = "Click a Polymarket node or market card to inspect it here.";
+        elements.marketInspectorLink.hidden = true;
+        elements.marketInspectorLink.removeAttribute("href");
+        elements.marketInspectorChips.innerHTML = "";
+        elements.marketInspectorRules.textContent = "No market selected yet.";
+        elements.marketInspectorLinks.innerHTML = '<p class="relation-empty">Select a market to inspect its channel map.</p>';
+        elements.marketInspectorOpen.disabled = true;
+        return;
+      }
+
+      elements.marketInspector.classList.remove("empty");
+      elements.marketInspectorTitle.textContent = market.question || "(untitled market)";
+      elements.marketInspectorHandle.textContent = market.slug
+        ? `${market.slug} | ${market.market_id}`
+        : `${market.market_id} | no public slug`;
+      const publicUrl = marketPublicUrl(market);
+      if (publicUrl) {
+        elements.marketInspectorLink.hidden = false;
+        elements.marketInspectorLink.href = publicUrl;
+        elements.marketInspectorLink.textContent = publicUrl;
+      } else {
+        elements.marketInspectorLink.hidden = true;
+        elements.marketInspectorLink.removeAttribute("href");
+      }
+      elements.marketInspectorChips.innerHTML = `
+        <span class="chip market">local ${safePercent(market.analysis_local_score ?? market.local_score)}</span>
+        <span class="chip">mapped ${toInt(market.mapped_channels)}</span>
+        <span class="chip">${escapeHtml(market.market_archetype || "unknown")}</span>
+        ${market.high_competition ? '<span class="chip warn">high competition</span>' : ""}
+      `;
+      elements.marketInspectorRules.textContent = market.rules_text
+        || market.market_context
+        || "No market rules or context stored yet.";
+      elements.marketInspectorLinks.innerHTML = renderLinkedChannelsHtml(getLinkedChannelsForMarket(market.market_id));
+      elements.marketInspectorOpen.disabled = !publicUrl;
+    }
+
+    function renderChannelInspector() {
+      const channel = getInspectorChannel();
+      if (!channel) {
+        elements.channelInspector.classList.add("empty");
+        elements.channelInspectorTitle.textContent = "No channel selected";
+        elements.channelInspectorHandle.textContent = "Click a Telegram node or channel card to inspect it here.";
+        elements.channelInspectorLink.hidden = true;
+        elements.channelInspectorLink.removeAttribute("href");
+        elements.channelInspectorChips.innerHTML = "";
+        elements.channelInspectorNotes.textContent = "No channel selected yet.";
+        elements.channelInspectorLastMessage.textContent = "Select a channel to inspect recent text and metadata.";
+        elements.channelInspectorLinks.innerHTML = '<p class="relation-empty">Select a channel to inspect its linked markets.</p>';
+        elements.channelInspectorOpen.disabled = true;
+        return;
+      }
+
+      elements.channelInspector.classList.remove("empty");
+      elements.channelInspectorTitle.textContent = channel.title || "(untitled channel)";
+      elements.channelInspectorHandle.textContent = channel.username
+        ? `@${channel.username} | chat_id ${channel.chat_id}`
+        : `chat_id ${channel.chat_id} | no public username`;
+      const publicUrl = channelPublicUrl(channel);
+      if (publicUrl) {
+        elements.channelInspectorLink.hidden = false;
+        elements.channelInspectorLink.href = publicUrl;
+        elements.channelInspectorLink.textContent = publicUrl;
+      } else {
+        elements.channelInspectorLink.hidden = true;
+        elements.channelInspectorLink.removeAttribute("href");
+      }
+      elements.channelInspectorChips.innerHTML = `
+        <span class="chip channel">trust ${safePercent(channel.trust_weight)}</span>
+        <span class="chip">mapped ${toInt(channel.mapped_markets)}</span>
+        <span class="chip">members ${formatNumber(channel.member_count)}</span>
+      `;
+      elements.channelInspectorNotes.textContent = channel.notes
+        || channel.description
+        || "No analyst notes or channel description stored yet.";
+      elements.channelInspectorLastMessage.textContent = channel.last_message && channel.last_message.text
+        ? channel.last_message.text
+        : "No ingested message yet.";
+      elements.channelInspectorLinks.innerHTML = renderLinkedMarketsHtml(getLinkedMarketsForChannel(channel.chat_id));
+      elements.channelInspectorOpen.disabled = !publicUrl;
+    }
+
+    function selectMarketFromInspector(marketId) {
+      const currentChannel = getInspectorChannel();
+      state.selected.marketId = String(marketId);
+      if (!state.selected.chatId && currentChannel) {
+        state.selected.chatId = String(currentChannel.chat_id);
+      }
+      state.focus = { kind: "market", id: String(marketId) };
+      renderEverything();
+      zoomToNode("market", String(marketId), true);
+    }
+
+    function selectChannelFromInspector(chatId) {
+      const currentMarket = getInspectorMarket();
+      state.selected.chatId = String(chatId);
+      if (!state.selected.marketId && currentMarket) {
+        state.selected.marketId = String(currentMarket.market_id);
+      }
+      state.focus = { kind: "channel", id: String(chatId) };
+      renderEverything();
+      zoomToNode("channel", String(chatId), true);
+    }
+
+    function handleMarketInspectorClick(event) {
+      const button = event.target.closest("button[data-role]");
+      if (!button) return;
+      const role = button.dataset.role;
+      const id = button.dataset.id;
+      if (!id) return;
+
+      if (role === "inspect-linked-channel") {
+        selectChannelFromInspector(id);
+      } else if (role === "open-linked-channel") {
+        const channel = findChannelById(id);
+        if (channel) openChannelLink(channel);
+      }
+    }
+
+    function handleChannelInspectorClick(event) {
+      const button = event.target.closest("button[data-role]");
+      if (!button) return;
+      const role = button.dataset.role;
+      const id = button.dataset.id;
+      if (!id) return;
+
+      if (role === "inspect-linked-market") {
+        selectMarketFromInspector(id);
+      } else if (role === "open-linked-market") {
+        const market = findMarketById(id);
+        if (market) openMarketLink(market);
+      }
+    }
+
+    function renderMarketsList() {
+      const search = elements.marketSearch.value.trim().toLowerCase();
+      const fragment = document.createDocumentFragment();
+      const visible = getVisibleMarkets(search);
+      elements.marketVisibleCounter.textContent = `${visible.length} visible`;
+      elements.marketTotalCounter.textContent = `${state.data.markets.length} total`;
+
+      for (const market of visible) {
+        const card = document.createElement("article");
+        card.className = "item";
+        if (state.focus.kind === "market" && String(state.focus.id) === String(market.market_id)) {
+          card.classList.add("focus");
+        }
+
+        card.innerHTML = `
+          <div class="row-main">
+            <p class="item-title">
+              ${escapeHtml(market.question || "(untitled market)")}
+              <small>${escapeHtml(market.slug || market.market_id)}</small>
+            </p>
+            <button type="button" data-role="select-market" data-id="${escapeAttr(market.market_id)}" class="ghost">
+              ${state.selected.marketId === String(market.market_id) ? "Selected" : "Select"}
+            </button>
+          </div>
+          <div class="chips">
+            <span class="chip market">local ${(safePercent(market.analysis_local_score ?? market.local_score))}</span>
+            <span class="chip">mapped ${toInt(market.mapped_channels)}</span>
+            <span class="chip">${escapeHtml(market.market_archetype || "unknown")}</span>
+            ${market.high_competition ? '<span class="chip warn">high competition</span>' : ""}
+          </div>
+          <div class="detail-body">
+            <p class="detail-text">${escapeHtml((market.rules_text || market.market_context || "No rules text yet.").slice(0, 1800))}</p>
+            <div class="item-actions">
+              <button type="button" data-role="focus-market" data-id="${escapeAttr(market.market_id)}">Focus</button>
+              <button type="button" data-role="pin-market" data-id="${escapeAttr(market.market_id)}">Pin In Graph</button>
+            </div>
+          </div>
+        `;
+        fragment.appendChild(card);
+      }
+
+      elements.marketList.innerHTML = "";
+      elements.marketList.appendChild(fragment);
+      bindMarketListEvents();
+    }
+
+    function renderChannelsList() {
+      const search = elements.channelSearch.value.trim().toLowerCase();
+      const fragment = document.createDocumentFragment();
+      const visible = getVisibleChannels(search);
+      elements.channelVisibleCounter.textContent = `${visible.length} visible`;
+      elements.channelTotalCounter.textContent = `${state.data.channels.length} total`;
+
+      for (const channel of visible) {
+        const card = document.createElement("article");
+        card.className = "item";
+        if (state.focus.kind === "channel" && String(state.focus.id) === String(channel.chat_id)) {
+          card.classList.add("focus");
+        }
+
+        const username = channel.username ? `@${channel.username}` : "no @username";
+        const lastMessage = channel.last_message && channel.last_message.text
+          ? channel.last_message.text.slice(0, 220)
+          : "No ingested message yet";
+
+        card.innerHTML = `
+          <div class="row-main">
+            <p class="item-title">
+              ${escapeHtml(channel.title || "(untitled channel)")}
+              <small>${escapeHtml(username)}</small>
+            </p>
+            <button type="button" data-role="select-channel" data-id="${escapeAttr(channel.chat_id)}" class="ghost">
+              ${state.selected.chatId === String(channel.chat_id) ? "Selected" : "Select"}
+            </button>
+          </div>
+          <div class="chips">
+            <span class="chip channel">trust ${safePercent(channel.trust_weight)}</span>
+            <span class="chip">mapped ${toInt(channel.mapped_markets)}</span>
+            <span class="chip">members ${formatNumber(channel.member_count)}</span>
+          </div>
+          <div class="detail-body">
+            <p class="detail-text">${escapeHtml(lastMessage)}</p>
+            <div class="item-actions">
+              <button type="button" data-role="focus-channel" data-id="${escapeAttr(channel.chat_id)}">Focus</button>
+              <button type="button" data-role="open-telegram" data-id="${escapeAttr(channel.chat_id)}">Open Channel</button>
+            </div>
+          </div>
+        `;
+        fragment.appendChild(card);
+      }
+
+      elements.channelList.innerHTML = "";
+      elements.channelList.appendChild(fragment);
+      bindChannelListEvents();
+    }
+
+    function bindMarketListEvents() {
+      elements.marketList.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const role = button.dataset.role;
+          const marketId = String(button.dataset.id || "");
+          if (!marketId) return;
+
+          if (role === "select-market") {
+            state.selected.marketId = state.selected.marketId === marketId ? null : marketId;
+            renderMarketsList();
+            renderMarketInspector();
+            renderSelectionLine();
+            renderQueueButtons();
+            renderGraph();
+            if (state.selected.marketId === marketId) {
+              zoomToNode("market", marketId, true);
+            }
+          } else if (role === "focus-market") {
+            state.focus = { kind: "market", id: marketId };
+            renderEverything();
+            zoomToNode("market", marketId, true);
+          } else if (role === "pin-market") {
+            zoomToNode("market", marketId, false);
+          }
+        });
+      });
+    }
+
+    function bindChannelListEvents() {
+      elements.channelList.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const role = button.dataset.role;
+          const chatId = String(button.dataset.id || "");
+          if (!chatId) return;
+
+          if (role === "select-channel") {
+            state.selected.chatId = state.selected.chatId === chatId ? null : chatId;
+            renderChannelsList();
+            renderChannelInspector();
+            renderSelectionLine();
+            renderQueueButtons();
+            renderGraph();
+            if (state.selected.chatId === chatId) {
+              zoomToNode("channel", chatId, true);
+            }
+          } else if (role === "focus-channel") {
+            state.focus = { kind: "channel", id: chatId };
+            renderEverything();
+            zoomToNode("channel", chatId, true);
+          } else if (role === "open-telegram") {
+            const channel = state.data.channels.find((item) => String(item.chat_id) === chatId);
+            if (!channel) return;
+            openChannelLink(channel);
+          }
+        });
+      });
+    }
+
+    function renderGraph() {
+      renderNodes();
+      renderEdges();
+    }
+
+    function renderNodes() {
+      elements.nodeLayer.innerHTML = "";
+      const scale = state.viewport.scale;
+
+      const visibleMarketIds = new Set(getVisibleMarkets(elements.marketSearch.value.trim().toLowerCase()).map((item) => String(item.market_id)));
+      const visibleChannelIds = new Set(getVisibleChannels(elements.channelSearch.value.trim().toLowerCase()).map((item) => String(item.chat_id)));
+
+      for (const market of state.data.markets) {
+        const marketId = String(market.market_id);
+        if (!visibleMarketIds.has(marketId)) continue;
+        const position = state.positions.market[marketId] || { x: 120, y: 80 };
+        const node = document.createElement("div");
+        node.className = "node market";
+        node.dataset.kind = "market";
+        node.dataset.id = marketId;
+        node.style.left = `${position.x * scale}px`;
+        node.style.top = `${position.y * scale}px`;
+        node.style.transform = `scale(${scale})`;
+        node.style.transformOrigin = "top left";
+
+        const isFocus = state.focus.kind === "market" && String(state.focus.id) === marketId;
+        const isSelected = state.selected.marketId === marketId;
+        if (isFocus) node.classList.add("focus");
+        if (isSelected) node.classList.add("selected");
+
+        node.innerHTML = `
+          <div class="node-head">
+            <div>
+              <p class="node-title">${escapeHtml((market.question || "(untitled)").slice(0, 70))}</p>
+              <p class="node-sub">${escapeHtml(market.slug || market.market_id)}</p>
+            </div>
+          </div>
+          <div class="node-meta">
+            <span class="node-market-tag">local ${safePercent(market.analysis_local_score ?? market.local_score)}</span>
+            <span>map ${toInt(market.mapped_channels)}</span>
+          </div>
+        `;
+        attachNodeEvents(node);
+        elements.nodeLayer.appendChild(node);
+      }
+
+      for (const channel of state.data.channels) {
+        const chatId = String(channel.chat_id);
+        if (!visibleChannelIds.has(chatId)) continue;
+        const fallbackX = Math.max(state.layout.worldWidth - state.layout.channelNodeWidth - 24, 340);
+        const position = state.positions.channel[chatId] || { x: fallbackX, y: 80 };
+        const node = document.createElement("div");
+        node.className = "node channel";
+        node.dataset.kind = "channel";
+        node.dataset.id = chatId;
+        node.style.left = `${position.x * scale}px`;
+        node.style.top = `${position.y * scale}px`;
+        node.style.transform = `scale(${scale})`;
+        node.style.transformOrigin = "top left";
+
+        const isFocus = state.focus.kind === "channel" && String(state.focus.id) === chatId;
+        const isSelected = state.selected.chatId === chatId;
+        if (isFocus) node.classList.add("focus");
+        if (isSelected) node.classList.add("selected");
+
+        node.innerHTML = `
+          <div class="channel-pill">
+            <span class="channel-dot-stack" aria-hidden="true">
+              <span class="channel-dot one"></span>
+              <span class="channel-dot two"></span>
+              <span class="channel-dot three"></span>
+            </span>
+            <div class="node-head">
+              <div>
+                <p class="node-title" title="${escapeAttr(channel.title || "(untitled)")}">${escapeHtml(channel.title || "(untitled)")}</p>
+                <p class="node-sub">${escapeHtml(channel.username ? `@${channel.username}` : `members ${formatNumber(channel.member_count)}`)}</p>
+              </div>
+            </div>
+          </div>
+          <div class="node-meta">
+            <span class="node-channel-tag">t${safePercent(channel.trust_weight)}</span>
+            <span>m${toInt(channel.mapped_markets)}</span>
+          </div>
+        `;
+        attachNodeEvents(node);
+        elements.nodeLayer.appendChild(node);
+      }
+    }
+
+    function attachNodeEvents(node) {
+      const kind = node.dataset.kind;
+      const id = String(node.dataset.id || "");
+      if (!kind || !id) return;
+
+      node.addEventListener("click", (event) => {
+        if (event.target.closest("button")) return;
+        if (kind === "market") {
+          state.selected.marketId = state.selected.marketId === id ? null : id;
+        } else {
+          state.selected.chatId = state.selected.chatId === id ? null : id;
+        }
+        renderMarketsList();
+        renderChannelsList();
+        renderMarketInspector();
+        renderChannelInspector();
+        renderSelectionLine();
+        renderQueueButtons();
+        renderGraph();
+        const isNowSelected = (kind === "market")
+          ? state.selected.marketId === id
+          : state.selected.chatId === id;
+        if (isNowSelected) {
+          zoomToNode(kind, id, true);
+        }
+      });
+
+      node.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0) return;
+        event.preventDefault();
+        node.setPointerCapture(event.pointerId);
+
+        const positionMap = state.positions[kind];
+        const start = positionMap[id] || { x: 0, y: 0 };
+        state.dragging = {
+          pointerId: event.pointerId,
+          kind,
+          id,
+          startX: start.x,
+          startY: start.y,
+          pointerStartX: event.clientX,
+          pointerStartY: event.clientY,
+        };
+      });
+
+      node.addEventListener("pointermove", (event) => {
+        if (!state.dragging || state.dragging.pointerId !== event.pointerId) return;
+        const drag = state.dragging;
+        const scale = state.viewport.scale;
+        const dx = (event.clientX - drag.pointerStartX) / scale;
+        const dy = (event.clientY - drag.pointerStartY) / scale;
+        const nodeWidth = drag.kind === "channel" ? state.layout.channelNodeWidth : state.layout.marketNodeWidth;
+        const maxX = Math.max(state.layout.worldWidth - nodeWidth - 24, 24);
+        const maxY = Math.max(state.layout.worldHeight - 92, 24);
+        const nextX = clamp(drag.startX + dx, 12, maxX);
+        const nextY = clamp(drag.startY + dy, 12, maxY);
+        state.positions[drag.kind][drag.id] = { x: nextX, y: nextY };
+        node.style.left = `${nextX * scale}px`;
+        node.style.top = `${nextY * scale}px`;
+        renderEdges();
+      });
+
+      node.addEventListener("pointerup", (event) => {
+        if (state.dragging && state.dragging.pointerId === event.pointerId) {
+          state.dragging = null;
+        }
+      });
+
+      node.addEventListener("pointercancel", () => {
+        state.dragging = null;
+      });
+    }
+
+    function renderEdges() {
+      elements.edgeLayer.innerHTML = "";
+      const scale = state.viewport.scale;
+      const visibleMarketIds = new Set(getVisibleMarkets(elements.marketSearch.value.trim().toLowerCase()).map((item) => String(item.market_id)));
+      const visibleChannelIds = new Set(getVisibleChannels(elements.channelSearch.value.trim().toLowerCase()).map((item) => String(item.chat_id)));
+
+      const fragment = document.createDocumentFragment();
+      for (const edge of state.data.edges) {
+        const marketId = String(edge.market_id);
+        const chatId = String(edge.chat_id);
+        if (!visibleMarketIds.has(marketId) || !visibleChannelIds.has(chatId)) continue;
+        const marketPos = state.positions.market[marketId];
+        const channelPos = state.positions.channel[chatId];
+        if (!marketPos || !channelPos) continue;
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("class", "edge");
+        path.setAttribute("d", edgePathD(marketPos, channelPos, scale));
+        const key = edgeKey(edge);
+        path.dataset.key = key;
+        path.dataset.market = marketId;
+        path.dataset.chat = chatId;
+
+        const shouldFocus = (
+          (state.focus.kind === "market" && String(state.focus.id) === marketId)
+          || (state.focus.kind === "channel" && String(state.focus.id) === chatId)
+          || (state.focus.kind === "edge" && String(state.focus.id) === key)
+        );
+        if (shouldFocus) path.classList.add("focus");
+        if (state.selectedEdgeKey && state.selectedEdgeKey === key) path.classList.add("selected");
+
+        path.addEventListener("click", (event) => {
+          event.stopPropagation();
+          state.selectedEdgeKey = key;
+          state.focus = { kind: "edge", id: key };
+          renderQueueButtons();
+          renderSelectionLine();
+          renderGraph();
+          if (state.viewport.scale < 1.15) {
+            setZoom(1.15);
+          }
+          const midX = (
+            marketPos.x + state.layout.marketNodeWidth + channelPos.x
+          ) * 0.5;
+          const midY = (
+            marketPos.y + state.layout.marketAnchorY
+            + channelPos.y + state.layout.channelAnchorY
+          ) * 0.5;
+          centerWorldPoint(midX, midY, true);
+        });
+
+        fragment.appendChild(path);
+      }
+      elements.edgeLayer.appendChild(fragment);
+    }
+
+    function edgePathD(marketPos, channelPos, scale) {
+      const startX = (marketPos.x + state.layout.marketNodeWidth) * scale;
+      const startY = (marketPos.y + state.layout.marketAnchorY) * scale;
+      const endX = channelPos.x * scale;
+      const endY = (channelPos.y + state.layout.channelAnchorY) * scale;
+      const curve = Math.max(92 * scale, (endX - startX) * 0.5);
+      return `M ${startX} ${startY} C ${startX + curve} ${startY}, ${endX - curve} ${endY}, ${endX} ${endY}`;
+    }
+
+    function getVisibleMarkets(search) {
+      if (!search) return state.data.markets.slice();
+      return state.data.markets.filter((market) => {
+        const blob = `${market.question || ""} ${market.slug || ""} ${market.market_archetype || ""}`.toLowerCase();
+        return blob.includes(search);
+      });
+    }
+
+    function getVisibleChannels(search) {
+      if (!search) return state.data.channels.slice();
+      return state.data.channels.filter((channel) => {
+        const blob = `${channel.title || ""} ${channel.username || ""} ${channel.notes || ""}`.toLowerCase();
+        return blob.includes(search);
+      });
+    }
+
+    function renderSelectionLine() {
+      const market = state.data.markets.find((item) => String(item.market_id) === String(state.selected.marketId));
+      const channel = state.data.channels.find((item) => String(item.chat_id) === String(state.selected.chatId));
+      const edgeInfo = state.selectedEdgeKey ? state.data.edges.find((item) => edgeKey(item) === state.selectedEdgeKey) : null;
+
+      const marketText = market ? (market.question || market.market_id).slice(0, 70) : "none";
+      const channelText = channel ? (channel.title || channel.chat_id) : "none";
+      let line = `Selected market: ${marketText} | selected channel: ${channelText}`;
+      if (edgeInfo) {
+        line += ` | selected edge: ${edgeInfo.market_id} -> ${edgeInfo.chat_id}`;
+      }
+      elements.selectionLine.textContent = line;
+    }
+
+    function renderQueueButtons() {
+      elements.queueSelectedButton.disabled = !(state.selected.marketId && state.selected.chatId);
+      elements.queueUnlinkButton.disabled = !state.selectedEdgeKey;
+    }
+
+    function queueLinkFromSelection() {
+      if (!state.selected.marketId || !state.selected.chatId) return;
+      const payload = {
+        action: "link_add",
+        market_id: String(state.selected.marketId),
+        chat_id: Number(state.selected.chatId),
+        created_at_utc: new Date().toISOString(),
+      };
+      if (queueExists(payload.action, payload.market_id, payload.chat_id)) return;
+      state.queue.push(payload);
+      renderQueue();
+    }
+
+    function queueUnlinkFromSelectedEdge() {
+      if (!state.selectedEdgeKey) return;
+      const found = state.data.edges.find((edge) => edgeKey(edge) === state.selectedEdgeKey);
+      if (!found) return;
+      const payload = {
+        action: "link_remove",
+        market_id: String(found.market_id),
+        chat_id: Number(found.chat_id),
+        created_at_utc: new Date().toISOString(),
+      };
+      if (queueExists(payload.action, payload.market_id, payload.chat_id)) return;
+      state.queue.push(payload);
+      renderQueue();
+    }
+
+    function queueExists(action, marketId, chatId) {
+      return state.queue.some((item) => (
+        item.action === action
+        && String(item.market_id) === String(marketId)
+        && Number(item.chat_id) === Number(chatId)
+      ));
+    }
+
+    function renderQueue() {
+      const body = elements.queueTableBody;
+      body.innerHTML = "";
+
+      state.queue.forEach((item, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td><code>${escapeHtml(item.action)}</code></td>
+          <td><code>${escapeHtml(item.market_id)}</code></td>
+          <td><code>${escapeHtml(String(item.chat_id))}</code></td>
+          <td>${escapeHtml(item.created_at_utc)}</td>
+          <td><button type="button" class="danger" data-role="remove-queue" data-index="${index}">remove</button></td>
+        `;
+        body.appendChild(row);
+      });
+
+      body.querySelectorAll("button[data-role='remove-queue']").forEach((button) => {
+        button.addEventListener("click", () => {
+          const index = Number(button.dataset.index);
+          if (!Number.isNaN(index)) {
+            state.queue.splice(index, 1);
+            renderQueue();
+          }
+        });
+      });
+
+      elements.queueEmpty.style.display = state.queue.length ? "none" : "block";
+    }
+
+    function populateBacktestMarketRefFromSelection() {
+      const market = getInspectorMarket() || findMarketById(state.selected.marketId);
+      if (!market) {
+        alert("Select a market first, then use this button to load its slug into the backtest.");
+        return;
+      }
+      elements.backtestMarketRef.value = market.slug || market.market_id || "";
+      renderBacktest();
+    }
+
+    function resetBacktestPromptEditor() {
+      const debug = state.backtest.payload?.planner?.prompt_debug || {};
+      elements.backtestPlannerSystemPrompt.value = debug.system_prompt || "";
+      elements.backtestPlannerUserPrompt.value = debug.user_prompt || "";
+      elements.backtestPlannerInput.textContent = debug.input_materials
+        ? JSON.stringify(debug.input_materials, null, 2)
+        : "No planner input loaded yet.";
+      elements.backtestPlannerOutput.textContent = debug.output_json
+        ? JSON.stringify(debug.output_json, null, 2)
+        : (debug.note || "No planner output captured yet.");
+      elements.backtestPromptStatus.textContent = debug.system_prompt
+        ? (
+          debug.note
+          || `Planner runtime: ${debug.runtime_mode || "unknown"}${debug.model ? ` | model ${debug.model}` : ""}`
+        )
+        : "Run a backtest first to load the exact planner prompt, input materials, and output JSON.";
+    }
+
+    async function loadBacktest({ usePromptOverride = false } = {}) {
+      const apiBase = normalizeBase(elements.apiBase.value);
+      const marketRef = String(elements.backtestMarketRef.value || "").trim();
+      if (!marketRef) {
+        alert("Enter a Polymarket URL, slug, or market id for the backtest.");
+        return;
+      }
+
+      const targetChannels = clampInt(elements.backtestTargetChannels.value, 1, 100, 25);
+      const queryResults = clampInt(elements.backtestQueryResults.value, 1, 50, 20);
+      const maxQueries = clampInt(elements.backtestMaxQueries.value, 1, 12, 6);
+      const similarSeeds = clampInt(elements.backtestSimilarSeeds.value, 0, 10, 3);
+      const similarPerSeed = clampInt(elements.backtestSimilarPerSeed.value, 0, 25, 10);
+      const minChannelMembers = clampInt(elements.minChannelMembers.value, 0, 10000000, 1000);
+      const minChannelRelevance = clampFloat(elements.minChannelRelevance.value, 0, 1, 0.18);
+      const body = {
+        market_ref: marketRef,
+        target_channels: targetChannels,
+        query_results_limit: queryResults,
+        max_queries: maxQueries,
+        similar_seed_channels: similarSeeds,
+        similar_per_seed: similarPerSeed,
+        min_channel_members: minChannelMembers,
+        min_channel_relevance: minChannelRelevance,
+        planner_system_prompt: String(elements.backtestPlannerSystemPrompt.value || ""),
+        planner_user_prompt: String(elements.backtestPlannerUserPrompt.value || ""),
+        use_prompt_override: !!usePromptOverride,
+      };
+
+      state.backtest.loading = true;
+      state.backtest.error = "";
+      renderBacktest();
+      elements.backtestPromptStatus.textContent = usePromptOverride
+        ? "Running backtest with edited planner prompt..."
+        : "Running backtest with the current default planner prompt...";
+      setStatus(usePromptOverride ? "running planner prompt override..." : "running telegram backtest...", "warn");
+      elements.backtestRunButton.disabled = true;
+      elements.backtestPromptRunButton.disabled = true;
+
+      try {
+        const response = await fetch(`${apiBase}/api/intel/telegram-backtest`, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`HTTP ${response.status}: ${text.slice(0, 240)}`);
+        }
+        const payload = await response.json();
+        state.backtest.payload = payload;
+        state.backtest.stepIndex = 0;
+        state.backtest.error = "";
+        if (payload.market?.market_id) {
+          state.selected.marketId = String(payload.market.market_id);
+        }
+        resetBacktestPromptEditor();
+        setStatus(usePromptOverride ? "telegram backtest reloaded with edited prompt" : "telegram backtest loaded", "ok");
+      } catch (error) {
+        state.backtest.payload = null;
+        state.backtest.error = error.message;
+        resetBacktestPromptEditor();
+        setStatus("telegram backtest failed", "warn");
+      } finally {
+        state.backtest.loading = false;
+        elements.backtestRunButton.disabled = false;
+        elements.backtestPromptRunButton.disabled = false;
+        renderEverything();
+      }
+    }
+
+    function stepBacktest(direction) {
+      const stages = getBacktestStages();
+      if (!stages.length) return;
+      state.backtest.stepIndex = clamp(state.backtest.stepIndex + direction, 0, stages.length - 1);
+      renderBacktest();
+    }
+
+    function getBacktestStages() {
+      const payload = state.backtest.payload;
+      if (!payload) return [];
+      const plannerVersion = payload.planner?.planner_version || "heuristic";
+      return [
+        {
+          key: "market",
+          label: "Market",
+          title: "Market context and runtime thresholds",
+          subtitle: "This is the exact market row used for the discovery run.",
+          html: renderBacktestMarketStage(payload),
+        },
+        {
+          key: "planner",
+          label: "Planner",
+          title: "Stage 1: query planning",
+          subtitle: `Current engine is ${plannerVersion}. This is where an LLM prompt can replace the planner later.`,
+          html: renderBacktestPlannerStage(payload),
+        },
+        {
+          key: "search",
+          label: "Search",
+          title: "Stage 2: Telegram query execution",
+          subtitle: "Each query shows how it ran, including exact handle lookups and public search, then the relevance/member decision per channel.",
+          html: renderBacktestSearchStage(payload),
+        },
+        {
+          key: "similar",
+          label: "Similar",
+          title: "Stage 3: similar-channel expansion",
+          subtitle: "Expansion starts from the strongest accepted search hits, then runs the same relevance and member filters.",
+          html: renderBacktestSimilarStage(payload),
+        },
+        {
+          key: "final",
+          label: "Final",
+          title: "Stage 4: final ranked channel set",
+          subtitle: "These are the channels the current pipeline would keep for this market under the active thresholds.",
+          html: renderBacktestFinalStage(payload),
+        },
+      ];
+    }
+
+    function renderBacktest() {
+      const payload = state.backtest.payload;
+      const stages = getBacktestStages();
+      const stepIndex = clamp(state.backtest.stepIndex, 0, Math.max(stages.length - 1, 0));
+      state.backtest.stepIndex = stepIndex;
+      const promptDebug = payload?.planner?.prompt_debug || null;
+
+      elements.backtestUseSelectedButton.disabled = !(getInspectorMarket() || findMarketById(state.selected.marketId));
+      elements.backtestPrevButton.disabled = !payload || stepIndex <= 0 || state.backtest.loading;
+      elements.backtestNextButton.disabled = !payload || stepIndex >= stages.length - 1 || state.backtest.loading;
+      elements.backtestPromptResetButton.disabled = !payload || state.backtest.loading;
+      elements.backtestPromptRunButton.disabled = !payload || state.backtest.loading || promptDebug?.editable === false;
+
+      if (state.backtest.loading) {
+        elements.backtestSteps.innerHTML = '<span class="backtest-step active">loading...</span>';
+        elements.backtestSummaryLine.textContent = "Running live Telegram discovery backtest...";
+        elements.backtestStageTitle.textContent = "Loading backtest";
+        elements.backtestStageSub.textContent = "The backend is running planner, Telegram search, relevance filtering, and similar expansion.";
+        elements.backtestContent.innerHTML = '<div class="empty">Waiting for the live backtest response...</div>';
+        return;
+      }
+
+      if (!payload) {
+        elements.backtestSteps.innerHTML = "";
+        elements.backtestSummaryLine.textContent = state.backtest.error || "No backtest loaded.";
+        elements.backtestStageTitle.textContent = state.backtest.error ? "Backtest failed" : "Select a market and run the backtest";
+        elements.backtestStageSub.textContent = state.backtest.error
+          ? "Fix the TDLib session / Telegram env / market ref and run again."
+          : "Paste a Polymarket event URL, slug, or market id. The runner stays manual and only advances when you click Next.";
+        elements.backtestContent.innerHTML = `<div class="empty">${escapeHtml(state.backtest.error || "The backtest will show query generation, raw search hits, relevance decisions, similar expansion, and the final selected set.")}</div>`;
+        elements.backtestPromptStatus.textContent = state.backtest.error || "Run a backtest first to load the exact planner prompt, input materials, and output JSON.";
+        return;
+      }
+
+      elements.backtestSteps.innerHTML = stages.map((stage, index) => {
+        const className = [
+          "backtest-step",
+          index < stepIndex ? "done" : "",
+          index === stepIndex ? "active" : "",
+        ].filter(Boolean).join(" ");
+        return `<span class="${className}">${index + 1}. ${escapeHtml(stage.label)}</span>`;
+      }).join("");
+
+      const activeStage = stages[stepIndex];
+      elements.backtestSummaryLine.textContent = [
+        `market ${payload.market?.slug || payload.market?.market_id || "unknown"}`,
+        `accepted ${toInt(payload.summary?.accepted_candidates)}`,
+        `selected ${toInt(payload.summary?.selected_channels)}/${toInt(payload.summary?.target_channels)}`,
+        `members>=${toInt(payload.summary?.min_channel_members)}`,
+        `rel>=${formatScore(payload.summary?.min_channel_relevance_score)}`,
+      ].join(" | ");
+      elements.backtestStageTitle.textContent = activeStage.title;
+      elements.backtestStageSub.textContent = activeStage.subtitle;
+      elements.backtestContent.innerHTML = activeStage.html;
+    }
+
+    function renderBacktestMarketStage(payload) {
+      const market = payload.market || {};
+      const publicUrl = market.slug ? `https://polymarket.com/event/${market.slug}` : "";
+      return `
+        <div class="backtest-grid">
+          <div class="backtest-card">
+            <h4>${escapeHtml(market.question || "(untitled market)")}</h4>
+            <div class="chips">
+              <span class="chip market">${escapeHtml(market.market_archetype || "unknown")}</span>
+              <span class="chip">class ${escapeHtml(market.classification || "unknown")}</span>
+              <span class="chip">local ${safePercent(market.local_score)}</span>
+              <span class="chip">mapped ${toInt(market.mapped_channels)}</span>
+            </div>
+            <p class="backtest-row-sub">${escapeHtml(market.slug || market.market_id || "no ref")}</p>
+            <div class="backtest-actions">
+              ${publicUrl ? `<button type="button" data-role="backtest-open-market" data-url="${escapeAttr(publicUrl)}">Open Market</button>` : ""}
+              ${market.market_id ? `<button type="button" data-role="backtest-focus-market" data-id="${escapeAttr(market.market_id)}">Focus In Graph</button>` : ""}
+            </div>
+          </div>
+          <div class="backtest-card">
+            <h4>Runtime thresholds</h4>
+            <div class="chips">
+              <span class="chip">target ${toInt(payload.summary?.target_channels)}</span>
+              <span class="chip">min members ${toInt(payload.summary?.min_channel_members)}</span>
+              <span class="chip">min relevance ${formatScore(payload.summary?.min_channel_relevance_score)}</span>
+              <span class="chip">queries ${toInt(payload.meta?.max_queries)}</span>
+            </div>
+            <p class="backtest-row-sub">This stage is read-only. Nothing is persisted and nothing is written back to Telegram.</p>
+          </div>
+        </div>
+        <div class="backtest-card">
+          <h4>Rules / Context</h4>
+          <div class="code-block">${escapeHtml(market.rules_text || market.market_context || "No market rules or context stored.")}</div>
+        </div>
+      `;
+    }
+
+    function renderBacktestPlannerStage(payload) {
+      const planner = payload.planner || {};
+      const promptDebug = planner.prompt_debug || {};
+      const tokens = Array.isArray(planner.tokens) ? planner.tokens : [];
+      const regionHints = Array.isArray(planner.region_hints) ? planner.region_hints : [];
+      const detectedEntities = Array.isArray(planner.detected_entities) ? planner.detected_entities : [];
+      const priorityLanguages = Array.isArray(planner.priority_languages) ? planner.priority_languages : [];
+      const officialTargets = Array.isArray(planner.official_targets) ? planner.official_targets : [];
+      const keywordGroups = Array.isArray(planner.keyword_groups) ? planner.keyword_groups : [];
+      const queryCandidates = Array.isArray(planner.query_candidates) ? planner.query_candidates : [];
+      const queries = Array.isArray(planner.queries) ? planner.queries : [];
+      const metrics = planner.metrics || {};
+      return `
+        <div class="backtest-grid">
+          <div class="backtest-card">
+            <h4>Planner engine</h4>
+            <div class="chips">
+              <span class="chip">${escapeHtml(planner.planner_version || "unknown")}</span>
+              <span class="chip">prompt ${escapeHtml(planner.prompt_version || "unknown")}</span>
+              <span class="chip">query cap ${toInt(planner.max_queries)}</span>
+              <span class="chip ${promptDebug.editable ? "market" : ""}">${escapeHtml(promptDebug.runtime_mode || "unknown")}</span>
+              ${promptDebug.model ? `<span class="chip">model ${escapeHtml(promptDebug.model)}</span>` : ""}
+            </div>
+            <p class="backtest-row-sub">This is the current first layer. It identifies actors, languages, official targets, and query buckets before any Telegram search is run.</p>
+            <div class="code-block">${escapeHtml(planner.query_intent || planner.question_seed || "")}</div>
+          </div>
+          <div class="backtest-card">
+            <h4>Planner metrics</h4>
+            <div class="backtest-stat-grid">
+              ${renderBacktestStat("entities", toInt(metrics.entity_count))}
+              ${renderBacktestStat("languages", toInt(metrics.priority_language_count))}
+              ${renderBacktestStat("official", toInt(metrics.official_target_count))}
+              ${renderBacktestStat("keyword groups", toInt(metrics.keyword_group_count))}
+              ${renderBacktestStat("candidate queries", toInt(metrics.candidate_query_count))}
+              ${renderBacktestStat("selected queries", toInt(metrics.selected_query_count))}
+            </div>
+          </div>
+        </div>
+        <div class="backtest-grid">
+          <div class="backtest-card">
+            <h4>Prompt execution</h4>
+            <div class="chips">
+              <span class="chip">${escapeHtml(promptDebug.editable ? "editable" : "read-only")}</span>
+              <span class="chip">${escapeHtml(promptDebug.override_applied ? "override applied" : "default prompt")}</span>
+            </div>
+            <p class="backtest-row-sub">${escapeHtml(promptDebug.note || "The planner editor above shows the exact prompts sent to the runtime for this backtest.")}</p>
+          </div>
+          <div class="backtest-card">
+            <h4>Prompt output JSON</h4>
+            <div class="code-block">${escapeHtml(promptDebug.output_json ? JSON.stringify(promptDebug.output_json, null, 2) : (promptDebug.note || "No AI planner output was captured for this run."))}</div>
+          </div>
+        </div>
+        <div class="backtest-grid">
+          <div class="backtest-card">
+            <h4>Detected entities</h4>
+            ${detectedEntities.length ? `
+              <div class="backtest-inline-list">
+                ${detectedEntities.map((entity) => `
+                  <div class="backtest-inline-item">
+                    <strong>${escapeHtml(entity.label || entity.entity_key || "entity")}</strong>
+                    <div class="chips">
+                      ${(Array.isArray(entity.local_languages) ? entity.local_languages : []).map((item) => `<span class="chip market">local ${escapeHtml(item)}</span>`).join("")}
+                      ${(Array.isArray(entity.bridge_languages) ? entity.bridge_languages : []).map((item) => `<span class="chip">bridge ${escapeHtml(item)}</span>`).join("")}
+                    </div>
+                    <p class="meta">aliases hit: ${escapeHtml((Array.isArray(entity.aliases_hit) ? entity.aliases_hit : []).join(", ") || "none")}</p>
+                  </div>
+                `).join("")}
+              </div>
+            ` : '<div class="empty">No entities were explicitly detected from the market text.</div>'}
+          </div>
+          <div class="backtest-card">
+            <h4>Language plan</h4>
+            <div class="chips">${priorityLanguages.length ? priorityLanguages.map((item) => `<span class="chip market">${escapeHtml(item)}</span>`).join("") : '<span class="chip">none</span>'}</div>
+            <p class="backtest-row-sub">These are the languages the planner thinks should be searched first across local and bridge reporting contexts.</p>
+            <div class="chips">${regionHints.length ? regionHints.map((item) => `<span class="chip">${escapeHtml(item)}</span>`).join("") : '<span class="chip">no region hints</span>'}</div>
+          </div>
+        </div>
+        <div class="backtest-grid">
+          <div class="backtest-card">
+            <h4>Official targets</h4>
+            ${officialTargets.length ? `
+              <div class="backtest-inline-list">
+                ${officialTargets.map((target) => `
+                  <div class="backtest-inline-item">
+                    <strong>${escapeHtml(target.label || target.entity_label || "official target")}</strong>
+                    <div class="chips">
+                      <span class="chip channel">${escapeHtml(target.type || "official")}</span>
+                      <span class="chip">${escapeHtml(target.entity_label || target.entity_key || "")}</span>
+                    </div>
+                    <div class="chips">
+                      ${(Array.isArray(target.handles) ? target.handles : []).map((item) => `<span class="chip market">${escapeHtml(item)}</span>`).join("")}
+                      ${(Array.isArray(target.queries) ? target.queries : []).slice(0, 4).map((item) => `<span class="chip">${escapeHtml(item)}</span>`).join("")}
+                    </div>
+                  </div>
+                `).join("")}
+              </div>
+            ` : '<div class="empty">No explicit official targets were inferred for this market.</div>'}
+          </div>
+          <div class="backtest-card">
+            <h4>Keyword buckets</h4>
+            ${keywordGroups.length ? `
+              <div class="backtest-inline-list">
+                ${keywordGroups.map((group) => `
+                  <div class="backtest-inline-item">
+                    <strong>${escapeHtml(group.entity_label || group.entity_key || "entity")} · ${escapeHtml(group.language_code || "n/a")}</strong>
+                    <div class="chips">
+                      ${(Array.isArray(group.query_terms) ? group.query_terms : []).map((item) => `<span class="chip">${escapeHtml(item)}</span>`).join("")}
+                    </div>
+                  </div>
+                `).join("")}
+              </div>
+            ` : '<div class="empty">No multilingual keyword groups were generated.</div>'}
+          </div>
+        </div>
+        <div class="backtest-card">
+          <h4>Planner tokens</h4>
+          <div class="chips">${tokens.length ? tokens.map((item) => `<span class="chip">${escapeHtml(item)}</span>`).join("") : '<span class="chip">none</span>'}</div>
+        </div>
+        <div class="backtest-query-grid">
+          <div class="backtest-card">
+            <h4>Candidate queries</h4>
+            <div class="backtest-query-list">
+              ${queryCandidates.length ? queryCandidates.map((query, index) => `
+                <div class="backtest-query-item">
+                  <div class="chips">
+                    <span class="chip">candidate ${index + 1}</span>
+                  </div>
+                  <div class="query">${escapeHtml(query)}</div>
+                </div>
+              `).join("") : '<div class="empty">Planner produced no candidate queries.</div>'}
+            </div>
+          </div>
+          <div class="backtest-card">
+            <h4>Executed queries</h4>
+            <div class="backtest-query-list">
+              ${queries.length ? queries.map((query, index) => `
+                <div class="backtest-query-item">
+                  <div class="chips">
+                    <span class="chip market">query ${index + 1}</span>
+                    <span class="chip">${escapeHtml(query.startsWith("@") ? "exact handle" : "public search")}</span>
+                  </div>
+                  <div class="query">${escapeHtml(query)}</div>
+                </div>
+              `).join("") : '<div class="empty">Planner produced no executable queries.</div>'}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderBacktestSearchStage(payload) {
+      const searchStages = payload.stages?.search || [];
+      if (!searchStages.length) {
+        return '<div class="empty">No search stages were recorded for this market.</div>';
+      }
+      return `
+        <div class="backtest-list">
+          ${searchStages.map((item, index) => `
+            <div class="backtest-card">
+              <h4>Query ${index + 1}: ${escapeHtml(item.query || "")}</h4>
+              <div class="chips">
+                <span class="chip market">${escapeHtml(item.query_type || "public_search")}</span>
+                <span class="chip">${escapeHtml(item.status || "unknown")}</span>
+                <span class="chip">hits ${toInt(item.result_count)}</span>
+                <span class="chip">accepted ${toInt(item.accepted_count)}</span>
+              </div>
+              <p class="backtest-row-sub">${escapeHtml(item.query_type === "exact_handle" ? "Exact username resolution through TDLib search_public_chat." : "Broad Telegram public-channel search through TDLib search_public_chats.")}</p>
+              ${item.error ? `<div class="code-block">${escapeHtml(item.error)}</div>` : ""}
+              <div class="backtest-list">${renderBacktestDecisionRows(item.results || [])}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderBacktestSimilarStage(payload) {
+      const similarStages = payload.stages?.similar || [];
+      if (!similarStages.length) {
+        return '<div class="empty">No similar-channel expansion was run or no seed channels survived the search stage.</div>';
+      }
+      return `
+        <div class="backtest-list">
+          ${similarStages.map((item, index) => `
+            <div class="backtest-card">
+              <h4>Seed ${index + 1}: ${escapeHtml(item.seed_title || `chat ${item.seed_chat_id}`)}</h4>
+              <div class="chips">
+                <span class="chip">${escapeHtml(item.status || "unknown")}</span>
+                <span class="chip">seed ${escapeHtml(String(item.seed_chat_id || ""))}</span>
+                <span class="chip">accepted ${toInt(item.accepted_count)}</span>
+              </div>
+              ${item.error ? `<div class="code-block">${escapeHtml(item.error)}</div>` : ""}
+              <div class="backtest-list">${renderBacktestDecisionRows(item.results || [])}</div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderBacktestFinalStage(payload) {
+      const finalStage = payload.stages?.final || {};
+      const selectedChannels = finalStage.selected_channels || [];
+      const rejected = payload.summary?.rejected_counts || {};
+      return `
+        <div class="backtest-grid">
+          <div class="backtest-card">
+            <h4>Outcome summary</h4>
+            <div class="chips">
+              <span class="chip">queries ${toInt(payload.summary?.queries_sent)}</span>
+              <span class="chip">accepted ${toInt(payload.summary?.accepted_candidates)}</span>
+              <span class="chip">selected ${toInt(payload.summary?.selected_channels)}</span>
+            </div>
+            <div class="chips">
+              <span class="chip">low members ${toInt(rejected.low_members)}</span>
+              <span class="chip">low relevance ${toInt(rejected.low_relevance)}</span>
+              <span class="chip">duplicates ${toInt(rejected.duplicate)}</span>
+              <span class="chip">cap ${toInt(rejected.global_cap)}</span>
+            </div>
+          </div>
+          <div class="backtest-card">
+            <h4>Raw stage counts</h4>
+            <div class="chips">
+              <span class="chip">search hits ${toInt(payload.summary?.raw_search_results)}</span>
+              <span class="chip">similar hits ${toInt(payload.summary?.raw_similar_results)}</span>
+              <span class="chip">target ${toInt(finalStage.target_channels)}</span>
+            </div>
+            <p class="backtest-row-sub">This is the ranked set the current pipeline would keep for this market.</p>
+          </div>
+        </div>
+        <div class="backtest-card">
+          <h4>Selected channels</h4>
+          <div class="backtest-list">
+            ${selectedChannels.length ? renderBacktestDecisionRows(selectedChannels.map((channel, index) => ({
+              ...channel,
+              accepted: true,
+              decision_code: "accepted",
+              decision_reason: channel.discovery_relevance_reason || channel.notes || "",
+              relevance_score: channel.discovery_relevance_score,
+              relevance_label: channel.discovery_relevance_label,
+              relevance_reason: channel.discovery_relevance_reason,
+              final_rank: index + 1,
+            }))) : '<div class="empty">No channels survived the current thresholds.</div>'}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderBacktestDecisionRows(items) {
+      if (!items.length) {
+        return '<div class="empty">No channels in this stage.</div>';
+      }
+      return items.map((item) => {
+        const rowClass = item.error
+          ? "backtest-row error"
+          : item.accepted
+            ? "backtest-row accepted"
+            : "backtest-row rejected";
+        const username = item.username ? `@${item.username}` : `chat_id ${item.chat_id}`;
+        const focusable = !!findChannelById(item.chat_id);
+        const publicUrl = item.username ? `https://t.me/${item.username}` : "";
+        return `
+          <div class="${rowClass}">
+            <div class="backtest-row-top">
+              <div>
+                <p class="backtest-row-title">${escapeHtml(item.title || "(untitled channel)")}</p>
+                <p class="backtest-row-sub">${escapeHtml(username)}${item.final_rank ? ` | final rank ${toInt(item.final_rank)}` : ""}</p>
+              </div>
+              <div class="chips">
+                <span class="chip ${item.accepted ? "channel" : ""}">${escapeHtml(item.decision_code || (item.accepted ? "accepted" : "rejected"))}</span>
+                <span class="chip">rel ${formatScore(item.relevance_score)}</span>
+                ${item.relevance_label ? `<span class="chip">${escapeHtml(item.relevance_label)}</span>` : ""}
+                <span class="chip">members ${formatNumber(item.member_count)}</span>
+                ${Array.isArray(item.matched_entities) && item.matched_entities.length ? `<span class="chip">entity hits ${toInt(item.matched_entities.length)}</span>` : ""}
+                ${Array.isArray(item.matched_phrases) && item.matched_phrases.length ? `<span class="chip">phrase hits ${toInt(item.matched_phrases.length)}</span>` : ""}
+              </div>
+            </div>
+            <p class="backtest-row-sub">${escapeHtml(item.decision_reason || item.relevance_reason || "No decision reason stored.")}</p>
+            ${item.description ? `<p class="backtest-row-sub">${escapeHtml(truncateText(item.description, 220))}</p>` : ""}
+            <div class="backtest-evidence">
+              ${Array.isArray(item.matched_entities) && item.matched_entities.length ? `<div class="backtest-evidence-line">matched entities: ${escapeHtml(item.matched_entities.join(", "))}</div>` : ""}
+              ${Array.isArray(item.matched_terms) && item.matched_terms.length ? `<div class="backtest-evidence-line">matched terms: ${escapeHtml(item.matched_terms.join(", "))}</div>` : ""}
+              ${Array.isArray(item.matched_phrases) && item.matched_phrases.length ? `<div class="backtest-evidence-line">matched phrases: ${escapeHtml(item.matched_phrases.join(", "))}</div>` : ""}
+              ${Array.isArray(item.matched_language_scripts) && item.matched_language_scripts.length ? `<div class="backtest-evidence-line">language scripts: ${escapeHtml(item.matched_language_scripts.join(", "))}</div>` : ""}
+            </div>
+            <div class="backtest-actions">
+              ${publicUrl ? `<button type="button" data-role="backtest-open-channel" data-url="${escapeAttr(publicUrl)}">Open Channel</button>` : ""}
+              ${focusable ? `<button type="button" data-role="backtest-focus-channel" data-id="${escapeAttr(item.chat_id)}">Focus In Graph</button>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function handleBacktestContentClick(event) {
+      const button = event.target.closest("button[data-role]");
+      if (!button) return;
+      const role = button.dataset.role;
+
+      if (role === "backtest-open-market") {
+        const url = button.dataset.url;
+        if (url) {
+          window.open(url, "_blank", "noopener,noreferrer");
+        }
+        return;
+      }
+
+      if (role === "backtest-open-channel") {
+        const url = button.dataset.url;
+        if (url) {
+          window.open(url, "_blank", "noopener,noreferrer");
+        }
+        return;
+      }
+
+      if (role === "backtest-focus-market") {
+        const id = button.dataset.id;
+        if (!id) return;
+        state.selected.marketId = String(id);
+        state.focus = { kind: "market", id: String(id) };
+        renderEverything();
+        zoomToNode("market", String(id), true);
+        return;
+      }
+
+      if (role === "backtest-focus-channel") {
+        const id = button.dataset.id;
+        if (!id) return;
+        state.selected.chatId = String(id);
+        state.focus = { kind: "channel", id: String(id) };
+        renderEverything();
+        zoomToNode("channel", String(id), true);
+      }
+    }
+
+    function exportQueue() {
+      const payload = {
+        exported_at_utc: new Date().toISOString(),
+        count: state.queue.length,
+        actions: state.queue,
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "agent-lab-action-queue.json";
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
+    }
+
+    function updateMeta(reason) {
+      const meta = state.data.meta || {};
+      elements.metaMarkets.textContent = `markets: ${state.data.markets.length}`;
+      elements.metaChannels.textContent = `channels: ${state.data.channels.length}`;
+      elements.metaEdges.textContent = `edges: ${state.data.edges.length}`;
+      elements.metaGenerated.textContent = `generated: ${formatDate(meta.generated_at)}`;
+      if (meta.min_channel_members !== undefined || meta.min_channel_relevance !== undefined) {
+        elements.metaGenerated.textContent += ` | members>=${toInt(meta.min_channel_members)} rel>=${formatScore(meta.min_channel_relevance)}`;
+      }
+      if (reason) {
+        elements.metaGenerated.textContent += ` (${reason})`;
+      }
+    }
+
+    function resetFocusAndSelection() {
+      state.focus = { kind: null, id: null };
+      state.selected = { marketId: null, chatId: null };
+      state.selectedEdgeKey = null;
+      renderEverything();
+    }
+
+    function applyAutoRefresh() {
+      if (state.autoRefreshTimer) {
+        window.clearInterval(state.autoRefreshTimer);
+        state.autoRefreshTimer = null;
+      }
+      const seconds = clampInt(elements.autoRefresh.value, 0, 600, 0);
+      if (seconds > 0) {
+        state.autoRefreshTimer = window.setInterval(() => {
+          loadGraph();
+        }, seconds * 1000);
+      }
+    }
+
+    function scrollNodeIntoView(kind, id) {
+      zoomToNode(kind, id, false);
+    }
+
+    function edgeKey(edge) {
+      return `${edge.market_id}::${edge.chat_id}`;
+    }
+
+    function normalizeBase(input) {
+      const trimmed = String(input || "").trim();
+      if (!trimmed) return guessApiBase();
+      return trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
+    }
+
+    function formatDate(value) {
+      if (!value) return "n/a";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value);
+      return date.toISOString().replace("T", " ").replace(".000Z", "Z");
+    }
+
+    function safePercent(value) {
+      if (value === null || value === undefined || Number.isNaN(Number(value))) return "n/a";
+      return `${(Number(value) * 100).toFixed(1)}%`;
+    }
+
+    function toInt(value) {
+      if (value === null || value === undefined || Number.isNaN(Number(value))) return 0;
+      return Math.trunc(Number(value));
+    }
+
+    function formatNumber(value) {
+      if (value === null || value === undefined || Number.isNaN(Number(value))) return "n/a";
+      return Number(value).toLocaleString("en-US");
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function clampInt(raw, min, max, fallback) {
+      const value = Number.parseInt(String(raw), 10);
+      if (Number.isNaN(value)) return fallback;
+      return clamp(value, min, max);
+    }
+
+    function clampFloat(raw, min, max, fallback) {
+      const value = Number.parseFloat(String(raw));
+      if (Number.isNaN(value)) return fallback;
+      return clamp(value, min, max);
+    }
+
+    function formatScore(value) {
+      if (value === null || value === undefined || Number.isNaN(Number(value))) return "n/a";
+      return Number(value).toFixed(2);
+    }
+
+    function truncateText(value, maxLength = 220) {
+      const text = String(value || "").trim();
+      if (!text) return "";
+      if (text.length <= maxLength) return text;
+      return `${text.slice(0, Math.max(0, maxLength - 3)).trimEnd()}...`;
+    }
+
+    function renderBacktestStat(label, value) {
+      return `
+        <div class="backtest-stat">
+          <span class="backtest-stat-label">${escapeHtml(label)}</span>
+          <strong class="backtest-stat-value">${escapeHtml(String(value ?? "n/a"))}</strong>
+        </div>
+      `;
+    }
+
+    function escapeHtml(input) {
+      return String(input ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function escapeAttr(input) {
+      return escapeHtml(String(input ?? ""));
+    }
+
+    function buildSampleGraph(minChannelMembers = 1000, minChannelRelevance = 0.18) {
+      const now = new Date().toISOString();
+      const payload = {
+        meta: {
+          generated_at: now,
+          market_count: 3,
+          channel_count: 4,
+          edge_count: 5,
+          track_now_only: true,
+        },
+        markets: [
+          {
+            market_id: "mkt-iran-strike-daily",
+            slug: "will-iran-strike-israel",
+            question: "Will Iran strike Israel by March 31?",
+            rules_text: "Yes resolves if a qualifying strike occurs and is confirmed by credible reporting.",
+            market_archetype: "binary_daily",
+            local_score: 0.88,
+            analysis_local_score: 0.88,
+            high_competition: false,
+            mapped_channels: 3,
+          },
+          {
+            market_id: "mkt-gaza-strike-daily",
+            slug: "will-israel-strike-gaza",
+            question: "Will Israel strike Gaza on the listed date?",
+            rules_text: "Yes if qualifying drone/missile/air strike lands on Gaza territory.",
+            market_archetype: "binary_daily",
+            local_score: 0.84,
+            analysis_local_score: 0.84,
+            high_competition: false,
+            mapped_channels: 2,
+          },
+          {
+            market_id: "mkt-lebanon-offensive",
+            slug: "will-israel-ground-offensive-lebanon",
+            question: "Will Israel launch a major ground offensive in Lebanon by March 31?",
+            rules_text: "Yes if large-scale operation exceeds threshold defined in market rules.",
+            market_archetype: "binary_deadline",
+            local_score: 0.8,
+            analysis_local_score: 0.8,
+            high_competition: true,
+            mapped_channels: 2,
+          },
+        ],
+        channels: [
+          {
+            chat_id: 1001,
+            title: "IDF Official",
+            username: "idfofficial",
+            trust_weight: 0.95,
+            member_count: 650000,
+            mapped_markets: 2,
+            last_message: {
+              message_id: 44,
+              posted_at: now,
+              text: "Operational update from southern command.",
+            },
+          },
+          {
+            chat_id: 1002,
+            title: "Lebanon Field Updates",
+            username: "lebfielddesk",
+            trust_weight: 0.72,
+            member_count: 85000,
+            mapped_markets: 1,
+            last_message: {
+              message_id: 11,
+              posted_at: now,
+              text: "Reports of military movement near border area.",
+            },
+          },
+          {
+            chat_id: 1003,
+            title: "Tehran Local Wire",
+            username: "tehranlocalwire",
+            trust_weight: 0.69,
+            member_count: 51000,
+            mapped_markets: 2,
+            last_message: {
+              message_id: 218,
+              posted_at: now,
+              text: "State media updates on regional air defense readiness.",
+            },
+          },
+          {
+            chat_id: 1004,
+            title: "Regional Journalists Desk",
+            username: null,
+            trust_weight: 0.61,
+            member_count: 23000,
+            mapped_markets: 1,
+            last_message: null,
+          },
+        ],
+        edges: [
+          { market_id: "mkt-iran-strike-daily", chat_id: 1001, link_source: "auto", priority_rank: 1, relevance_score: 0.44, relevance_label: "candidate" },
+          { market_id: "mkt-iran-strike-daily", chat_id: 1003, link_source: "auto", priority_rank: 2, relevance_score: 0.73, relevance_label: "strong" },
+          { market_id: "mkt-gaza-strike-daily", chat_id: 1001, link_source: "manual", priority_rank: 1, relevance_score: 0.51, relevance_label: "strong" },
+          { market_id: "mkt-gaza-strike-daily", chat_id: 1004, link_source: "auto", priority_rank: 4, relevance_score: 0.12, relevance_label: "weak" },
+          { market_id: "mkt-lebanon-offensive", chat_id: 1002, link_source: "auto", priority_rank: 1, relevance_score: 0.76, relevance_label: "strong" },
+        ],
+      };
+      return applyLocalGraphFilters(payload, minChannelMembers, minChannelRelevance);
+    }
+
+    function applyLocalGraphFilters(payload, minChannelMembers, minChannelRelevance) {
+      const channelsById = new Map((payload.channels || []).map((channel) => [String(channel.chat_id), { ...channel }]));
+      const marketsById = new Map((payload.markets || []).map((market) => [String(market.market_id), { ...market }]));
+      const edges = (payload.edges || []).filter((edge) => {
+        const channel = channelsById.get(String(edge.chat_id));
+        if (!channel) return false;
+        const memberCount = Number(channel.member_count || 0);
+        const relevanceScore = Number(edge.relevance_score || 0);
+        return memberCount >= minChannelMembers && relevanceScore >= minChannelRelevance;
+      });
+
+      const mappedByMarket = new Map();
+      const mappedByChannel = new Map();
+      for (const edge of edges) {
+        mappedByMarket.set(String(edge.market_id), (mappedByMarket.get(String(edge.market_id)) || 0) + 1);
+        mappedByChannel.set(String(edge.chat_id), (mappedByChannel.get(String(edge.chat_id)) || 0) + 1);
+      }
+
+      const channels = Array.from(channelsById.values())
+        .filter((channel) => mappedByChannel.has(String(channel.chat_id)))
+        .map((channel) => ({
+          ...channel,
+          mapped_markets: mappedByChannel.get(String(channel.chat_id)) || 0,
+        }));
+
+      const markets = Array.from(marketsById.values()).map((market) => ({
+        ...market,
+        mapped_channels: mappedByMarket.get(String(market.market_id)) || 0,
+      }));
+
+      return {
+        meta: {
+          ...(payload.meta || {}),
+          market_count: markets.length,
+          channel_count: channels.length,
+          edge_count: edges.length,
+          min_channel_members: minChannelMembers,
+          min_channel_relevance: minChannelRelevance,
+        },
+        markets,
+        channels,
+        edges,
+      };
+    }
+
+    init();
+  </script>
+</body>
+</html>

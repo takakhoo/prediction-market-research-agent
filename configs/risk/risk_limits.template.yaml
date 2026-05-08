@@ -1,0 +1,17 @@
+global_limits:
+  max_daily_loss_usd: 500
+  max_open_positions: 5
+  kill_switch_enabled: true
+
+per_market_limits:
+  max_position_usd: 100
+  max_order_usd: 25
+  cooldown_seconds_after_fill: 120
+  min_confidence_to_alert: 0.65
+  min_confidence_to_auto_trade: 0.8
+
+execution_guards:
+  require_rule_mapping: true
+  require_min_two_source_confirmation: true
+  block_if_spread_bps_gt: 300
+  block_if_recent_volatility_bps_gt: 1000
