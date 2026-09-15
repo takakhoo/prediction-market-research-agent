@@ -36,10 +36,20 @@ class TDLibDiscoveryClient:
         self.settings = settings
         self._client: Optional[Client] = None
         self._started = False
-        self._start_lock = asyncio.Lock()
+        # Locks are created lazily inside a running event loop. Constructing an
+        # asyncio.Lock here breaks synchronous app factories on Python 3.9 and
+        # makes imports unnecessarily dependent on ambient loop state.
+        self._start_lock: Optional[asyncio.Lock] = None
         # TDLib/aiotdlib can fail if receive is triggered from concurrent call paths.
         # Serialize all request calls through one lock.
-        self._api_lock = asyncio.Lock()
+        self._api_lock: Optional[asyncio.Lock] = None
+
+    def _lock(self, attribute: str) -> asyncio.Lock:
+        lock = getattr(self, attribute)
+        if lock is None:
+            lock = asyncio.Lock()
+            setattr(self, attribute, lock)
+        return lock
 
     @property
     def started(self) -> bool:
@@ -64,7 +74,7 @@ class TDLibDiscoveryClient:
         if self._started:
             return
 
-        async with self._start_lock:
+        async with self._lock("_start_lock"):
             if self._started:
                 return
 
@@ -299,7 +309,7 @@ class TDLibDiscoveryClient:
 
     async def _call_with_retry(self, method: Any, *, operation: str, **kwargs: Any) -> Any:
         self._assert_read_only_operation(operation)
-        async with self._api_lock:
+        async with self._lock("_api_lock"):
             retries = 2
             for attempt in range(retries + 1):
                 try:

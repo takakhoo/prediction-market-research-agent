@@ -1,8 +1,13 @@
 # Polymarket News Agent
 
-An AI-powered agent that finds prediction markets on [Polymarket](https://polymarket.com) where **local news sources** provide an information edge, then monitors those sources in real time for actionable signals.
+An AI-assisted research system that finds prediction markets on [Polymarket](https://polymarket.com) where **local news sources** may provide relevant evidence, then monitors those sources for reviewable signals.
 
-**How it works in plain English:** The agent scans Polymarket for markets that could be resolved by local/niche news (think city council votes, regional weather events, local elections). It then automatically discovers relevant Telegram channels, listens for new messages, and uses AI to determine whether a message is evidence for or against a market outcome. When confidence is high enough, it alerts you (and eventually can place trades).
+**How it works in plain English:** The agent scans Polymarket for markets that could be resolved by local or niche news (for example, city council votes, regional weather events, or local elections). It discovers relevant Telegram channels, listens for new messages, and uses AI plus deterministic rules to classify possible evidence for human review.
+
+> **Safety and scope:** the current repository is a research and monitoring
+> system. Automated trade execution is not implemented. Model outputs can be
+> wrong; verify source authenticity and market rules independently. Nothing in
+> this repository is financial advice.
 
 ---
 

@@ -23,7 +23,7 @@ class FakeRepo:
         self.requested_limit = limit
         return list(self.pending_rows[:limit])
 
-    def save_market_analysis_results(self, rows):
+    def save_market_analysis_results(self, rows, *, keep_history=True):
         self.saved_rows = list(rows)
         return len(self.saved_rows)
 

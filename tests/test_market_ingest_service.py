@@ -23,7 +23,13 @@ class FakeRepo:
     def __init__(self):
         self.last_bundles: list[MarketBundle] = []
 
-    def upsert_market_bundles(self, bundles):
+    def upsert_market_bundles(
+        self,
+        bundles,
+        *,
+        store_outcomes=True,
+        store_snapshots=True,
+    ):
         self.last_bundles = list(bundles)
         return len(self.last_bundles)
 
