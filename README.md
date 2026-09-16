@@ -1,4 +1,4 @@
-# Polymarket News Agent
+# Prediction-Market Evidence Agent
 
 An AI-assisted research system that finds prediction markets on [Polymarket](https://polymarket.com) where **local news sources** may provide relevant evidence, then monitors those sources for reviewable signals.
 
@@ -23,7 +23,7 @@ An AI-assisted research system that finds prediction markets on [Polymarket](htt
 8. [Run the Real-Time Listener](#8-run-the-real-time-listener)
 9. [Deploy to EC2 (Optional)](#9-deploy-to-ec2-optional)
 10. [Architecture Overview](#10-architecture-overview)
-11. [Project Roadmap](#11-project-roadmap)
+11. [Current Boundary](#11-current-boundary)
 
 ---
 
@@ -44,7 +44,6 @@ Optional (for specific features):
 | Requirement | What it's for |
 |---|---|
 | **SerpAPI or Serper key** | Google search for discovering official Telegram channels |
-| **Polymarket CLOB API keys** | Placing actual trades (Phase 5 -- not yet implemented) |
 
 ---
 
@@ -52,8 +51,8 @@ Optional (for specific features):
 
 ```bash
 # Clone this repo
-git clone https://github.com/takakhoo/Polymarket_Agent.git
-cd Polymarket_Agent
+git clone https://github.com/takakhoo/prediction-market-research-agent.git
+cd prediction-market-research-agent
 
 # Create a virtual environment
 python3 -m venv venv
@@ -312,32 +311,31 @@ See the full runbook at `docs/runbooks/EC2_DEPLOYMENT.md`.
 
 ---
 
-## 11. Project Roadmap
+## 11. Current Boundary
 
-| Phase | Status | Description |
-|---|---|---|
-| Phase 0: Foundation | Done | Repo structure, docs, config templates |
-| Phase 1: Discovery + Market Retrieval | Done | Telegram discovery dashboard, Polymarket API clients |
-| Phase 2: Telegram Intake Pipeline | Active | Real-time listener, message persistence, AI matching |
-| Phase 3: Reliability Scoring | Planned | Rank channels by precision and lead time |
-| Phase 4: Rule-Grounded Decision Engine | Planned | Map claims to market resolution rules |
-| Phase 5: Polymarket Action Integration | Planned | Authenticated trading via CLOB API |
-| Phase 6: Execution Guardrails | Planned | Position limits, kill switch, slippage checks |
+Implemented: public market ingestion, Telegram discovery and intake, persistent
+evidence storage, LLM-assisted relevance classification, dashboards, and
+read-only monitoring. Not implemented: authenticated order placement. The
+system ends at evidence review by design.
 
 ---
 
 ## Running Tests
 
 ```bash
-pytest tests/
+python -m pytest -q
 ```
+
+Verified on September 16, 2026: **46 tests passed**. The suite covers market
+normalization, source matching, listener behavior, database-facing boundaries,
+and safety controls without requiring live Telegram or trading credentials.
 
 ---
 
 ## Project Structure
 
 ```
-Polymarket_Agent/
+prediction-market-research-agent/
 ├── configs/
 │   ├── prompts/          # AI prompt templates (editable)
 │   ├── markets/          # Market configuration
@@ -372,10 +370,8 @@ Polymarket_Agent/
 
 ---
 
-## License
+## Usage boundary
 
-This project is for educational and research purposes.
-
----
-
-*Built with FastAPI, TDLib, Supabase, and OpenAI-compatible LLMs.*
+This repository is provided for research review. It does not include a license
+grant and should not be treated as a deploy-and-trade product. Verify source
+authenticity, market rules, and every model-produced match independently.
