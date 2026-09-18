@@ -1,0 +1,62 @@
+{
+  "kind": "synthetic model-output contract replay, not relevance accuracy or trading performance",
+  "passed": 8,
+  "total": 8,
+  "cases": [
+    {
+      "case": "valid",
+      "expected_accepted": true,
+      "accepted": true,
+      "decisions": [
+        {
+          "market_id": "fixture-council",
+          "confidence": 0.91,
+          "reason_short": "Fixture evidence mentions the scheduled council vote.",
+          "market_label": "Will the fictional council vote this month?"
+        }
+      ]
+    },
+    {
+      "case": "below_threshold",
+      "expected_accepted": false,
+      "accepted": false,
+      "decisions": []
+    },
+    {
+      "case": "infinity",
+      "expected_accepted": false,
+      "accepted": false,
+      "decisions": []
+    },
+    {
+      "case": "nan",
+      "expected_accepted": false,
+      "accepted": false,
+      "decisions": []
+    },
+    {
+      "case": "boolean",
+      "expected_accepted": false,
+      "accepted": false,
+      "decisions": []
+    },
+    {
+      "case": "string",
+      "expected_accepted": false,
+      "accepted": false,
+      "decisions": []
+    },
+    {
+      "case": "out_of_range",
+      "expected_accepted": false,
+      "accepted": false,
+      "decisions": []
+    },
+    {
+      "case": "negative",
+      "expected_accepted": false,
+      "accepted": false,
+      "decisions": []
+    }
+  ]
+}

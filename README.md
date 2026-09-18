@@ -13,6 +13,34 @@ An AI-assisted research system that finds prediction markets on [Polymarket](htt
 
 ## Table of Contents
 
+### Try the credential-free replay first
+
+```sh
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-offline.txt
+python -m pytest -q
+python scripts/offline_replay.py
+```
+
+[Inspect the committed replay](results/offline-replay.json): eight synthetic
+model-response cases, including invalid numeric values, tested through the
+actual message matcher. This requires no `.env`, external inference, database,
+Telegram login, market access, or trading. It measures **contract handling,
+not relevance accuracy, source truth, or profit**. The existing application
+still needs separately configured services for a live integration run.
+
+The matcher now rejects nonfinite/out-of-range/string/boolean confidence
+values instead of promoting or clamping them into accepted signals. Invalid
+response envelopes fail explicitly; unknown IDs and duplicate matches are
+filtered. Classifier booleans/scores are validated too. Prompt interpolation
+is single-pass so message text cannot expand another template placeholder.
+These are reliability safeguards, not a guarantee against prompt injection.
+
+CI runs the complete offline suite and regenerates the checked-in replay.
+
+## Live integration setup
+
 1. [Prerequisites](#1-prerequisites)
 2. [Clone & Install](#2-clone--install)
 3. [Set Up Your Environment Variables](#3-set-up-your-environment-variables)

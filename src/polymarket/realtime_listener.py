@@ -17,6 +17,7 @@ from .config import PolymarketConfig
 from .llm_runtime import JSONReasoningClient, LLMRuntimeUnavailable, OpenAIJSONReasoningClient, resolve_reasoning_client
 from .market_intel_repository import MarketIntelRepository
 from .prompt_store import load_prompt_template, render_prompt_template
+from .validation import probability
 
 
 @dataclass(frozen=True)
@@ -111,7 +112,10 @@ class RealtimeMessageBatchMatcher:
                 "No AI_TELEGRAM_MESSAGE_MATCHER_MODEL or OPENROUTER_MODEL configured."
             )
         self.candidate_batch_size = max(1, min(int(candidate_batch_size), 40))
-        self.min_confidence = max(0.0, min(float(min_confidence), 1.0))
+        threshold = probability(min_confidence)
+        if threshold is None:
+            raise ValueError("min_confidence must be a finite number in [0,1]")
+        self.min_confidence = threshold
         self.matcher_version = f"ai_message_batch_matcher_v1:{self.model}"
 
     def _default_system_prompt(self) -> str:
@@ -150,7 +154,7 @@ class RealtimeMessageBatchMatcher:
                         "type": "object",
                         "properties": {
                             "candidate_id": {"type": "string"},
-                            "confidence": {"type": "number"},
+                            "confidence": {"type": "number", "minimum": 0, "maximum": 1},
                             "reason_short": {"type": "string"},
                         },
                         "required": ["candidate_id", "confidence", "reason_short"],
@@ -214,14 +218,17 @@ class RealtimeMessageBatchMatcher:
                 schema_name="telegram_live_message_matcher",
                 schema=self._schema(),
             )
-            for raw_item in list(payload.get("matches") or []):
+            if not isinstance(payload, dict) or not isinstance(payload.get("matches"), list):
+                raise ValueError("Matcher response must contain a matches array")
+            for raw_item in payload["matches"]:
                 if not isinstance(raw_item, dict):
                     continue
                 candidate_id = str(raw_item.get("candidate_id") or "").strip()
                 if not candidate_id or candidate_id not in candidate_lookup:
                     continue
-                confidence = max(0.0, min(float(raw_item.get("confidence") or 0.0), 1.0))
-                if confidence < self.min_confidence:
+                confidence = probability(raw_item.get("confidence"))
+                reason = raw_item.get("reason_short")
+                if confidence is None or confidence < self.min_confidence or not isinstance(reason, str) or not reason.strip():
                     continue
                 market = candidate_lookup[candidate_id]
                 market_id = str(market["market_id"])
@@ -232,7 +239,7 @@ class RealtimeMessageBatchMatcher:
                     RealtimeBatchMatchDecision(
                         market_id=market_id,
                         confidence=confidence,
-                        reason_short=str(raw_item.get("reason_short") or "").strip()[:240] or "batch_match",
+                        reason_short=reason.strip()[:240],
                         market_label=str(market.get("requested_name") or market.get("question") or market_id),
                     )
                 )

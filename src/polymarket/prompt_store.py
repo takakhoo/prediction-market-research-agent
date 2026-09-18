@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 from typing import Mapping
 
@@ -29,7 +30,5 @@ def load_prompt_template(relative_path: str, fallback: str) -> str:
 
 
 def render_prompt_template(template: str, values: Mapping[str, str]) -> str:
-    rendered = str(template)
-    for key, value in values.items():
-        rendered = rendered.replace(f"{{{{{key}}}}}", str(value))
-    return rendered
+    # One pass: placeholders inside inserted, untrusted data stay literal.
+    return re.sub(r"\{\{([^{}]+)\}\}", lambda m: str(values[m[1]]) if m[1] in values else m[0], str(template))

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from .validation import probability
 
 from dataclasses import dataclass
 import json
@@ -219,12 +220,18 @@ class LocalMarketRuleClassifier:
         payload: dict[str, Any],
     ) -> MarketAnalysisResult:
 
+        if not isinstance(payload, dict):
+            raise ValueError("Classifier output must be an object")
         reason_json = payload.get("reason_json") or {}
+        if not isinstance(reason_json, dict):
+            raise ValueError("reason_json must be an object")
         classification = str(payload.get("classification") or "track_later").strip().lower()
         if classification not in {"track_now", "track_later", "ignore"}:
             classification = "track_later"
-        is_local = bool(payload.get("is_local"))
-        local_score = max(0.0, min(float(payload.get("local_score") or 0.0), 1.0))
+        is_local = payload.get("is_local")
+        local_score = probability(payload.get("local_score"))
+        if not isinstance(is_local, bool) or local_score is None:
+            raise ValueError("Classifier requires a boolean is_local and numeric probability local_score")
         if not bool(market.get("active", False)) or bool(market.get("closed", False)):
             classification = "ignore"
             is_local = False
