@@ -105,3 +105,11 @@ def test_rule_expiry_reads_the_settlement_time_from_the_rules():
     d = "the Binance 1 minute candle for BTCUSDT 10 June '25 12:00 in the ET timezone (noon)"
     assert rule_expiry(q, d, api_end) == datetime(2025, 6, 10, 16, 0, tzinfo=timezone.utc).timestamp()
     assert rule_expiry("Bitcoin above 71,600 on April 12, 1PM ET?", "the 1 hour candle", api_end) == api_end
+
+
+def test_walkthrough_reproduces_the_pipeline_values_from_the_committed_sample():
+    from research import walkthrough as w
+
+    c, t0, close, mv = w.load()
+    gaps = [abs(w.price(c, t0, close, mv, f["t"])["value"] - f["pm"]) for f in c["fills"][::50]]
+    assert max(gaps) < 1e-3

@@ -234,7 +234,7 @@ def fig_equity():
         ax.plot(pd.to_datetime(np.array(cv["day"]) * 86400, unit="s"), np.array(cv["cum_pnl"]) / 1e3, color=c, lw=2, label=lab)
     ax.axvspan(pd.Timestamp("2026-04-01"), pd.Timestamp("2026-10-01"), color=GRID, alpha=0.6, lw=0)
     ax.text(pd.Timestamp("2026-04-08"), ax.get_ylim()[1] * 0.92, "confirmation period", fontsize=8, color=INK2)
-    ax.set_ylabel("cumulative profit ($ thousands, $200 cap per fill)")
+    ax.set_ylabel("cumulative profit (thousand dollars, 200-dollar cap per fill)")
     ax.set_title("Replay of the option-model rule on real fills")
     ax.legend(fontsize=8, loc="upper left")
     save(fig, "equity")
