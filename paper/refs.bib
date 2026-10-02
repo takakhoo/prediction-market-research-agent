@@ -1,0 +1,905 @@
+% refs.bib
+% Reference base for the prediction-market efficiency paper.
+% Every entry was confirmed on 2026-10-02. The `url` field is the page that was opened.
+% The `verifiedvia` field records how the entry was confirmed:
+%   page      = abstract or landing page opened directly (arXiv, NBER, AEA, IDEAS/RePEc, publisher, blog)
+%   pdf       = PDF opened and first pages read
+%   crossref  = DOI registry record (api.crossref.org) plus OpenAlex abstract, used when the
+%               publisher or SSRN page returned HTTP 403 to the fetch tool
+% Entries confirmed by `crossref` only carry the fields the registry returned. Where the registry
+% gave no end page or volume, the field is left out on purpose. Fill those from the PDF.
+
+% ---------------------------------------------------------------------------
+% A. Prediction market accuracy, calibration, favorite-longshot bias
+% ---------------------------------------------------------------------------
+
+@article{wolfers2004prediction,
+  author      = {Wolfers, Justin and Zitzewitz, Eric},
+  title       = {Prediction Markets},
+  journal     = {Journal of Economic Perspectives},
+  volume      = {18},
+  number      = {2},
+  pages       = {107--126},
+  year        = {2004},
+  doi         = {10.1257/0895330041371321},
+  url         = {https://www.nber.org/papers/w10504},
+  verifiedvia = {page (NBER w10504) and crossref},
+  note        = {verified 2026-10-02}
+}
+
+@techreport{wolfers2006interpreting,
+  author      = {Wolfers, Justin and Zitzewitz, Eric},
+  title       = {Interpreting Prediction Market Prices as Probabilities},
+  institution = {National Bureau of Economic Research},
+  type        = {Working Paper},
+  number      = {12200},
+  year        = {2006},
+  doi         = {10.3386/w12200},
+  url         = {https://www.nber.org/papers/w12200},
+  verifiedvia = {page},
+  note        = {verified 2026-10-02}
+}
+
+@article{manski2006interpreting,
+  author      = {Manski, Charles F.},
+  title       = {Interpreting the Predictions of Prediction Markets},
+  journal     = {Economics Letters},
+  volume      = {91},
+  number      = {3},
+  pages       = {425--429},
+  year        = {2006},
+  doi         = {10.1016/j.econlet.2006.01.004},
+  url         = {https://www.nber.org/papers/w10359},
+  verifiedvia = {page (NBER w10359) and crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{snowberg2010explaining,
+  author      = {Snowberg, Erik and Wolfers, Justin},
+  title       = {Explaining the Favorite-Long Shot Bias: Is it Risk-Love or Misperceptions?},
+  journal     = {Journal of Political Economy},
+  volume      = {118},
+  number      = {4},
+  pages       = {723--746},
+  year        = {2010},
+  doi         = {10.1086/655844},
+  url         = {https://www.nber.org/papers/w15923},
+  verifiedvia = {page (NBER w15923) and crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{page2013prediction,
+  author      = {Page, Lionel and Clemen, Robert T.},
+  title       = {Do Prediction Markets Produce Well-Calibrated Probability Forecasts?},
+  journal     = {The Economic Journal},
+  volume      = {123},
+  number      = {568},
+  pages       = {491--513},
+  year        = {2013},
+  doi         = {10.1111/j.1468-0297.2012.02561.x},
+  url         = {https://doi.org/10.1111/j.1468-0297.2012.02561.x},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{ottaviani2010noise,
+  author      = {Ottaviani, Marco and S{\o}rensen, Peter Norman},
+  title       = {Noise, Information, and the Favorite-Longshot Bias in Parimutuel Predictions},
+  journal     = {American Economic Journal: Microeconomics},
+  volume      = {2},
+  number      = {1},
+  pages       = {58--85},
+  year        = {2010},
+  doi         = {10.1257/mic.2.1.58},
+  url         = {https://www.aeaweb.org/articles?id=10.1257/mic.2.1.58},
+  verifiedvia = {page},
+  note        = {verified 2026-10-02}
+}
+
+@article{ottaviani2015price,
+  author      = {Ottaviani, Marco and S{\o}rensen, Peter Norman},
+  title       = {Price Reaction to Information with Heterogeneous Beliefs and Wealth Effects: Underreaction, Momentum, and Reversal},
+  journal     = {American Economic Review},
+  volume      = {105},
+  number      = {1},
+  pages       = {1--34},
+  year        = {2015},
+  doi         = {10.1257/aer.20120881},
+  url         = {https://www.aeaweb.org/articles?id=10.1257/aer.20120881},
+  verifiedvia = {page},
+  note        = {verified 2026-10-02}
+}
+
+@article{berg2008prediction,
+  author      = {Berg, Joyce E. and Nelson, Forrest D. and Rietz, Thomas A.},
+  title       = {Prediction Market Accuracy in the Long Run},
+  journal     = {International Journal of Forecasting},
+  volume      = {24},
+  number      = {2},
+  pages       = {285--300},
+  year        = {2008},
+  doi         = {10.1016/j.ijforecast.2008.03.007},
+  url         = {https://ideas.repec.org/a/eee/intfor/v24y2008i2p285-300.html},
+  verifiedvia = {page (IDEAS/RePEc) and crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{erikson2008political,
+  author      = {Erikson, Robert S. and Wlezien, Christopher},
+  title       = {Are Political Markets Really Superior to Polls as Election Predictors?},
+  journal     = {Public Opinion Quarterly},
+  volume      = {72},
+  number      = {2},
+  pages       = {190--215},
+  year        = {2008},
+  doi         = {10.1093/poq/nfn010},
+  url         = {https://doi.org/10.1093/poq/nfn010},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{atanasov2017distilling,
+  author      = {Atanasov, Pavel and Rescober, Phillip and Stone, Eric and Swift, Samuel A. and Servan-Schreiber, Emile and Tetlock, Philip and Ungar, Lyle and Mellers, Barbara},
+  title       = {Distilling the Wisdom of Crowds: Prediction Markets vs. Prediction Polls},
+  journal     = {Management Science},
+  volume      = {63},
+  number      = {3},
+  pages       = {691--706},
+  year        = {2017},
+  doi         = {10.1287/mnsc.2015.2374},
+  url         = {https://doi.org/10.1287/mnsc.2015.2374},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@techreport{burgi2026makers,
+  author      = {B{\"u}rgi, Constantin and Deng, Wanying and Whelan, Karl},
+  title       = {Makers and Takers: The Economics of the {Kalshi} Prediction Market},
+  institution = {CESifo},
+  type        = {CESifo Working Paper},
+  number      = {12122},
+  year        = {2026},
+  url         = {https://www.ifo.de/en/cesifo/publications/2026/working-paper/makers-and-takers-economics-kalshi-prediction-market},
+  verifiedvia = {page (CESifo) and pdf (https://www.karlwhelan.com/Papers/Kalshi.pdf, January 2026 draft, pages 1-5)},
+  note        = {verified 2026-10-02}
+}
+
+@misc{becker2026microstructure,
+  author       = {Becker, Jonathan},
+  title        = {The Microstructure of Wealth Transfer in Prediction Markets},
+  year         = {2026},
+  howpublished = {Research post, jbecker.dev (January 2026); SSRN working paper (August 2026)},
+  doi          = {10.2139/ssrn.7217640},
+  url          = {https://www.jbecker.dev/research/prediction-market-microstructure},
+  verifiedvia  = {page (author site) and crossref (SSRN DOI record with abstract)},
+  note         = {verified 2026-10-02}
+}
+
+@misc{reichenbach2025exploring,
+  author       = {Reichenbach, Felix and Walther, Martin},
+  title        = {Exploring Decentralized Prediction Markets: Accuracy, Skill, and Bias on {Polymarket}},
+  year         = {2025},
+  howpublished = {SSRN working paper},
+  doi          = {10.2139/ssrn.5910522},
+  url          = {https://doi.org/10.2139/ssrn.5910522},
+  verifiedvia  = {crossref (title, authors, year only; SSRN page returned 403, abstract not read)},
+  note         = {verified 2026-10-02}
+}
+
+@misc{clinton2026prediction,
+  author       = {Clinton, Joshua D. and Huang, TzuFeng},
+  title        = {Prediction Markets? The Accuracy and Efficiency of Political Prediction Markets in the 2024 Presidential Election},
+  year         = {2026},
+  howpublished = {SocArXiv preprint, version 5 (10 June 2026). Versions 1 to 3 (December 2025) were titled ``Prediction Markets? The Accuracy and Efficiency of \$2.4 Billion in the 2024 Presidential Election''},
+  doi          = {10.31235/osf.io/d5yx2_v5},
+  url          = {https://doi.org/10.31235/osf.io/d5yx2_v5},
+  verifiedvia  = {crossref (OSF/SocArXiv DOI record with abstract)},
+  note         = {verified 2026-10-02}
+}
+
+@misc{saguillo2025unravelling,
+  author        = {Saguillo, Oriol and Ghafouri, Vahid and Kiffer, Lucianna and Suarez-Tangil, Guillermo},
+  title         = {Unravelling the Probabilistic Forest: Arbitrage in Prediction Markets},
+  year          = {2025},
+  eprint        = {2508.03474},
+  archiveprefix = {arXiv},
+  url           = {https://arxiv.org/abs/2508.03474},
+  verifiedvia   = {page (abstract and HTML full text)},
+  note          = {verified 2026-10-02}
+}
+
+@misc{cardozo2026favorite,
+  author        = {Cardozo, Marcos and Rivero-Wildemauwe, Jos{\'e} Ignacio},
+  title         = {The Favorite-Longshot Bias in Prediction Markets: Evidence from {Polymarket}},
+  year          = {2026},
+  eprint        = {2609.12878},
+  archiveprefix = {arXiv},
+  url           = {https://arxiv.org/abs/2609.12878},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}
+
+@misc{le2026decomposing,
+  author        = {Le, Nam Anh},
+  title         = {Decomposing Crowd Wisdom: Domain-Specific Calibration Dynamics in Prediction Markets},
+  year          = {2026},
+  eprint        = {2602.19520},
+  archiveprefix = {arXiv},
+  primaryclass  = {stat.AP},
+  url           = {https://arxiv.org/abs/2602.19520},
+  verifiedvia   = {page (abstract and HTML full text)},
+  note          = {verified 2026-10-02}
+}
+
+@thesis{walker2026price,
+  author      = {Walker, Aidan},
+  title       = {The Price is (Almost) Right: A Calibration Analysis of {Polymarket} Pricing Data},
+  type        = {Undergraduate senior thesis},
+  institution = {Princeton University},
+  year        = {2026},
+  url         = {https://theses-dissertations.princeton.edu/entities/publication/d5708372-5ea3-4252-b669-7f9cee07387c},
+  verifiedvia = {page},
+  note        = {verified 2026-10-02}
+}
+
+@misc{gomezcram2026prediction,
+  author       = {Gomez-Cram, Roberto and Guo, Yunhan and Jensen, Theis Ingerslev and Kung, Howard},
+  title        = {Prediction Market Accuracy: Crowd Wisdom or Informed Minority?},
+  year         = {2026},
+  howpublished = {SSRN working paper},
+  doi          = {10.2139/ssrn.6617059},
+  url          = {https://insights.som.yale.edu/insights/wisdom-of-the-few-prediction-markets-are-driven-by-small-number-of-skilled-traders},
+  verifiedvia  = {crossref (SSRN DOI record with abstract) and page (Yale Insights summary by the authors' institution)},
+  note         = {verified 2026-10-02}
+}
+
+@misc{ng2025price,
+  author       = {Ng, Hunter and Peng, Lin and Tao, Yubo and Zhou, Dexin},
+  title        = {Price Discovery and Trading in Modern Prediction Markets},
+  year         = {2025},
+  howpublished = {SSRN working paper},
+  doi          = {10.2139/ssrn.5331995},
+  url          = {https://doi.org/10.2139/ssrn.5331995},
+  verifiedvia  = {crossref (SSRN DOI record with abstract)},
+  note         = {verified 2026-10-02}
+}
+
+@misc{tsang2026anatomy,
+  author        = {Tsang, Kwok Ping and Yang, Zichao},
+  title         = {The Anatomy of a Blockchain Prediction Market: {Polymarket} in the 2024 {U.S.} Presidential Election},
+  year          = {2026},
+  eprint        = {2603.03136},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.GN},
+  url           = {https://arxiv.org/abs/2603.03136},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}
+
+@misc{sirolly2025network,
+  author       = {Sirolly, Allen and Ma, Hongyao and Kanoria, Yash and Sethi, Rajiv},
+  title        = {Network-Based Detection of Wash Trading},
+  year         = {2025},
+  howpublished = {SSRN working paper},
+  doi          = {10.2139/ssrn.5714122},
+  url          = {https://doi.org/10.2139/ssrn.5714122},
+  verifiedvia  = {crossref (title, authors, year); numbers read from Fortune coverage dated 2025-11-07},
+  note         = {verified 2026-10-02}
+}
+
+@misc{rasooly2025manipulable,
+  author        = {Rasooly, Itzhak and Rozzi, Roberto},
+  title         = {How Manipulable Are Prediction Markets?},
+  year          = {2025},
+  eprint        = {2503.03312},
+  archiveprefix = {arXiv},
+  primaryclass  = {econ.GN},
+  url           = {https://arxiv.org/abs/2503.03312},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}
+
+@article{hanson2009manipulator,
+  author      = {Hanson, Robin and Oprea, Ryan},
+  title       = {A Manipulator Can Aid Prediction Market Accuracy},
+  journal     = {Economica},
+  volume      = {76},
+  number      = {302},
+  pages       = {304--314},
+  year        = {2009},
+  doi         = {10.1111/j.1468-0335.2008.00734.x},
+  url         = {https://doi.org/10.1111/j.1468-0335.2008.00734.x},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+% ---------------------------------------------------------------------------
+% B. LLM forecasting vs markets and crowds
+% ---------------------------------------------------------------------------
+
+@misc{halawi2024approaching,
+  author        = {Halawi, Danny and Zhang, Fred and Yueh-Han, Chen and Steinhardt, Jacob},
+  title         = {Approaching Human-Level Forecasting with Language Models},
+  year          = {2024},
+  eprint        = {2402.18563},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  url           = {https://arxiv.org/abs/2402.18563},
+  verifiedvia   = {page (abstract and HTML full text)},
+  note          = {verified 2026-10-02}
+}
+
+@misc{schoenegger2024wisdom,
+  author        = {Schoenegger, Philipp and Tuminauskaite, Indre and Park, Peter S. and Tetlock, Philip E.},
+  title         = {Wisdom of the Silicon Crowd: {LLM} Ensemble Prediction Capabilities Rival Human Crowd Accuracy},
+  year          = {2024},
+  eprint        = {2402.19379},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.CY},
+  url           = {https://arxiv.org/abs/2402.19379},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}
+
+@misc{karger2024forecastbench,
+  author        = {Karger, Ezra and Bastani, Houtan and Yueh-Han, Chen and Jacobs, Zachary and Halawi, Danny and Zhang, Fred and Tetlock, Philip E.},
+  title         = {{ForecastBench}: A Dynamic Benchmark of {AI} Forecasting Capabilities},
+  year          = {2024},
+  eprint        = {2409.19839},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  url           = {https://arxiv.org/abs/2409.19839},
+  verifiedvia   = {page (abstract and HTML full text)},
+  note          = {verified 2026-10-02}
+}
+
+@misc{paleka2025pitfalls,
+  author        = {Paleka, Daniel and Goel, Shashwat and Geiping, Jonas and Tram{\`e}r, Florian},
+  title         = {Pitfalls in Evaluating Language Model Forecasters},
+  year          = {2025},
+  eprint        = {2506.00723},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.LG},
+  url           = {https://arxiv.org/abs/2506.00723},
+  verifiedvia   = {page (abstract and HTML full text)},
+  note          = {verified 2026-10-02}
+}
+
+@misc{yang2025prophet,
+  author        = {Yang, Qingchuan and Mahns, Simon and Li, Sida and Gu, Anri and Wu, Jibang and Xu, Haifeng},
+  title         = {{LLM}-as-a-Prophet: Understanding Predictive Intelligence with {Prophet Arena}},
+  year          = {2025},
+  eprint        = {2510.17638},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.AI},
+  url           = {https://arxiv.org/abs/2510.17638},
+  verifiedvia   = {page (abstract and HTML full text)},
+  note          = {verified 2026-10-02}
+}
+
+@misc{nel2025kalshibench,
+  author        = {Nel, Lukas},
+  title         = {Do Large Language Models Know What They Don't Know? {Kalshibench}: A New Benchmark for Evaluating Epistemic Calibration via Prediction Markets},
+  year          = {2025},
+  eprint        = {2512.16030},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.AI},
+  url           = {https://arxiv.org/abs/2512.16030},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}
+
+@misc{wilson2026futureeval,
+  author       = {Wilson, Ben and Bash, John},
+  title        = {{FutureEval} Spring Results: Pros Beat Bots, but the Gap is Nearly Gone},
+  year         = {2026},
+  howpublished = {Metaculus analysis post, LessWrong, 9 September 2026},
+  url          = {https://www.lesswrong.com/posts/wZBbDqzfBjYG58CxK/futureeval-spring-results-pros-beat-bots-but-the-gap-is},
+  verifiedvia  = {page},
+  note         = {verified 2026-10-02}
+}
+
+@misc{turtel2025outcome,
+  author        = {Turtel, Benjamin and Franklin, Danny and Skotheim, Kris and Hewitt, Luke and Schoenegger, Philipp},
+  title         = {Outcome-based Reinforcement Learning to Predict the Future},
+  year          = {2025},
+  eprint        = {2505.17989},
+  archiveprefix = {arXiv},
+  url           = {https://arxiv.org/abs/2505.17989},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}
+
+@misc{alur2025aia,
+  author        = {Alur, Rohan and Stadie, Bradly C. and Kang, Daniel and Chen, Ryan and McManus, Matt and Rickert, Michael and Lee, Tyler and Federici, Michael and Zhu, Richard and Fogerty, Dennis and Williamson, Hayley and Lozinski, Nina and Linsky, Aaron and Sekhon, Jasjeet S.},
+  title         = {{AIA} Forecaster: Technical Report},
+  year          = {2025},
+  eprint        = {2511.07678},
+  archiveprefix = {arXiv},
+  url           = {https://arxiv.org/abs/2511.07678},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}
+
+@misc{capponi2025agentic,
+  author        = {Capponi, Agostino and Gliozzo, Alfio and Zhu, Brian},
+  title         = {Agentic {AI} for Clustering, Relationship Discovery, and Semantic Trading in Prediction Markets},
+  year          = {2025},
+  eprint        = {2512.02436},
+  archiveprefix = {arXiv},
+  primaryclass  = {cs.AI},
+  url           = {https://arxiv.org/abs/2512.02436},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}
+
+@misc{cheng2026polybench,
+  author        = {Cheng, Pu and Liu, Juncheng and Long, Yunshen},
+  title         = {{PolyBench}: Benchmarking {LLM} Forecasting and Trading Capabilities on Live Prediction Market Data},
+  year          = {2026},
+  eprint        = {2604.14199},
+  archiveprefix = {arXiv},
+  url           = {https://arxiv.org/abs/2604.14199},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}
+
+@misc{kim2026riskmanager,
+  author        = {Kim, Sumin and Kim, Minjae and Kwon, Jihoon and Kim, Yoon and Kagan, Nicole and Lee, Joo Won and Levy, Oscar and Lopez-Lira, Alejandro and Lee, Yongjae and Choi, Chanyeol},
+  title         = {{LLM} as a Risk Manager: {LLM} Semantic Filtering for Lead-Lag Trading in Prediction Markets},
+  year          = {2026},
+  eprint        = {2602.07048},
+  archiveprefix = {arXiv},
+  url           = {https://arxiv.org/abs/2602.07048},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}
+
+@misc{lopezlira2025memorization,
+  author        = {Lopez-Lira, Alejandro and Tang, Yuehua and Zhu, Mingyin},
+  title         = {The Memorization Problem: Can We Trust {LLMs}' Economic Forecasts?},
+  year          = {2025},
+  eprint        = {2504.14765},
+  archiveprefix = {arXiv},
+  doi           = {10.2139/ssrn.5217505},
+  url           = {https://arxiv.org/abs/2504.14765},
+  verifiedvia   = {page and crossref (SSRN DOI record)},
+  note          = {verified 2026-10-02}
+}
+
+@misc{sarkar2024lookahead,
+  author       = {Sarkar, Suproteem K. and Vafa, Keyon},
+  title        = {Lookahead Bias in Pretrained Language Models},
+  year         = {2024},
+  howpublished = {SSRN working paper},
+  doi          = {10.2139/ssrn.4754678},
+  url          = {https://doi.org/10.2139/ssrn.4754678},
+  verifiedvia  = {crossref (SSRN DOI record with abstract)},
+  note         = {verified 2026-10-02}
+}
+
+% ---------------------------------------------------------------------------
+% C. Prediction markets and asset prices
+% ---------------------------------------------------------------------------
+
+@misc{wolfers2016financial,
+  author       = {Wolfers, Justin and Zitzewitz, Eric},
+  title        = {What Do Financial Markets Think of the 2016 Election?},
+  year         = {2016},
+  howpublished = {Brookings Institution, October 2016},
+  url          = {https://www.brookings.edu/articles/what-do-financial-markets-think-of-the-2016-election/},
+  verifiedvia  = {page},
+  note         = {verified 2026-10-02}
+}
+
+@article{snowberg2007partisan,
+  author      = {Snowberg, Erik and Wolfers, Justin and Zitzewitz, Eric},
+  title       = {Partisan Impacts on the Economy: Evidence from Prediction Markets and Close Elections},
+  journal     = {The Quarterly Journal of Economics},
+  volume      = {122},
+  number      = {2},
+  pages       = {807--829},
+  year        = {2007},
+  doi         = {10.1162/qjec.122.2.807},
+  url         = {https://www.nber.org/papers/w12073},
+  verifiedvia = {page (NBER w12073) and crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{knight2006policy,
+  author      = {Knight, Brian},
+  title       = {Are Policy Platforms Capitalized into Equity Prices? Evidence from the {Bush/Gore} 2000 Presidential Election},
+  journal     = {Journal of Public Economics},
+  volume      = {90},
+  number      = {4-5},
+  pages       = {751--773},
+  year        = {2006},
+  doi         = {10.1016/j.jpubeco.2005.06.003},
+  url         = {https://ideas.repec.org/a/eee/pubeco/v90y2006i4-5p751-773.html},
+  verifiedvia = {page (IDEAS/RePEc) and crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{wolfers2009iraq,
+  author      = {Wolfers, Justin and Zitzewitz, Eric},
+  title       = {Using Markets to Inform Policy: The Case of the {Iraq} War},
+  journal     = {Economica},
+  volume      = {76},
+  number      = {302},
+  pages       = {225--250},
+  year        = {2009},
+  doi         = {10.1111/j.1468-0335.2008.00750.x},
+  url         = {https://doi.org/10.1111/j.1468-0335.2008.00750.x},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@techreport{diercks2026kalshi,
+  author      = {Diercks, Anthony M. and Katz, Jared Dean and Wright, Jonathan H.},
+  title       = {{Kalshi} and the Rise of Macro Markets},
+  institution = {National Bureau of Economic Research},
+  type        = {Working Paper},
+  number      = {34702},
+  year        = {2026},
+  doi         = {10.3386/w34702},
+  url         = {https://www.nber.org/papers/w34702},
+  verifiedvia = {page (NBER; also Federal Reserve FEDS 2026-010, https://www.federalreserve.gov/econres/feds/kalshi-and-the-rise-of-macro-markets.htm) and pdf (pages 1-9)},
+  note        = {verified 2026-10-02}
+}
+
+@techreport{gurkaynak2006macro,
+  author      = {G{\"u}rkaynak, Refet and Wolfers, Justin},
+  title       = {Macroeconomic Derivatives: An Initial Analysis of Market-Based Macro Forecasts, Uncertainty, and Risk},
+  institution = {National Bureau of Economic Research},
+  type        = {Working Paper},
+  number      = {11929},
+  year        = {2006},
+  url         = {https://www.nber.org/papers/w11929},
+  verifiedvia = {page},
+  note        = {verified 2026-10-02}
+}
+
+@unpublished{swanson2025effects,
+  author      = {Swanson, Eric T. and Wang, Renxuan and Wu, Yanbin},
+  title       = {The Effects of Monetary Policy on Macroeconomic Expectations: High-Frequency Evidence from Prediction Markets},
+  year        = {2025},
+  url         = {https://www.aeaweb.org/conference/2026/program/paper/KRnrdTQN},
+  verifiedvia = {pdf (December 2025 draft, AEA 2026 conference program, pages 1-2)},
+  note        = {verified 2026-10-02}
+}
+
+@misc{eichengreen2025pressure,
+  author       = {Eichengreen, Barry and Viswanath-Natraj, Ganesh and Wang, Junxuan and Wang, Zijie},
+  title        = {Under Pressure? Central Bank Independence Meets Blockchain Prediction Markets},
+  year         = {2025},
+  howpublished = {SSRN working paper},
+  doi          = {10.2139/ssrn.5366862},
+  url          = {https://doi.org/10.2139/ssrn.5366862},
+  verifiedvia  = {crossref (title, authors, year only; SSRN and VoxEU pages returned 403, abstract not read)},
+  note         = {verified 2026-10-02}
+}
+
+@misc{mohanty2026kalshi,
+  author        = {Mohanty, Hardhik and Krishnamachari, Bhaskar},
+  title         = {Do Prediction Markets Forecast Cryptocurrency Volatility? Evidence from {Kalshi} Macro Contracts},
+  year          = {2026},
+  eprint        = {2604.01431},
+  archiveprefix = {arXiv},
+  url           = {https://arxiv.org/abs/2604.01431},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}
+
+% ---------------------------------------------------------------------------
+% D. Binary options, risk-neutral vs physical probability
+% ---------------------------------------------------------------------------
+
+@article{breeden1978prices,
+  author      = {Breeden, Douglas T. and Litzenberger, Robert H.},
+  title       = {Prices of State-Contingent Claims Implicit in Option Prices},
+  journal     = {The Journal of Business},
+  volume      = {51},
+  number      = {4},
+  pages       = {621},
+  year        = {1978},
+  doi         = {10.1086/296025},
+  url         = {https://doi.org/10.1086/296025},
+  verifiedvia = {crossref (registry lists first page only; end page not confirmed)},
+  note        = {verified 2026-10-02}
+}
+
+@article{jackwerth2000recovering,
+  author      = {Jackwerth, Jens Carsten},
+  title       = {Recovering Risk Aversion from Option Prices and Realized Returns},
+  journal     = {The Review of Financial Studies},
+  volume      = {13},
+  number      = {2},
+  pages       = {433--451},
+  year        = {2000},
+  doi         = {10.1093/rfs/13.2.433},
+  url         = {https://doi.org/10.1093/rfs/13.2.433},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{ross2015recovery,
+  author      = {Ross, Steve},
+  title       = {The Recovery Theorem},
+  journal     = {The Journal of Finance},
+  volume      = {70},
+  number      = {2},
+  pages       = {615--648},
+  year        = {2015},
+  doi         = {10.1111/jofi.12092},
+  url         = {https://doi.org/10.1111/jofi.12092},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@misc{portnaya2026prediction,
+  author        = {Portnaya, Victoria},
+  title         = {Do Prediction Markets Match Option Prices? {Bitcoin} Threshold Evidence from {Binance} and {Polymarket}},
+  year          = {2026},
+  eprint        = {2606.19517},
+  archiveprefix = {arXiv},
+  url           = {https://arxiv.org/abs/2606.19517},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}
+
+% ---------------------------------------------------------------------------
+% E. Backtest rigor, scoring rules, calibration
+% ---------------------------------------------------------------------------
+
+@article{bailey2014deflated,
+  author      = {Bailey, David H. and L{\'o}pez de Prado, Marcos},
+  title       = {The Deflated {Sharpe} Ratio: Correcting for Selection Bias, Backtest Overfitting, and Non-Normality},
+  journal     = {The Journal of Portfolio Management},
+  volume      = {40},
+  number      = {5},
+  pages       = {94--107},
+  year        = {2014},
+  doi         = {10.3905/jpm.2014.40.5.094},
+  url         = {https://doi.org/10.3905/jpm.2014.40.5.094},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{bailey2016probability,
+  author      = {Bailey, David and Borwein, Jonathan and L{\'o}pez de Prado, Marcos and Zhu, Qiji Jim},
+  title       = {The Probability of Backtest Overfitting},
+  journal     = {The Journal of Computational Finance},
+  year        = {2016},
+  doi         = {10.21314/JCF.2016.322},
+  url         = {https://doi.org/10.21314/JCF.2016.322},
+  verifiedvia = {crossref (registry gives no volume or pages)},
+  note        = {verified 2026-10-02}
+}
+
+@article{harvey2016cross,
+  author      = {Harvey, Campbell R. and Liu, Yan and Zhu, Heqing},
+  title       = {{\ldots} and the Cross-Section of Expected Returns},
+  journal     = {The Review of Financial Studies},
+  volume      = {29},
+  number      = {1},
+  pages       = {5--68},
+  year        = {2016},
+  doi         = {10.1093/rfs/hhv059},
+  url         = {https://www.nber.org/papers/w20592},
+  verifiedvia = {page (NBER w20592) and crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{white2000reality,
+  author      = {White, Halbert},
+  title       = {A Reality Check for Data Snooping},
+  journal     = {Econometrica},
+  volume      = {68},
+  number      = {5},
+  pages       = {1097--1126},
+  year        = {2000},
+  doi         = {10.1111/1468-0262.00152},
+  url         = {https://doi.org/10.1111/1468-0262.00152},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{hansen2005test,
+  author      = {Hansen, Peter Reinhard},
+  title       = {A Test for Superior Predictive Ability},
+  journal     = {Journal of Business \& Economic Statistics},
+  volume      = {23},
+  number      = {4},
+  pages       = {365--380},
+  year        = {2005},
+  doi         = {10.1198/073500105000000063},
+  url         = {https://doi.org/10.1198/073500105000000063},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{gu2020empirical,
+  author      = {Gu, Shihao and Kelly, Bryan and Xiu, Dacheng},
+  title       = {Empirical Asset Pricing via Machine Learning},
+  journal     = {The Review of Financial Studies},
+  volume      = {33},
+  number      = {5},
+  pages       = {2223--2273},
+  year        = {2020},
+  doi         = {10.1093/rfs/hhaa009},
+  url         = {https://www.nber.org/papers/w25398},
+  verifiedvia = {page (NBER w25398) and crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{kelly1956new,
+  author      = {Kelly, J. L.},
+  title       = {A New Interpretation of Information Rate},
+  journal     = {Bell System Technical Journal},
+  volume      = {35},
+  number      = {4},
+  pages       = {917--926},
+  year        = {1956},
+  doi         = {10.1002/j.1538-7305.1956.tb03809.x},
+  url         = {https://doi.org/10.1002/j.1538-7305.1956.tb03809.x},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{gneiting2007strictly,
+  author      = {Gneiting, Tilmann and Raftery, Adrian E.},
+  title       = {Strictly Proper Scoring Rules, Prediction, and Estimation},
+  journal     = {Journal of the American Statistical Association},
+  volume      = {102},
+  number      = {477},
+  pages       = {359--378},
+  year        = {2007},
+  doi         = {10.1198/016214506000001437},
+  url         = {https://doi.org/10.1198/016214506000001437},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{murphy1973new,
+  author      = {Murphy, Allan H.},
+  title       = {A New Vector Partition of the Probability Score},
+  journal     = {Journal of Applied Meteorology},
+  volume      = {12},
+  number      = {4},
+  pages       = {595--600},
+  year        = {1973},
+  doi         = {10.1175/1520-0450(1973)012<0595:ANVPOT>2.0.CO;2},
+  url         = {https://doi.org/10.1175/1520-0450(1973)012<0595:ANVPOT>2.0.CO;2},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{brier1950verification,
+  author      = {Brier, Glenn W.},
+  title       = {Verification of Forecasts Expressed in Terms of Probability},
+  journal     = {Monthly Weather Review},
+  volume      = {78},
+  number      = {1},
+  pages       = {1--3},
+  year        = {1950},
+  doi         = {10.1175/1520-0493(1950)078<0001:VOFEIT>2.0.CO;2},
+  url         = {https://doi.org/10.1175/1520-0493(1950)078<0001:VOFEIT>2.0.CO;2},
+  verifiedvia = {crossref (no abstract available)},
+  note        = {verified 2026-10-02}
+}
+
+@inproceedings{niculescu2005predicting,
+  author      = {Niculescu-Mizil, Alexandru and Caruana, Rich},
+  title       = {Predicting Good Probabilities with Supervised Learning},
+  booktitle   = {Proceedings of the 22nd International Conference on Machine Learning (ICML '05)},
+  pages       = {625--632},
+  year        = {2005},
+  doi         = {10.1145/1102351.1102430},
+  url         = {https://doi.org/10.1145/1102351.1102430},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{benjamini1995controlling,
+  author      = {Benjamini, Yoav and Hochberg, Yosef},
+  title       = {Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing},
+  journal     = {Journal of the Royal Statistical Society: Series B (Methodological)},
+  volume      = {57},
+  number      = {1},
+  pages       = {289--300},
+  year        = {1995},
+  doi         = {10.1111/j.2517-6161.1995.tb02031.x},
+  url         = {https://doi.org/10.1111/j.2517-6161.1995.tb02031.x},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{diebold1995comparing,
+  author      = {Diebold, Francis X. and Mariano, Roberto S.},
+  title       = {Comparing Predictive Accuracy},
+  journal     = {Journal of Business \& Economic Statistics},
+  volume      = {13},
+  number      = {3},
+  pages       = {253--263},
+  year        = {1995},
+  doi         = {10.1080/07350015.1995.10524599},
+  url         = {https://doi.org/10.1080/07350015.1995.10524599},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+% ---------------------------------------------------------------------------
+% F. Information and news in markets
+% ---------------------------------------------------------------------------
+
+@article{croxson2014information,
+  author      = {Croxson, Karen and Reade, J. James},
+  title       = {Information and Efficiency: Goal Arrival in Soccer Betting},
+  journal     = {The Economic Journal},
+  volume      = {124},
+  number      = {575},
+  pages       = {62--91},
+  year        = {2014},
+  doi         = {10.1111/ecoj.12033},
+  url         = {https://doi.org/10.1111/ecoj.12033},
+  verifiedvia = {crossref},
+  note        = {verified 2026-10-02}
+}
+
+@article{brown2019when,
+  author      = {Brown, Alasdair and Reade, J. James and Vaughan Williams, Leighton},
+  title       = {When Are Prediction Market Prices Most Informative?},
+  journal     = {International Journal of Forecasting},
+  volume      = {35},
+  number      = {1},
+  pages       = {420--428},
+  year        = {2019},
+  doi         = {10.1016/j.ijforecast.2018.05.005},
+  url         = {https://ideas.repec.org/a/eee/intfor/v35y2019i1p420-428.html},
+  verifiedvia = {page (IDEAS/RePEc) and crossref},
+  note        = {verified 2026-10-02}
+}
+
+@misc{tsang2026political,
+  author        = {Tsang, Kwok Ping and Yang, Zichao},
+  title         = {Political Shocks and Price Discovery in Prediction Markets: Evidence from the 2024 {U.S.} Presidential Election},
+  year          = {2026},
+  eprint        = {2603.03152},
+  archiveprefix = {arXiv},
+  url           = {https://arxiv.org/abs/2603.03152},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}
+
+@misc{mitts2026iran,
+  author       = {Mitts, Joshua and Ofir, Moran},
+  title        = {From {Iran} to {Taylor Swift}: Informed Trading in Prediction Markets},
+  year         = {2026},
+  howpublished = {SSRN working paper},
+  doi          = {10.2139/ssrn.6426778},
+  url          = {https://doi.org/10.2139/ssrn.6426778},
+  verifiedvia  = {crossref (SSRN DOI record with abstract)},
+  note         = {verified 2026-10-02}
+}
+
+@misc{nechepurenko2026permarket,
+  author        = {Nechepurenko, Maksym},
+  title         = {Per-Market Information Leakage and Order-Flow Skill: Two Methodological Lenses on Informed Trading in Decentralized Prediction Markets},
+  year          = {2026},
+  eprint        = {2605.02287},
+  archiveprefix = {arXiv},
+  url           = {https://arxiv.org/abs/2605.02287},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}
+
+@misc{sultan2026conversation,
+  author        = {Sultan, Omneya and Morstatter, Fred},
+  title         = {The Conversation Turns First: Crowd Discussion and Price Reversals in Prediction Markets},
+  year          = {2026},
+  eprint        = {2609.28965},
+  archiveprefix = {arXiv},
+  url           = {https://arxiv.org/abs/2609.28965},
+  verifiedvia   = {page},
+  note          = {verified 2026-10-02}
+}

@@ -9,5 +9,14 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install -r requirements-offline.txt
-      - run: python -m pytest -q
+      - run: python -m pytest -q --ignore=tests/research
       - run: python scripts/offline_replay.py && git diff --exit-code -- results/offline-replay.json
+  research:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements-research.txt
+      - run: python -m pytest -q tests/research

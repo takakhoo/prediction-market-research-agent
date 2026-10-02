@@ -1,0 +1,11 @@
+# Research pipeline (research/): collectors, experiments, figures, tests. Python 3.11+.
+httpx==0.28.1
+matplotlib==3.11.2
+numpy==2.5.3
+pandas==3.0.6
+pillow==12.3.0
+pyarrow==25.0.1
+pytest==9.1.1
+scikit-learn==1.9.1
+scipy==1.18.1
+statsmodels==0.15.0

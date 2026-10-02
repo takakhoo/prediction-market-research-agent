@@ -1,405 +1,241 @@
-# Prediction-Market Evidence Agent
+# Prediction-Market Research Agent
 
-An AI-assisted research system that finds prediction markets on [Polymarket](https://polymarket.com) where **local news sources** may provide relevant evidence, then monitors those sources for reviewable signals.
+[![tests](https://github.com/takakhoo/prediction-market-research-agent/actions/workflows/offline.yml/badge.svg)](https://github.com/takakhoo/prediction-market-research-agent/actions/workflows/offline.yml)
 
-**How it works in plain English:** The agent scans Polymarket for markets that could be resolved by local or niche news (for example, city council votes, regional weather events, or local elections). It discovers relevant Telegram channels, listens for new messages, and uses AI plus deterministic rules to classify possible evidence for human review.
+**Most of the edge you can measure in a prediction market disappears when you try to trade it. This repo measures how much is left, on 1,009,373 resolved Polymarket markets and $97 billion of volume.**
 
-> **Safety and scope:** the current repository is a research and monitoring
-> system. Automated trade execution is not implemented. Model outputs can be
-> wrong; verify source authenticity and market rules independently. Nothing in
-> this repository is financial advice.
+Polymarket prices are read as probabilities, and every gap between price and outcome looks like a trading rule. We rebuilt 23.7 million real fills, priced tens of thousands of contracts as options on the asset underneath them, trained models, asked language models, and then put every apparent edge through the same sequence of controls: real fills, fair estimators, old information, limited capital, fees, and a confirmation period picked in advance.
 
----
+![One real contract: Polymarket fills against the option model](results/figures/demo.gif)
 
-## Table of Contents
+*One real crypto threshold contract, chosen by a fixed rule (among contracts whose spot price crossed the strike in the last 36 hours, the one where the option-model rule staked the most). Blue dots are actual Polymarket fills. The orange line is what a textbook digital-option formula says the contract is worth, using only the spot price and trailing volatility available one minute earlier.*
 
-### Try the credential-free replay first
+## The result
 
-```sh
-python3.11 -m venv .venv
-source .venv/bin/activate
+![The same rule under each successive control](results/figures/ladder.png)
+
+One rule, "take the side the option model prefers when it disagrees with the price by ten cents", scored five ways on crypto threshold contracts:
+
+| How it is scored | Return on stake |
+|---|---|
+| At displayed prices, the way a quick backtest would | +53% (+50 to +56) |
+| At fills that happened, model sees 1-minute-old spot, after fees | **+18.6% (+4.7 to +34.0)** |
+| Same, model sees 15-minute-old spot | +7.2% (-0.3 to +14.3) |
+| Capped at $200 per fill, 15-minute-old spot, whole sample | +8.1% (Sharpe 1.33, t = 1.76 on daily returns, deflated Sharpe probability 0.38) |
+| Confirmation period, April to September 2026 | +1.5% (t = 0.33) |
+
+What we found, in order of how sure we are:
+
+- **Displayed prices lie where nobody trades.** 32% of price-history snapshots have had no trade in a day. Their midpoints sit near 0.5 and resolve Yes 14 points less often than shown. That is the famous "Yes bias", and most of it cannot be traded.
+- **The favorite-longshot bias has whatever sign your estimator gives it.** On the same fills, pooling says Yes prices of 0.8 to 0.9 are too low by 6.5 (3.9 to 8.6) points. One bet per market at the first fill in that band says they are too high by 11.3 (10.1 to 12.4) points.
+- **A textbook option formula knows as much as the price.** On crypto threshold contracts the best forecast puts weight 0.52 on the fill price and 0.60 (0.39 to 0.69) on the formula. Takers who trade against the formula by ten cents lose 10.2% (1.9 to 18.2).
+- **That edge is a speed race, and it is closing.** It shrinks as the formula's data ages (+7.2% (-0.3 to +14.3) with 15-minute-old spot), and it shrank when fees arrived: endorsed fills returned +2.6% (-17.9 to +18.8) in 2026Q3.
+- **First prints overshoot, in tiny size.** The first fill of a market inside a high price band is about eleven points too high. Buying No at the next real fill returned +15.5% (+10.8 to +20.0) after fees, on fills with a median stake of $5.
+- **A learned model beats the price, modestly.** Trained walk-forward on 36,398 test markets, a boosted residual model with order-flow, wallet, and option-value features improves the Brier score of the last traded price by +1.87% (+2.19% on the last five months). On price-linked contracts the bare formula beats the displayed quote by +10.9%.
+- **The standard fixes do not.** Platt and isotonic recalibration lose to the raw price out of time. Sorting wallets by past return does not sort their future return. Claude Fable 5.1, Sonnet, and Haiku with no retrieval score 0.236, 0.235, and 0.246 against the market's 0.153 on 282 questions opened after their training cutoffs.
+
+Paper: [`paper/main.pdf`](paper/main.pdf). Target venue: **ACM EC 2027** (ACM Conference on Economics and Computation), with KDD 2027 as the backup. The EC 2027 call is not out yet, so the deadline is an estimate from last year (early February 2027). Venue notes are in [`paper/VENUES.md`](paper/VENUES.md).
+
+Nothing here is investment advice. The repo places no orders.
+
+## Contents
+
+- [The data](#the-data)
+- [The science, step by step](#the-science-step-by-step)
+- [What it means for stocks and investing](#what-it-means-for-stocks-and-investing)
+- [Try it](#try-it)
+- [The monitoring application](#the-monitoring-application)
+- [What happened to v1](#what-happened-to-v1)
+- [Reproduce](#reproduce)
+
+## The data
+
+![Resolved markets per quarter](results/figures/dataset.png)
+
+Everything comes from public endpoints with no credentials.
+
+| Layer | What | Size |
+|---|---|---|
+| Markets | every closed Polymarket market with at least $1,000 volume, with rules, tags, fee schedule | 1,009,373 markets, $97B |
+| Fills | complete taker-trade histories with wallets, on a stratified random sample | 23.7 million fills, 48,193 markets, $2.83B staked |
+| Quotes | midpoint price paths | 170 thousand markets |
+| Underlyings | Binance 1-minute candles (BTC, ETH, SOL, XRP), Deribit DVOL, hourly and daily equity bars | 2024 to October 2026 |
+| Forecasts | 1,692 language-model forecasts on 282 post-cutoff questions | three models, two conditions |
+
+Replaying each price-linked contract's settlement rule on the underlying data reproduces Polymarket's official outcome for 99.97% of Binance-settled crypto threshold contracts and 99.9% of single-stock contracts. Settlement times are read from each contract's rules. The API's end time is wrong for about 3% of threshold contracts, by up to 16 hours.
+
+## The science, step by step
+
+### 1. A third of displayed prices are parked
+
+![Dormant quotes fake a Yes bias](results/figures/midpoint_artifact.png)
+
+Polymarket's price history is a quote midpoint. A book with a bid at one cent and an ask at 99 cents has a midpoint of 0.50. 38% of dormant snapshots sit between 0.4 and 0.6, against 14% of active ones, and in ordinary Yes/No markets they resolve Yes 14 points less often than displayed. Active snapshots are off by 7 points. Any calibration curve or backtest built on the price-history endpoint inherits this.
+
+Everything after this section uses prices that traded.
+
+### 2. Same fills, opposite answers
+
+![Two estimators on the same fills](results/figures/estimators.png)
+
+If fill prices are fair, outcome minus price averages zero under any rule that only looks backward. Two such rules disagree in sign:
+
+- **Pool every fill**, weighted by shares. Markets count in proportion to how much they trade inside a band, and volume piles up where a contract is on its way to resolving.
+- **First touch**, one bet per market at the first fill inside the band. 30% of those moments are a single order sweeping a thin book and paying 45 (42 to 48) points too much.
+
+A third common choice, averaging each market's return ratio, is biased upward even when prices are fair, so we do not use it. Buying the favorite at its first fill between 0.70 and 0.85 returned -2.65% (-3.25 to -2.03) across 31,956 markets.
+
+### 3. Who wins
+
+![Taker returns by category](results/figures/maker_taker.png)
+
+Across $2.83 billion of taker stake, takers earned -0.27% (-0.61 to +0.09) after fees. There is no aggregate maker-taker transfer of the kind reported on Kalshi. The exception is the 5-minute and 15-minute crypto up/down contracts, where takers lose 2.34% (1.49 to 3.20) and fees take 2.63% of stake.
+
+At scheduled snapshots, last-trade prices are slightly too extreme early in a market's life (calibration slope 0.79) and close to right at the end (0.96).
+
+### 4. An event contract is a digital option
+
+"Will Bitcoin be above $82,000 at noon on February 9?" pays one dollar or nothing. That is a cash-or-nothing call, and with spot $S$, strike $K$, time left $\tau$, and volatility $\sigma$ it is worth
+
+$$\hat p = \Phi\left(\frac{\ln(S/K) - \tfrac{1}{2}\sigma^2\tau}{\sigma\sqrt{\tau}}\right)$$
+
+We use trailing realized volatility and the last one-minute candle that closed before each fill. Nothing is fitted.
+
+![Fill price against the option model](results/figures/options_brier.png)
+
+On 9,612 threshold contracts the formula and the fill price are tied at every horizon, and each carries information the other lacks. On the short up/down contracts the market wins outright (weight on the formula: 0.07 (-0.03 to 0.20)).
+
+![Implied against realized volatility](results/figures/implied_vol.png)
+
+Backing volatility out of Polymarket fills gives a number within 0.97 to 0.99 of what was realized afterwards. Listed options usually charge a premium over realized volatility. These contracts do not.
+
+The same construction on 2,694 contracts on NVDA, TSLA, AAPL, and other single-stock closes gives the formula weight 0.37 (0.27 to 0.50). Takers who trade against it by ten cents lose 23.2% (13.2 to 32.1).
+
+### 5. The edge, and how it fades
+
+![The edge by data age and by quarter](results/figures/edge_decay.png)
+
+Fills the formula endorses returned +18.6% (+4.7 to +34.0) to the taker after fees; fills it opposes returned -10.2% (-18.2 to -1.9). Give the formula older spot data and the edge shrinks: +8.7% (-0.6 to +17.6) at 5 minutes, +7.2% (-0.3 to +14.3) at 15, +0.8% (-6.9 to +7.6) at 60. Most of it is a speed race. At 5 and 15 minutes the estimate is still positive but its interval reaches zero, and at an hour nothing is left.
+
+![Replay of the rule on real fills](results/figures/equity.png)
+
+A capital-constrained replay (15-minute-old data, $200 per fill, profit booked at expiry) made $624 thousand on at most $379 thousand deployed. On daily returns that is a Sharpe ratio of 1.33 with t = 1.76: the pooled fill-level interval excludes zero, the day-by-day series does not. The ten-cent threshold was set on contracts expiring before April 2026. After that the rule returned +1.5%, as a 7% crypto fee rate reached every contract and the stake clearing the bar fell by a factor of five or more.
+
+The single-stock version is smaller and cleaner: +15.5% on stake with at most $43 thousand deployed, Sharpe 2.53, deflated Sharpe probability 0.72, and +7.9% in the confirmation period.
+
+### 6. Can anything else beat the price?
+
+![Out-of-time challengers](results/figures/models.png)
+
+Every challenger is trained walk-forward: a model tested in a given month has seen only markets that had already resolved. 36,398 test markets, last-trade Brier 0.1124.
+
+| Challenger | Brier skill vs price, all months | Last five months (May to Sep 2026) |
+|---|---|---|
+| Quote midpoint | +0.20% | +1.71% |
+| Platt recalibration | -0.11% | -0.41% |
+| Isotonic recalibration | -0.13% | -0.29% |
+| Boosted residual model: path, flow, wallet records | +0.84% | +1.08% |
+| Boosted residual model plus option value | +1.87% | +2.19% |
+| Price and option value, two-parameter blend | +1.96% | +1.47% |
+
+Positive is better than the price. The residual models start from the price and learn a correction, so with no signal they return the price itself. Both feature families help, and the option value helps most: on the 13,357 price-linked test markets the two-parameter blend improves on the last trade by +8.3% and on the quote midpoint by +11.5%. No setting was chosen on the last five months, but we did see scores for these configurations on those months on an earlier, smaller tape, so treat that column as a late-period check and not a pristine holdout.
+
+![Language models against the market](results/figures/llm.png)
+
+Language models get the question, the rules, and the date. Blind, all three are close to always guessing the base rate (0.243). Shown the market price, they return it almost unchanged.
+
+Wallet records: fills by wallets with no resolved history returned -1.14% (-2.07 to -0.05); seasoned wallets returned +0.55% (+0.17 to +0.98). Sorting seasoned wallets by past return does not sort their future return in this sample, which covers only part of each wallet's history.
+
+### 7. First prints overshoot
+
+The first fill of a market inside a Yes-price band of 0.8 to 0.9 is 11.3 (10.1 to 12.4) points above the outcome frequency. To trade that, you need a later price. Buying No at the next fill where a taker bought No, at least a minute later and only if the price is still within five cents of the band (median wait 73 minutes), returned +15.5% (+10.8 to +20.0) for the 0.6 to 0.8 band and +23.4% (+15.4 to +31.9) for 0.8 to 0.98, after fees. From April 2026 on: +16.7% (+10.7 to +22.8) and +31.8% (+20.7 to +43.7). Dropping the trigger and simply taking each market's first No-buying fill in the same price range returned +17.5% (+14.1 to +20.9) and +38.3% (+31.7 to +45.5), so the result does not depend on reacting to the first print.
+
+The catch is size. The fills this rule copies have a median stake of $5, and $176 thousand in total across both bands. It describes thin books early in a market's life and has almost no capacity.
+
+## What it means for stocks and investing
+
+This project started as a prediction-market tool. The parts that transfer:
+
+1. **A quote is evidence only if someone could trade it.** The largest "bias" in this dataset came from prices nobody could hit. The same applies to stale closes in thin stocks, wide option quotes, and any backtest on mid prices.
+2. **Price the derivative from the underlying first.** A threshold contract on NVDA or Bitcoin has a model price from spot and volatility. When the market and that price disagreed by a wide margin, the market was wrong more often. That is the same check an options trader runs against implied volatility.
+3. **Ask how an estimate could be executed.** Pooled averages and one-bet-per-market rules gave opposite signs here. A number that does not come with an executable rule is a description, and it may flip.
+4. **Edges decay, and fees move first.** The option-model rule was worth about 17% per dollar staked until a fee of at most 1.75 cents a share arrived.
+5. **Size matters.** The rule never deployed more than $379 thousand. Returns on that scale do not carry to a large account.
+
+## Try it
+
+Run the research tests (pricing identities, fee math, look-ahead guards). No data needed:
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements-research.txt
+python -m pytest tests/research -q
+```
+
+Regenerate the figures and this README from the committed result tables (the dataset chart needs the raw market pull and is skipped without it):
+
+```bash
+python -m research.figures
+```
+
+```bash
+python -m research.facts
+```
+
+Score the committed language-model forecasts against the market:
+
+```bash
+python -m research.experiments.e8_llm
+```
+
+## The monitoring application
+
+The original application in `src/` finds markets where local news may be evidence, discovers Telegram channels, and classifies messages for human review. It stops at review and does not trade. Its setup guide moved to [`docs/LIVE_SETUP.md`](docs/LIVE_SETUP.md). The credential-free check still works:
+
+```bash
 pip install -r requirements-offline.txt
-python -m pytest -q
+python -m pytest -q --ignore=tests/research
 python scripts/offline_replay.py
 ```
 
-[Inspect the committed replay](results/offline-replay.json): eight synthetic
-model-response cases, including invalid numeric values, tested through the
-actual message matcher. This requires no `.env`, external inference, database,
-Telegram login, market access, or trading. It measures **contract handling,
-not relevance accuracy, source truth, or profit**. The existing application
-still needs separately configured services for a live integration run.
+## What happened to v1
 
-The matcher now rejects nonfinite/out-of-range/string/boolean confidence
-values instead of promoting or clamping them into accepted signals. Invalid
-response envelopes fail explicitly; unknown IDs and duplicate matches are
-filtered. Classifier booleans/scores are validated too. Prompt interpolation
-is single-pass so message text cannot expand another template placeholder.
-These are reliability safeguards, not a guarantee against prompt injection.
+The first paper built on this application ([agent-evidence-evaluation](https://github.com/takakhoo/agent-evidence-evaluation)) reported a 5.8-hour news lead time and a 58% reduction in review load. The lead times came from randomly generated timestamps and the review-load number from a confounded comparison. Both were withdrawn. This version starts from the other end: measured outcomes on real markets, with each claim tested against the price a trader could have had.
 
-CI runs the complete offline suite and regenerates the checked-in replay.
+The same habit caught four problems inside this project before they reached a table: the parked midpoints of section 1, the biased per-market ratio of section 2, an option-model "win" over the market that existed only at displayed prices, and a batch of contracts whose listed end time was 16 hours before the candle their rules settle on, which made the option model look sharper than it was.
 
-## Live integration setup
+## Reproduce
 
-1. [Prerequisites](#1-prerequisites)
-2. [Clone & Install](#2-clone--install)
-3. [Set Up Your Environment Variables](#3-set-up-your-environment-variables)
-4. [Set Up the Database (Supabase)](#4-set-up-the-database-supabase)
-5. [Run the Polymarket Market Explorer](#5-run-the-polymarket-market-explorer)
-6. [Set Up Telegram Discovery](#6-set-up-telegram-discovery)
-7. [Run the Workspace Dashboard](#7-run-the-workspace-dashboard)
-8. [Run the Real-Time Listener](#8-run-the-real-time-listener)
-9. [Deploy to EC2 (Optional)](#9-deploy-to-ec2-optional)
-10. [Architecture Overview](#10-architecture-overview)
-11. [Current Boundary](#11-current-boundary)
+The raw pulls are about 4 GB and take a few hours at the public rate limits:
 
----
+```bash
+python -m research.collect.markets
+python -m research.collect.build_universe
+python -m research.collect.prices
+python -m research.collect.crypto
+python -m research.collect.stocks
+python -m research.collect.trades --ids research/data/derived/trade_ids.parquet
+```
 
-## 1. Prerequisites
+Then every table and figure:
 
-Before you start, make sure you have the following installed and accounts created:
+```bash
+./research/run_all.sh
+```
 
-| Requirement | What it's for | How to get it |
+| Step | Script | Table |
 |---|---|---|
-| **Python 3.9+** | Runs everything | [python.org](https://www.python.org/downloads/) |
-| **Git** | Version control | [git-scm.com](https://git-scm.com/) |
-| **Supabase account** | Postgres database for storing markets, channels, and signals | [supabase.com](https://supabase.com/) (free tier works) |
-| **Telegram API credentials** | Discovering and listening to Telegram channels | [my.telegram.org](https://my.telegram.org/) - create an app to get `api_id` and `api_hash` |
-| **OpenAI-compatible API key** | AI classification and matching | [OpenAI](https://platform.openai.com/), [OpenRouter](https://openrouter.ai/), or any compatible provider |
-
-Optional (for specific features):
-
-| Requirement | What it's for |
-|---|---|
-| **SerpAPI or Serper key** | Google search for discovering official Telegram channels |
-
----
-
-## 2. Clone & Install
-
-```bash
-# Clone this repo
-git clone https://github.com/takakhoo/prediction-market-research-agent.git
-cd prediction-market-research-agent
-
-# Create a virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install the package and all dependencies
-pip install -e ".[dev]"
-```
-
-**Verify the install worked:**
-
-```bash
-python -c "import src; print('Install OK')"
-```
-
----
-
-## 3. Set Up Your Environment Variables
-
-Copy the example env file and fill in your credentials:
-
-```bash
-cp .env.example .env
-```
-
-Open `.env` in your editor. Here are the **must-fill** fields grouped by priority:
-
-### Required for basic market browsing
-
-```env
-# Supabase -- get these from your Supabase project dashboard > Settings > API
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-SUPABASE_DB_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/postgres
-DATABASE_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/postgres
-DIRECT_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/postgres
-```
-
-### Required for AI classification
-
-```env
-# Use OpenAI, OpenRouter, or any OpenAI-compatible provider
-OPENAI_API_KEY=sk-your-key-here
-# If using OpenRouter, uncomment and set:
-# OPENAI_BASE_URL=https://openrouter.ai/api/v1
-```
-
-### Required for Telegram features
-
-```env
-# Get these from https://my.telegram.org
-TELEGRAM_API_ID=12345678
-TELEGRAM_API_HASH=your-api-hash
-TELEGRAM_PHONE_NUMBER=+1234567890
-TELEGRAM_2FA_PASSWORD=           # leave blank if you don't use 2FA
-```
-
-Everything else can stay at its default value to start.
-
----
-
-## 4. Set Up the Database (Supabase)
-
-This creates all the tables the agent needs to store markets, channels, messages, and match results.
-
-```bash
-# Apply the database schema (run all three in order)
-python3 scripts/init_supabase_schema.py --env-file .env --sql-file sql/001_init_market_intel_schema.sql
-python3 scripts/init_supabase_schema.py --env-file .env --sql-file sql/002_grouped_markets.sql
-python3 scripts/init_supabase_schema.py --env-file .env --sql-file sql/003_handpicked_market_targets.sql
-```
-
-**What this creates:** 10+ tables including `markets`, `market_outcomes`, `market_snapshots`, `telegram_channels`, `telegram_messages`, `message_market_matches`, and `market_activations`.
-
----
-
-## 5. Run the Polymarket Market Explorer
-
-This is the fastest way to see the system in action. No Telegram setup needed.
-
-### Step A: Ingest markets from Polymarket
-
-```bash
-python3 scripts/ingest_markets.py --env-file .env
-```
-
-This pulls active/open markets from Polymarket's public API and stores them in your database. It fetches up to 2,000 markets by default.
-
-### Step B: Run AI analysis on ingested markets
-
-```bash
-python3 scripts/analyze_markets.py --env-file .env
-```
-
-This classifies each market as having "local news edge" potential using your configured AI model.
-
-### Step C: Launch the Polymarket dashboard
-
-```bash
-bash scripts/run_polymarket_dashboard.sh .env 8010
-```
-
-Open [http://localhost:8010](http://localhost:8010) in your browser. You can browse markets, sample random ones for review, and see the AI classifications.
-
----
-
-## 6. Set Up Telegram Discovery
-
-This lets the agent find Telegram channels relevant to each market.
-
-### Step A: Run the preflight check
-
-```bash
-bash scripts/telegram_preflight.sh tdlib_discovery_only
-```
-
-This verifies your Telegram credentials and TDLib installation are working.
-
-### Step B: Bootstrap your Telegram session
-
-```bash
-python3 scripts/telegram_session_bootstrap.py --env-file .env
-```
-
-This will prompt you for a login code sent to your Telegram app. You only need to do this once -- the session is saved locally.
-
-### Step C: Launch the discovery dashboard
-
-```bash
-bash scripts/run_discovery_dashboard.sh .env 8000
-```
-
-Open [http://localhost:8000](http://localhost:8000). From here you can:
-- Search for Telegram channels by keyword
-- Expand discovery with "similar channels"
-- Review channel relevance with AI scoring
-
----
-
-## 7. Run the Workspace Dashboard
-
-This is the **main control panel** that combines everything into one tabbed interface.
-
-```bash
-bash scripts/run_workspace_dashboard.sh .env .env 8020
-```
-
-Open [http://localhost:8020](http://localhost:8020).
-
-### Available tabs and pages
-
-| URL | What it does |
-|---|---|
-| `/` | Main dashboard with Telegram, Polymarket, Backtest, and Prompts tabs |
-| `/market-rail` | High-speed market classification view |
-| `/agent-runtime` | Live worker status and event log |
-| `/stored-markets` | Browse grouped/stored markets |
-| `/handpicked-review` | Review and approve hand-selected markets |
-| `/saved-channel-map` | View the channel-to-market mapping graph |
-| `/telegram-live` | Monitor the real-time Telegram listener |
-
----
-
-## 8. Run the Real-Time Listener
-
-Once you have markets selected and channels mapped, start the live listener:
-
-### Step A: Build the grouped market scope
-
-```bash
-python3 scripts/rebuild_grouped_markets.py
-```
-
-### Step B: Import your handpicked markets
-
-Create a text file with market names (one per line), then import:
-
-```bash
-python3 scripts/import_handpicked_markets.py handpicked.txt --apply-migration --replace-source
-```
-
-### Step C: Map Telegram channels to your markets
-
-```bash
-python3 scripts/map_handpicked_channels.py --market-limit 83 --batch-size 28 --min-confidence 0.80
-```
-
-### Step D: Start the real-time listener
-
-```bash
-python3 scripts/run_realtime_telegram_listener.py --link-source ai_handpicked_batch_v1
-```
-
-### Step E: Watch it work
-
-Open [http://localhost:8020/telegram-live](http://localhost:8020/telegram-live) to see messages coming in and being matched against markets in real time.
-
----
-
-## 9. Deploy to EC2 (Optional)
-
-For always-on monitoring, deploy the workers to an AWS EC2 instance.
-
-```bash
-# On your EC2 instance:
-bash scripts/ec2_prepare_host.sh
-
-# Install as systemd services:
-sudo bash scripts/install_ec2_services.sh /path/to/repo ubuntu .env .env
-```
-
-See the full runbook at `docs/runbooks/EC2_DEPLOYMENT.md`.
-
----
-
-## 10. Architecture Overview
-
-```
-                    Polymarket APIs
-                         |
-                    [Market Ingest]
-                         |
-                    [AI Classifier] --- "Does this market have a local news edge?"
-                         |
-                   [Query Planner] --- "What Telegram channels might cover this?"
-                         |
-              [Channel Discovery] --- Search + Google SERP + Similar expansion
-                         |
-               [AI Channel Review] --- "Is this channel actually relevant?"
-                         |
-              [Channel-Market Map] --- Stored in DB
-                         |
-             [Real-Time Listener] --- TDLib watches mapped channels
-                         |
-             [AI Message Matcher] --- "Does this message affect the market?"
-                         |
-              [Alert / Activation] --- Signal stored, ready for action
-```
-
-### Key components
-
-| Component | Location | Purpose |
-|---|---|---|
-| Polymarket clients | `src/polymarket/gamma_client.py`, `clob_public_client.py` | Pull market data from Polymarket APIs |
-| Market ingest | `src/polymarket/market_ingest.py` | Batch-import markets into the database |
-| Market analysis | `src/polymarket/market_analysis.py` | AI-driven local-edge classification |
-| Telegram pipeline | `src/polymarket/telegram_pipeline.py` | Channel discovery + message listening |
-| Channel relevance | `src/polymarket/channel_relevance.py` | AI scoring of channel-market fit |
-| Real-time listener | `src/polymarket/realtime_listener.py` | Live TDLib message handler |
-| LLM runtime | `src/polymarket/llm_runtime.py` | Unified AI inference interface |
-| Discovery service | `src/discovery/service.py` | TDLib-backed channel search |
-| Workspace dashboard | `src/workspace_dashboard/api.py` | FastAPI web UI |
-| AI prompts | `configs/prompts/` | All prompt templates (editable) |
-| SQL migrations | `sql/` | Database schema files |
-
----
-
-## 11. Current Boundary
-
-Implemented: public market ingestion, Telegram discovery and intake, persistent
-evidence storage, LLM-assisted relevance classification, dashboards, and
-read-only monitoring. Not implemented: authenticated order placement. The
-system ends at evidence review by design.
-
----
-
-## Running Tests
-
-```bash
-python -m pytest -q
-```
-
-Verified on September 16, 2026: **46 tests passed**. The suite covers market
-normalization, source matching, listener behavior, database-facing boundaries,
-and safety controls without requiring live Telegram or trading credentials.
-
----
-
-## Project Structure
-
-```
-prediction-market-research-agent/
-├── configs/
-│   ├── prompts/          # AI prompt templates (editable)
-│   ├── markets/          # Market configuration
-│   ├── risk/             # Risk parameters
-│   └── sources/          # Source/env templates
-├── data/                 # Local data storage
-├── docs/                 # Documentation and runbooks
-├── logs/                 # Runtime logs
-├── scripts/              # CLI tools and shell scripts
-├── sql/                  # Database migrations
-├── src/
-│   ├── discovery/        # TDLib channel discovery backend
-│   ├── discovery_dashboard/  # Discovery web UI
-│   ├── polymarket/       # Core market + Telegram pipeline logic
-│   ├── polymarket_dashboard/ # Market explorer web UI
-│   └── workspace_dashboard/  # Main unified dashboard
-└── tests/                # Test suite
-```
-
----
-
-## Troubleshooting
-
-| Problem | Fix |
-|---|---|
-| `ModuleNotFoundError` | Make sure you ran `pip install -e ".[dev]"` inside your venv |
-| Telegram auth fails | Re-run `scripts/telegram_session_bootstrap.py` -- your session may have expired |
-| TDLib not found | Install TDLib for your OS: [tdlib.github.io](https://tdlib.github.io/td/build.html) |
-| Supabase connection refused | Check your `DATABASE_URL` in `.env` -- make sure the password is URL-encoded |
-| AI classification returns errors | Verify your `OPENAI_API_KEY` and `OPENAI_BASE_URL` are correct |
-| Dashboard won't start | Check if the port is already in use: `lsof -i :8020` |
-
----
-
-## Usage boundary
-
-This repository is provided for research review. It does not include a license
-grant and should not be treated as a deploy-and-trade product. Verify source
-authenticity, market rules, and every model-produced match independently.
+| Fill tape and snapshot panel | `research/experiments/build_tape.py` | `research/data/derived/` |
+| Dormant midpoints, calibration | `e1_e2_calibration.py` | `results/tables/e1_e2_calibration.json` |
+| Makers, takers, fees | `e3_maker_taker.py` | `e3_maker_taker.json` |
+| Pooled, first touch, fade | `e3b_first_touch.py` | `e3b_first_touch.json` |
+| Crypto contracts as options | `e4_crypto_options.py` | `e4_crypto_options.json` |
+| Walk-forward model comparison | `e5_model.py` | `e5_model.json` |
+| Capital-constrained replay | `e6_backtest.py` | `e6_backtest.json` |
+| Wallet records | `e7_wallets.py` | `e7_wallets.json` |
+| Language models | `e8_llm.py` | `e8_llm.json` |
+| Single-stock contracts as options | `e9_stock_options.py` | `e9_stock_options.json` |
+
+Limits worth knowing: fills are a sample, so wallet histories are partial. The trade feed shows the taker side only. Stock inputs are hourly bars with no extended-hours data. Fills bound the size each rule could have traded. The confirmation period is six months. Language-model forecasts came from subagents instructed to use no tools; every run made exactly the file read and write the protocol required.
+
+This repository has no license grant and is provided for research review.
