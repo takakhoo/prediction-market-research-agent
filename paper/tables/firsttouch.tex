@@ -1,0 +1,24 @@
+\begin{table}[t]
+\caption{Outcome minus Yes price at fills in long-tail Yes/No markets, two sampling rules.}
+\label{tab:firsttouch}
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\resizebox{\linewidth}{!}{\begin{tabular}{lrrrrr}
+\toprule
+Yes price band & Markets & Pooled (pts) & 95\% CI & First touch (pts) & 95\% CI \\
+\midrule
+0.02-0.1 & 14,675 & -2.2 & (-3.0, -1.3) & +3.1 & (+2.7, +3.6) \\
+0.1-0.2 & 11,704 & -2.3 & (-5.1, +1.3) & +2.2 & (+1.5, +2.9) \\
+0.2-0.3 & 9,871 & +3.4 & (-2.8, +9.3) & -0.5 & (-1.4, +0.4) \\
+0.3-0.4 & 8,775 & -2.0 & (-8.1, +4.5) & -3.2 & (-4.2, -2.2) \\
+0.4-0.5 & 8,506 & -1.9 & (-9.8, +6.6) & -6.4 & (-7.6, -5.3) \\
+0.5-0.6 & 7,445 & +0.1 & (-11.7, +11.7) & -6.1 & (-7.3, -5.0) \\
+0.6-0.7 & 7,012 & +4.4 & (-1.1, +10.2) & -9.2 & (-10.4, -8.1) \\
+0.7-0.8 & 6,785 & +10.0 & (+3.9, +14.0) & -11.1 & (-12.3, -9.9) \\
+0.8-0.9 & 6,504 & +6.5 & (+3.9, +8.6) & -11.3 & (-12.4, -10.1) \\
+0.9-0.98 & 6,583 & +0.9 & (-1.8, +2.7) & -11.8 & (-12.8, -10.8) \\
+\bottomrule
+\end{tabular}}
+
+\smallskip
+\begin{minipage}{0.96\linewidth}\footnotesize 21,003 Yes/No markets outside sports, crypto, and weather. Pooled: every fill, share-weighted. First touch: the first fill of each market inside the band. Both rules use only the past, so both average zero when fill prices are fair. Intervals resample events.\end{minipage}
+\end{table}

@@ -1,0 +1,26 @@
+\begin{table}[t]
+\caption{Capital-constrained replay of the option-model rule, \$200 cap per fill.}
+\label{tab:replay}
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\resizebox{\linewidth}{!}{\begin{tabular}{llrrrrrrrr}
+\toprule
+Rule & Period & Markets & Stake (\$k) & Profit (\$k) & Return (\%) & Peak capital (\$k) & Sharpe & $t$ & DSR \\
+\midrule
+Crypto, 1-min spot & all & 2,415 & 2971 & +663 & +22.3 & 371 & 1.30 & 1.71 & 0.30 \\
+Crypto, 1-min spot & before Apr 2026 & 1,617 & 2673 & +660 & +24.7 & 371 & 1.54 & 1.70 & 0.29 \\
+Crypto, 1-min spot & Apr to Sep 2026 & 798 & 297 & +3 & +1.0 & 13 & 0.15 & 0.11 & 0.03 \\
+Crypto, 15-min spot & all & 3,437 & 7733 & +624 & +8.1 & 379 & 1.33 & 1.76 & 0.38 \\
+Crypto, 15-min spot & before Apr 2026 & 2,332 & 6561 & +607 & +9.2 & 379 & 1.55 & 1.73 & 0.36 \\
+Crypto, 15-min spot & Apr to Sep 2026 & 1,105 & 1172 & +18 & +1.5 & 50 & 0.45 & 0.33 & 0.05 \\
+Stocks, current bar & all & 1,257 & 278 & +48 & +17.3 & 42 & 2.74 & 2.62 & 0.83 \\
+Stocks, current bar & before Apr 2026 & 716 & 176 & +38 & +21.6 & 42 & 4.67 & 2.97 & 0.95 \\
+Stocks, current bar & Apr to Sep 2026 & 541 & 102 & +10 & +9.8 & 14 & 1.07 & 0.77 & 0.07 \\
+Stocks, hour-old bar & all & 1,310 & 317 & +49 & +15.5 & 43 & 2.53 & 2.41 & 0.72 \\
+Stocks, hour-old bar & before Apr 2026 & 744 & 199 & +40 & +20.1 & 43 & 4.12 & 2.62 & 0.82 \\
+Stocks, hour-old bar & Apr to Sep 2026 & 566 & 118 & +9 & +7.9 & 17 & 0.96 & 0.69 & 0.07 \\
+\bottomrule
+\end{tabular}}
+
+\smallskip
+\begin{minipage}{0.96\linewidth}\footnotesize Profit is booked on the expiry day; daily return is profit over the largest stake outstanding on any day; Sharpe is annualized. $t$ is the daily-series $t$-statistic. DSR is the deflated Sharpe probability against the best of 24 skill-free variants. The ten-cent bar was fixed on contracts expiring before April 2026.\end{minipage}
+\end{table}

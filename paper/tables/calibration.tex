@@ -1,0 +1,29 @@
+\begin{table}[t]
+\caption{Calibration of the last traded price at scheduled snapshots.}
+\label{tab:calibration}
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\resizebox{\linewidth}{!}{\begin{tabular}{lrrrrrrrr}
+\toprule
+Sample & Markets & Brier & Mean price & Mean outcome & Slope $b$ & 95\% CI & Intercept $a$ & 95\% CI \\
+\midrule
+crypto thresholds and other crypto & 12,273 & 0.070 & 0.326 & 0.316 & 0.93 & (0.89, 0.97) & -0.17 & (-0.24, -0.11) \\
+crypto up/down & 2,109 & 0.243 & 0.504 & 0.501 & 0.92 & (0.73, 1.11) & -0.01 & (-0.10, +0.08) \\
+culture & 2,355 & 0.073 & 0.210 & 0.200 & 0.88 & (0.83, 0.95) & -0.23 & (-0.37, -0.09) \\
+economy & 922 & 0.102 & 0.234 & 0.253 & 0.95 & (0.85, 1.07) & +0.15 & (-0.04, +0.39) \\
+finance & 7,972 & 0.102 & 0.328 & 0.332 & 0.92 & (0.89, 0.96) & +0.01 & (-0.06, +0.08) \\
+geopolitics & 473 & 0.101 & 0.257 & 0.294 & 1.12 & (0.99, 1.28) & +0.48 & (+0.20, +0.80) \\
+mentions & 4,054 & 0.124 & 0.313 & 0.289 & 0.87 & (0.82, 0.92) & -0.24 & (-0.33, -0.14) \\
+politics & 3,687 & 0.090 & 0.228 & 0.234 & 0.93 & (0.87, 0.99) & +0.02 & (-0.10, +0.15) \\
+sports & 5,232 & 0.170 & 0.415 & 0.414 & 0.85 & (0.79, 0.90) & -0.04 & (-0.10, +0.02) \\
+technology & 483 & 0.066 & 0.207 & 0.203 & 1.01 & (0.90, 1.15) & -0.07 & (-0.48, +0.26) \\
+weather & 1,776 & 0.080 & 0.131 & 0.126 & 0.75 & (0.63, 0.89) & -0.38 & (-0.62, -0.12) \\
+life fraction 0-0.15 & 22,530 & 0.122 & 0.308 & 0.290 & 0.79 & (0.77, 0.82) & -0.26 & (-0.30, -0.22) \\
+life fraction 0.15-0.45 & 31,028 & 0.112 & 0.311 & 0.297 & 0.90 & (0.88, 0.92) & -0.17 & (-0.21, -0.13) \\
+life fraction 0.45-0.75 & 33,045 & 0.097 & 0.297 & 0.287 & 0.93 & (0.91, 0.96) & -0.13 & (-0.17, -0.10) \\
+life fraction 0.75-1.0 & 36,070 & 0.082 & 0.300 & 0.295 & 0.96 & (0.94, 0.99) & -0.08 & (-0.12, -0.04) \\
+\bottomrule
+\end{tabular}}
+
+\smallskip
+\begin{minipage}{0.96\linewidth}\footnotesize Logistic recalibration $\Pr(y=1)=\sigma(a+b\,\mathrm{logit}\,p)$ fitted with one weight per market. $b<1$ means prices are too extreme. Snapshots with a trade in the prior six hours or 10\% of the market's life. Intervals from 300 bootstrap draws that resample events.\end{minipage}
+\end{table}
