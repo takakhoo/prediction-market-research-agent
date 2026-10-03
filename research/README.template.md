@@ -10,6 +10,8 @@ A Polymarket price is read as a probability, so every gap between price and outc
 
 *One real Bitcoin contract, picked by a fixed rule (among contracts whose spot crossed the strike in the last 36 hours, the one where the option-model rule staked the most). Top: Binance spot against the strike. Bottom: blue dots are actual Polymarket fills, and the orange line is what a textbook digital-option formula says Yes is worth, using only spot and trailing volatility from one minute earlier. The two track each other for a day and a half. Where they part, late on, the rule sided with the formula and {{walkResult}} ${{walkPnl}}: on this contract the market was right.*
 
+**[Open the live explorer](https://takakhoo.github.io/prediction-market-research-agent/)**: scrub through this contract fill by fill, bend the formula's volatility and the rule's threshold, price your own contract, and hover the ladder for every interval. It runs in the browser from the committed sample and result tables.
+
 > **Status (2 Oct 2026).** Everything below is measured and regenerates from this repository. Fills cover a stratified sample of {{tapeMarkets}} markets out of {{nMarkets}}; the rest of the trade download is the next thing to run. Nothing here is investment advice and the repo places no orders.
 
 ## Headline
@@ -372,6 +374,7 @@ Then every table and figure:
 - [`research/experiments/`](research/experiments/): one script per table
 - [`research/figures.py`](research/figures.py), [`research/diagrams.py`](research/diagrams.py), [`research/render_demo.py`](research/render_demo.py): every image on this page
 - [`research/walkthrough.py`](research/walkthrough.py): the offline contract walkthrough
+- [`docs/`](docs/): the live explorer page (static HTML, served by GitHub Pages) and the application setup guide
 - [`research/facts.py`](research/facts.py): renders this README and `paper/numbers.tex` from the tables
 - [`results/`](results/): tables, figures, and the walkthrough sample
 - [`paper/`](paper/): draft in the ACM EC style (`cd paper && tectonic main.tex`), references, literature notes, venue notes
