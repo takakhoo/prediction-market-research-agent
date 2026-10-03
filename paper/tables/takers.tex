@@ -1,0 +1,27 @@
+\begin{table}[t]
+\caption{Taker returns on dollars staked, by category.}
+\label{tab:takers}
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\resizebox{\linewidth}{!}{\begin{tabular}{lrrrrrrr}
+\toprule
+Category & Markets & Stake (\$M) & Gross (\%) & 95\% CI & Net of fees (\%) & 95\% CI & Fees (\% of stake) \\
+\midrule
+crypto thresholds and other crypto & 12,652 & 502 & +0.15 & (-0.10, +0.39) & -0.02 & (-0.27, +0.22) & 0.17 \\
+crypto up/down & 6,112 & 97 & +0.28 & (-0.52, +1.13) & -2.34 & (-3.20, -1.49) & 2.63 \\
+culture & 2,421 & 161 & -0.47 & (-0.92, +0.22) & -0.54 & (-0.99, +0.12) & 0.07 \\
+economy & 952 & 251 & -0.53 & (-1.28, +0.14) & -0.63 & (-1.43, +0.05) & 0.11 \\
+finance & 8,229 & 210 & +0.08 & (-0.38, +0.64) & -0.16 & (-0.61, +0.38) & 0.25 \\
+geopolitics & 485 & 64 & -0.69 & (-1.53, +0.13) & -0.69 & (-1.53, +0.13) & 0.00 \\
+mentions & 4,488 & 225 & -0.09 & (-0.46, +0.29) & -0.21 & (-0.58, +0.20) & 0.11 \\
+other & 101 & 2 & -0.72 & (-9.57, +6.91) & -0.82 & (-9.78, +6.89) & 0.10 \\
+politics & 3,926 & 1026 & -0.41 & (-0.87, -0.01) & -0.44 & (-0.90, -0.04) & 0.03 \\
+sports & 6,551 & 258 & +1.93 & (-1.02, +4.91) & +1.22 & (-1.74, +4.19) & 0.71 \\
+technology & 495 & 18 & -0.42 & (-3.15, +1.83) & -0.66 & (-3.41, +1.52) & 0.24 \\
+weather & 1,781 & 11 & +1.19 & (-0.18, +3.12) & +0.79 & (-0.61, +2.73) & 0.41 \\
+\midrule all & 48,193 & 2825 & -0.03 & (-0.38, +0.33) & -0.27 & (-0.61, +0.09) & 0.24 \\
+\bottomrule
+\end{tabular}}
+
+\smallskip
+\begin{minipage}{0.96\linewidth}\footnotesize Return is dollars won over dollars staked across every fill in the sample; the maker's gross return is the negative of the taker's. Intervals from 1,000 bootstrap draws that resample events.\end{minipage}
+\end{table}

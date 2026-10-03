@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Shrinking Edge</title>
+<meta name="description" content="Scrub through one real Polymarket contract, see what a digital-option formula says it is worth at every fill, and watch the same trading rule lose its edge under each control.">
+<style>
+  :root {
+    --surface: #fcfcfb; --page: #f9f9f7; --ink: #0b0b0b; --ink2: #52514e; --muted: #898781; --grid: #e1e0d9; --base: #c3c2b7;
+    --blue: #2a78d6; --orange: #eb6834; --aqua: #1baf7a; --yellow: #eda100; --blue-light: #cde2fb; --grey-light: #efeeea;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --surface: #1a1a19; --page: #0d0d0d; --ink: #ffffff; --ink2: #c3c2b7; --muted: #898781; --grid: #2c2c2a; --base: #383835;
+    --blue: #3987e5; --orange: #d95926; --aqua: #199e70; --yellow: #c98500; --blue-light: #184f95; --grey-light: #262625;
+  } }
+  :root[data-theme="dark"] {
+    --surface: #1a1a19; --page: #0d0d0d; --ink: #ffffff; --ink2: #c3c2b7; --muted: #898781; --grid: #2c2c2a; --base: #383835;
+    --blue: #3987e5; --orange: #d95926; --aqua: #199e70; --yellow: #c98500; --blue-light: #184f95; --grey-light: #262625;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.5 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 28px 16px 64px; }
+  h1 { font-size: 30px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  h2 { font-size: 20px; margin: 36px 0 8px; }
+  p { margin: 6px 0 10px; color: var(--ink2); max-width: 78ch; }
+  p.lead { color: var(--ink); font-size: 17px; }
+  a { color: var(--blue); }
+  .card { background: var(--surface); border: 1px solid var(--grid); border-radius: 12px; padding: 16px; margin: 12px 0; }
+  .controls { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: center; margin: 8px 0 4px; }
+  .controls label { font-size: 13px; color: var(--ink2); display: flex; align-items: center; gap: 8px; }
+  input[type=range] { width: 180px; accent-color: var(--blue); }
+  .readout { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 16px; font-variant-numeric: tabular-nums; margin-top: 10px; }
+  .readout div { background: var(--grey-light); border-radius: 8px; padding: 8px 10px; }
+  .readout b { display: block; font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; }
+  .readout span { font-size: 17px; }
+  .verdict { font-size: 15px; padding: 8px 12px; border-radius: 8px; margin-top: 10px; background: var(--grey-light); }
+  .verdict.take { background: var(--blue-light); }
+  canvas { width: 100%; height: auto; display: block; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  td, th { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.02em; }
+  .bar { height: 10px; border-radius: 5px; background: var(--blue); display: inline-block; vertical-align: middle; }
+  .ci { color: var(--muted); font-size: 13px; }
+  .small { font-size: 13px; color: var(--muted); }
+  code { background: var(--grey-light); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  .formula { font-family: "Times New Roman", serif; font-size: 17px; color: var(--ink); margin: 8px 0; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; margin-right: 16px; font-size: 13px; color: var(--ink2); }
+  .legend i { width: 14px; height: 4px; border-radius: 2px; display: inline-block; }
+  .tooltip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--base); border-radius: 8px; padding: 6px 10px; font-size: 13px; color: var(--ink); box-shadow: 0 2px 10px rgba(0,0,0,.12); display: none; max-width: 280px; }
+  .wrap { position: relative; }
+</style>
+</head>
+<body>
+<main>
+  <h1>The Shrinking Edge</h1>
+  <p class="lead">A Polymarket contract that pays $1 if Bitcoin is above a strike at noon is a digital option. Below, a textbook formula prices one real contract at every one of its 6,998 fills, from public spot data alone. Scrub through the last 36 hours, bend the formula's volatility, and watch where it agrees with the market, where it disagrees, and what following it would have cost.</p>
+  <p class="small">Companion page to <a href="https://github.com/takakhoo/prediction-market-research-agent">takakhoo/prediction-market-research-agent</a>. Every number here is computed in your browser from the committed sample and result tables. Nothing on this page is investment advice.</p>
+
+  <h2>1. One contract, fill by fill</h2>
+  <div class="card">
+    <div id="q" style="font-weight:600"></div>
+    <div class="legend" style="margin:6px 0 4px"><span><i style="background:var(--ink2)"></i>Binance spot</span><span><i style="background:var(--muted);height:2px"></i>strike</span><span><i style="background:var(--blue);height:8px;border-radius:4px"></i>Polymarket fills</span><span><i style="background:var(--orange)"></i>option model value</span><span><i style="background:var(--ink);height:8px;border-radius:4px"></i>fills the rule takes</span></div>
+    <div class="wrap"><canvas id="chart" width="1000" height="470"></canvas><div class="tooltip" id="tip"></div></div>
+    <div class="controls">
+      <label>time <input type="range" id="cursor" min="0" max="6997" value="6997"></label>
+      <label>volatility x <input type="range" id="volx" min="50" max="200" value="100"> <span id="volxv">1.00</span></label>
+      <label>rule bar <input type="range" id="theta" min="2" max="25" value="10"> <span id="thetav">10</span> cents</label>
+      <label><button id="play" type="button">play</button></label>
+    </div>
+    <div class="readout" id="readout"></div>
+    <div class="verdict" id="verdict"></div>
+    <p class="small" style="margin-top:10px">Inputs the formula sees at the cursor: the last one-minute candle that had closed, the time to the settlement candle named in the contract's rules, and realized volatility over a trailing window about four times the horizon. Nothing is fitted. The volatility slider multiplies that trailing estimate so you can see how much the verdict depends on it. The fill at the cursor is the real one; the tally counts every earlier fill the rule would have taken at the current settings and what those fills made when the contract settled.</p>
+  </div>
+
+  <h2>2. The formula</h2>
+  <div class="card">
+    <div class="formula">value of Yes = &Phi;(d<sub>2</sub>), &nbsp; d<sub>2</sub> = ( ln(S / K) &minus; &sigma;<sup>2</sup>&tau; / 2 ) / ( &sigma; &radic;&tau; )</div>
+    <p>S is spot, K the strike, &tau; the time to settlement in years, &sigma; annualized volatility, and &Phi; the standard normal distribution function. The rule takes a fill when the side the taker bought is worth at least the bar more than its price plus the fee, where the fee is rate &times; price &times; (1 &minus; price) per share.</p>
+    <div class="controls">
+      <label>spot <input type="range" id="wS" min="90" max="112" value="100" step="0.1"> <span id="wSv">100.0</span></label>
+      <label>strike <input type="range" id="wK" min="90" max="112" value="103" step="0.1"> <span id="wKv">103.0</span></label>
+      <label>hours left <input type="range" id="wH" min="1" max="480" value="24"> <span id="wHv">24</span></label>
+      <label>volatility <input type="range" id="wV" min="10" max="150" value="60"> <span id="wVv">60</span>% a year</label>
+    </div>
+    <div class="readout"><div><b>d2</b><span id="wd2"></span></div><div><b>value of Yes</b><span id="wval"></span></div><div><b>value of No</b><span id="wno"></span></div><div><b>fee at that price, rate 0.07</b><span id="wfee"></span></div></div>
+    <canvas id="wchart" width="1000" height="260" style="margin-top:10px"></canvas>
+    <p class="small">The curve is the value of Yes against spot at the chosen volatility and horizon. It sharpens into a step as expiry approaches.</p>
+  </div>
+
+  <h2>3. The same rule under each successive control</h2>
+  <div class="card">
+    <p>Score the rule at displayed prices and it looks like free money. Score it at prices that traded, with older information, limited capital, fees, and in a confirmation period chosen in advance, and most of it is gone. Hover a row for the interval.</p>
+    <table id="ladder"></table>
+    <h3 style="font-size:15px;margin:18px 0 4px">By the age of the spot data the formula sees</h3>
+    <table id="ages"></table>
+    <h3 style="font-size:15px;margin:18px 0 4px">By settlement quarter</h3>
+    <table id="quarters"></table>
+    <p class="small" id="enc"></p>
+  </div>
+
+  <h2>4. Where the money went</h2>
+  <div class="card">
+    <canvas id="equity" width="1000" height="260"></canvas>
+    <p class="small">Cumulative profit of the capped replay (15-minute-old spot, $200 per fill, profit booked at expiry). The shaded region is the confirmation period, April to September 2026, after the rule's threshold was fixed on earlier contracts.</p>
+  </div>
+  <p class="small">Source, data, paper, and the full audit: <a href="https://github.com/takakhoo/prediction-market-research-agent">the repository</a>.</p>
+</main>
+<script>
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function erf(x){const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y;}
+const Phi = x => 0.5*(1+erf(x/Math.SQRT2));
+const YEAR = 365.25*86400;
+function digital(S,K,sig,tauS){const v=Math.max(sig,1e-6)*Math.sqrt(Math.max(tauS,1)/YEAR);return Phi((Math.log(S/K)-0.5*v*v)/v);}
+const clip=(x,a,b)=>Math.min(b,Math.max(a,x));
+const fmt=(x,d=3)=>x.toFixed(d);
+const money=x=>(x<0?'-$':'$')+Math.abs(x).toLocaleString(undefined,{maximumFractionDigits:0});
+
+let C, T, cursor, volx=1, theta=0.10, playing=false;
+fetch('data/contract.json').then(r=>r.json()).then(c=>{C=c;cursor=c.fills.length-1;document.getElementById('cursor').max=c.fills.length-1;document.getElementById('cursor').value=cursor;document.getElementById('q').textContent=c.question+'  (strike '+c.strike.toLocaleString()+', settles on the Binance 1-minute close, resolved '+(c.outcome_yes?'Yes':'No')+')';draw();});
+fetch('data/tables.json').then(r=>r.json()).then(t=>{T=t;tables();equity();});
+
+function value(f, m){ return clip(digital(f.s, C.strike, f.sigma*m, C.expiry-f.t), 0.001, 0.999); }
+function verdict(f, m, th){
+  const v=value(f,m); const cost=f.d===1?f.p:1-f.p; const fee=(C.fee_rate||0)*cost*(1-cost);
+  const worth=f.d===1?v:1-v; const won=f.d===1?C.outcome_yes:1-C.outcome_yes;
+  return {v,cost,fee,worth,edge:worth-cost-fee,take:worth-cost-fee>th,pnl:f.size*(won-cost-fee),stake:f.size*cost};
+}
+function draw(){
+  if(!C) return;
+  const cv=document.getElementById('chart'), ctx=cv.getContext('2d'); const W=cv.width,H=cv.height;
+  ctx.fillStyle=css('--surface'); ctx.fillRect(0,0,W,H);
+  const fills=C.fills, k=cursor, f=fills[k];
+  const tMin=C.expiry-36*3600, tMax=C.expiry; const X=t=>60+(t-tMin)/(tMax-tMin)*(W-80);
+  const top={y0:16,y1:170}, bot={y0:200,y1:440};
+  // spot panel
+  const sp=C.spot; let smin=C.strike, smax=C.strike;
+  for(let i=0;i<sp.close.length;i++){const t=sp.t0+i*60; if(t<tMin) continue; smin=Math.min(smin,sp.close[i]); smax=Math.max(smax,sp.close[i]);}
+  const pad=(smax-smin)*0.08; smin-=pad; smax+=pad;
+  const YS=s=>top.y1-(s-smin)/(smax-smin)*(top.y1-top.y0);
+  ctx.strokeStyle=css('--grid'); ctx.lineWidth=1; [top,bot].forEach(p=>{for(let g=0;g<=4;g++){const y=p.y0+(p.y1-p.y0)*g/4; ctx.beginPath();ctx.moveTo(60,y);ctx.lineTo(W-20,y);ctx.stroke();}});
+  ctx.setLineDash([5,4]); ctx.strokeStyle=css('--muted'); ctx.beginPath(); ctx.moveTo(60,YS(C.strike)); ctx.lineTo(W-20,YS(C.strike)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle=css('--muted'); ctx.font='11px sans-serif'; ctx.fillText('strike '+C.strike.toLocaleString(), 64, YS(C.strike)-4);
+  ctx.strokeStyle=css('--ink2'); ctx.lineWidth=1.4; ctx.beginPath(); let started=false;
+  for(let i=0;i<sp.close.length;i++){const t=sp.t0+i*60; if(t<tMin||t>f.t) continue; const x=X(t),y=YS(sp.close[i]); if(!started){ctx.moveTo(x,y);started=true;} else ctx.lineTo(x,y);} ctx.stroke();
+  ctx.fillStyle=css('--muted'); ctx.fillText('spot', 8, top.y0+12); ctx.fillText(smax.toLocaleString(undefined,{maximumFractionDigits:0}), 8, top.y0+26); ctx.fillText(smin.toLocaleString(undefined,{maximumFractionDigits:0}), 8, top.y1);
+  // price panel
+  const YP=p=>bot.y1-p*(bot.y1-bot.y0);
+  ctx.fillStyle=css('--muted'); ctx.fillText('price of Yes', 8, bot.y0+12); ctx.fillText('1.0', 36, bot.y0+4); ctx.fillText('0.5', 36, YP(0.5)+4); ctx.fillText('0.0', 36, bot.y1+4);
+  for(let h=36;h>=0;h-=6){const x=X(C.expiry-h*3600); ctx.fillText(h===0?'expiry':'-'+h+'h', x-10, H-6);}
+  let tally={n:0,stake:0,pnl:0};
+  ctx.fillStyle=css('--blue'); ctx.globalAlpha=0.45;
+  for(let i=0;i<=k;i++){const g=fills[i]; if(g.t<tMin) continue; ctx.beginPath(); ctx.arc(X(g.t),YP(g.p),1.6,0,6.283); ctx.fill();}
+  ctx.globalAlpha=1;
+  ctx.strokeStyle=css('--orange'); ctx.lineWidth=1.8; ctx.beginPath(); started=false;
+  for(let i=0;i<=k;i++){const g=fills[i]; if(g.t<tMin) continue; const x=X(g.t), y=YP(value(g,volx)); if(!started){ctx.moveTo(x,y);started=true;} else ctx.lineTo(x,y);} ctx.stroke();
+  ctx.fillStyle=css('--ink');
+  for(let i=0;i<=k;i++){const g=fills[i]; const r=verdict(g,volx,theta); if(r.take){tally.n++;tally.stake+=r.stake;tally.pnl+=r.pnl; if(g.t>=tMin){ctx.beginPath(); ctx.arc(X(g.t),YP(g.p),2.6,0,6.283); ctx.fill();}}}
+  // cursor
+  ctx.strokeStyle=css('--base'); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(X(f.t),top.y0); ctx.lineTo(X(f.t),bot.y1); ctx.stroke();
+  const r=verdict(f,volx,theta);
+  const hrs=(C.expiry-f.t)/3600;
+  document.getElementById('readout').innerHTML=[
+    ['hours to settlement',fmt(hrs,2)],['spot S',f.s.toLocaleString()],['trailing vol σ',fmt(100*f.sigma*volx,1)+'%'],
+    ['model value of Yes',fmt(r.v)],['this fill: Yes price',fmt(f.p)],['taker bought',(f.d===1?'Yes':'No')+' at '+fmt(r.cost)],
+    ['fee per share',fmt(r.fee,4)],['edge for the taker',(r.edge>=0?'+':'')+fmt(r.edge)],
+    ['fills taken so far',tally.n.toLocaleString()],['their stake',money(tally.stake)],['their result at settlement',money(tally.pnl)+(tally.stake?' ('+(100*tally.pnl/tally.stake).toFixed(1)+'%)':'')]
+  ].map(([b,s])=>'<div><b>'+b+'</b><span>'+s+'</span></div>').join('');
+  const vd=document.getElementById('verdict'); vd.className='verdict'+(r.take?' take':'');
+  vd.textContent=r.take?'The rule takes this fill: the side bought is worth '+fmt(r.worth)+' by the formula and cost '+fmt(r.cost)+' plus a fee of '+fmt(r.fee,4)+'.':'The rule passes: edge '+(r.edge>=0?'+':'')+fmt(r.edge)+' is under the bar of '+fmt(theta,2)+'.';
+}
+['cursor','volx','theta'].forEach(id=>document.getElementById(id).addEventListener('input',e=>{
+  if(id==='cursor') cursor=+e.target.value; if(id==='volx'){volx=+e.target.value/100;document.getElementById('volxv').textContent=volx.toFixed(2);} if(id==='theta'){theta=+e.target.value/100;document.getElementById('thetav').textContent=e.target.value;}
+  draw();
+}));
+document.getElementById('play').addEventListener('click',()=>{playing=!playing; document.getElementById('play').textContent=playing?'pause':'play'; if(playing){ if(cursor>=C.fills.length-1) cursor=0; step(); }});
+function step(){ if(!playing) return; cursor=Math.min(C.fills.length-1,cursor+35); document.getElementById('cursor').value=cursor; draw(); if(cursor>=C.fills.length-1){playing=false;document.getElementById('play').textContent='play';return;} requestAnimationFrame(()=>setTimeout(step,40)); }
+const cvs=document.getElementById('chart'), tip=document.getElementById('tip');
+cvs.addEventListener('mousemove',e=>{ if(!C) return; const rect=cvs.getBoundingClientRect(); const x=(e.clientX-rect.left)/rect.width*cvs.width; const tMin=C.expiry-36*3600; const t=tMin+(x-60)/(cvs.width-80)*36*3600; let best=0,bd=1e18; C.fills.forEach((g,i)=>{const d=Math.abs(g.t-t); if(d<bd){bd=d;best=i;}}); const g=C.fills[best]; const r=verdict(g,volx,theta); tip.style.display='block'; tip.style.left=(e.clientX-rect.left+14)+'px'; tip.style.top=(e.clientY-rect.top-10)+'px'; tip.innerHTML=((C.expiry-g.t)/3600).toFixed(2)+' h left: fill at '+fmt(g.p)+' ('+(g.d===1?'taker bought Yes':'taker bought No')+'), model '+fmt(r.v)+', edge '+(r.edge>=0?'+':'')+fmt(r.edge)+(r.take?' <b>take</b>':''); });
+cvs.addEventListener('mouseleave',()=>tip.style.display='none');
+cvs.addEventListener('click',e=>{ if(!C) return; const rect=cvs.getBoundingClientRect(); const x=(e.clientX-rect.left)/rect.width*cvs.width; const tMin=C.expiry-36*3600; const t=tMin+(x-60)/(cvs.width-80)*36*3600; let best=0,bd=1e18; C.fills.forEach((g,i)=>{const d=Math.abs(g.t-t); if(d<bd){bd=d;best=i;}}); cursor=best; document.getElementById('cursor').value=cursor; draw(); });
+
+// what-if
+function whatif(){
+  const S=+document.getElementById('wS').value, K=+document.getElementById('wK').value, Hh=+document.getElementById('wH').value, V=+document.getElementById('wV').value/100;
+  document.getElementById('wSv').textContent=S.toFixed(1); document.getElementById('wKv').textContent=K.toFixed(1); document.getElementById('wHv').textContent=Hh; document.getElementById('wVv').textContent=(100*V).toFixed(0);
+  const tau=Hh*3600; const v=V*Math.sqrt(tau/YEAR); const d2=(Math.log(S/K)-0.5*v*v)/v; const val=Phi(d2);
+  document.getElementById('wd2').textContent=(d2>=0?'+':'')+d2.toFixed(3); document.getElementById('wval').textContent=val.toFixed(3); document.getElementById('wno').textContent=(1-val).toFixed(3); document.getElementById('wfee').textContent=(0.07*val*(1-val)).toFixed(4);
+  const cv=document.getElementById('wchart'), ctx=cv.getContext('2d'); const W=cv.width,H=cv.height; ctx.fillStyle=css('--surface'); ctx.fillRect(0,0,W,H);
+  const X=s=>50+(s-90)/22*(W-70), Y=p=>H-30-p*(H-50);
+  ctx.strokeStyle=css('--grid'); [0,0.5,1].forEach(p=>{ctx.beginPath();ctx.moveTo(50,Y(p));ctx.lineTo(W-20,Y(p));ctx.stroke();});
+  ctx.fillStyle=css('--muted'); ctx.font='11px sans-serif'; ctx.fillText('1.0',22,Y(1)+4); ctx.fillText('0.5',22,Y(0.5)+4); ctx.fillText('0.0',22,Y(0)+4); ctx.fillText('spot',W/2,H-8);
+  ctx.setLineDash([5,4]); ctx.strokeStyle=css('--muted'); ctx.beginPath(); ctx.moveTo(X(K),Y(0)); ctx.lineTo(X(K),Y(1)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle=css('--orange'); ctx.lineWidth=2; ctx.beginPath(); for(let s=90;s<=112;s+=0.1){const p=Phi((Math.log(s/K)-0.5*v*v)/v); if(s===90) ctx.moveTo(X(s),Y(p)); else ctx.lineTo(X(s),Y(p));} ctx.stroke();
+  ctx.fillStyle=css('--blue'); ctx.beginPath(); ctx.arc(X(S),Y(val),5,0,6.283); ctx.fill();
+}
+['wS','wK','wH','wV'].forEach(id=>document.getElementById(id).addEventListener('input',whatif)); whatif();
+
+// tables
+const pct=x=>(100*x>=0?'+':'')+(100*x).toFixed(1)+'%';
+function row(label,sub,r,extra){const w=Math.max(0,100*r[0])*4; return '<tr title="'+(r[1]!==r[0]?'95% interval '+pct(r[1])+' to '+pct(r[2]):'')+'"><td>'+label+'<div class="small">'+sub+'</div></td><td><span class="bar" style="width:'+w+'px"></span> '+pct(r[0])+(r[1]!==r[0]?' <span class="ci">('+pct(r[1])+' to '+pct(r[2])+')</span>':'')+(extra?'<div class="small">'+extra+'</div>':'')+'</td></tr>';}
+function tables(){
+  document.getElementById('ladder').innerHTML='<tr><th>how the rule is scored</th><th>return on stake</th></tr>'+T.ladder.map(l=>row(l.label,l.sub,l.r,l.extra)).join('');
+  document.getElementById('ages').innerHTML='<tr><th>age of spot data</th><th>fills the formula endorses</th><th>fills it opposes</th></tr>'+T.ages.map(a=>'<tr><td>'+a.age+'</td><td>'+pct(a.endorsed[0])+' <span class="ci">('+pct(a.endorsed[1])+' to '+pct(a.endorsed[2])+')</span></td><td>'+pct(a.opposed[0])+' <span class="ci">('+pct(a.opposed[1])+' to '+pct(a.opposed[2])+')</span></td></tr>').join('');
+  document.getElementById('quarters').innerHTML='<tr><th>quarter</th><th>endorsed fills, return</th><th>stake that cleared the bar</th></tr>'+T.quarters.map(q=>'<tr><td>'+q.q+'</td><td>'+pct(q.r[0])+' <span class="ci">('+pct(q.r[1])+' to '+pct(q.r[2])+')</span></td><td>'+money(q.stake)+'</td></tr>').join('');
+  const e=T.encompass; document.getElementById('enc').textContent='Regressing the outcome on the log-odds of both forecasts puts weight '+e.w_price.toFixed(2)+' on the fill price and '+e.w_model.toFixed(2)+' ('+e.w_model_ci[0].toFixed(2)+' to '+e.w_model_ci[1].toFixed(2)+') on the formula: each knows something the other does not.';
+}
+function equity(){
+  const cv=document.getElementById('equity'), ctx=cv.getContext('2d'); const W=cv.width,H=cv.height; ctx.fillStyle=css('--surface'); ctx.fillRect(0,0,W,H);
+  const d=T.equity.day, c=T.equity.cum; const X=i=>50+(d[i]-d[0])/(d[d.length-1]-d[0])*(W-70); const mx=Math.max(...c), mn=Math.min(0,...c); const Y=v=>H-30-(v-mn)/(mx-mn)*(H-50);
+  const conf=Math.floor(Date.UTC(2026,3,1)/86400000); const xi=d.findIndex(x=>x>=conf); if(xi>0){ctx.fillStyle=css('--grid'); ctx.fillRect(X(xi),20,W-20-X(xi),H-50);}
+  ctx.strokeStyle=css('--grid'); [0,0.5,1].forEach(f=>{const v=mn+(mx-mn)*f; ctx.beginPath();ctx.moveTo(50,Y(v));ctx.lineTo(W-20,Y(v));ctx.stroke(); ctx.fillStyle=css('--muted'); ctx.font='11px sans-serif'; ctx.fillText(money(v),2,Y(v)+4);});
+  ctx.strokeStyle=css('--blue'); ctx.lineWidth=2; ctx.beginPath(); c.forEach((v,i)=>{ if(i===0) ctx.moveTo(X(i),Y(v)); else ctx.lineTo(X(i),Y(v)); }); ctx.stroke();
+  ctx.fillStyle=css('--muted'); [0,Math.floor(d.length/2),d.length-1].forEach(i=>{const dt=new Date(d[i]*86400000); ctx.fillText(dt.toISOString().slice(0,7),X(i)-20,H-8);});
+  if(xi>0){ctx.fillStyle=css('--ink2'); ctx.fillText('confirmation period',X(xi)+8,34);}
+}
+</script>
+</body>
+</html>

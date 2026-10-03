@@ -1,0 +1,290 @@
+[
+ {
+  "qid": "Q003",
+  "question": "Will Iran target Qatar by August 31, 2026?",
+  "resolution_rules": "This market will resolve to \u201cYes\u201d if Iran targets Qatar  through a qualifying military action between market creation and the listed date, Arabia Standard Time (AST). Otherwise, this market will resolve to \u201cNo.\u201d\n\nA qualifying military action refers to an air strike or a surface-to-surface missile strike, initiated by Iran, directed at Qatar. An air strike includes bombs, air-to-surface missiles, and air-launched drones. A surface-to-surface missile strike includes one-way attack drones and surface-to-surface missiles such as cruise or ballistic missiles.\n\nThe following actions do not constitute a qualifying military action:\nSurface-to-air missile strikes;\nSmall-arms fire;\nGround incursions;\nCyber operations;\nNaval gunfire and artillery fire;\nHowitzers, artillery pieces, mortars, and rocket artillery (e.g. MLRS systems);\nMinor surface-to-surface strikes, including short range loitering munitions, FPV drones, and ATGM strikes;\nAny threat, authorization, or announcement of force that has not been executed.\n\nMilitary action that consists primarily or exclusively of munitions that are intercepted before impact will still qualify if they constitute a qualifying military action during the specified timeframe; whether the munitions were intercepted, where the munitions landed, and whether damage resulted will not be considered.\n\nA military action will be considered directed at Qatar if it is directed at the terrestrial territory of Qatar, including any internal waters.\n\nOnly military",
+  "market_opened": "2026-08-18",
+  "today": "2026-08-22",
+  "scheduled_end": "2026-08-31"
+ },
+ {
+  "qid": "Q011",
+  "question": "Will Auyl win the second most seats in the 2026 Kazakh Kurultai elections?",
+  "resolution_rules": "Parliamentary elections to elect the Kurultai of Kazakhstan are scheduled to take place on August 23, 2026.\n\nThis market will resolve to the political party that wins the second-most number of seats in the Kurultai of Kazakhstan as a result of this election.\n\nIf the results of the specified election are not definitively known by July 31, 2027, this market will resolve to \"Other\".\n\nThe named parties will be primarily ranked by the number of seats won in the specified election. If two or more parties are tied on seats, ties will be broken by the total number of valid votes received, with higher vote totals ranking higher. If parties remain tied, ties will be broken by alphabetical order of the listed party names. This market will resolve to the party that occupies the second finishing position after applying this ranking.\n\nThis market's resolution will be based solely on the number of seats won by the named party.\n\nThis market will resolve based on the results of the elections, as indicated by a consensus of credible reporting. In the case of ambiguity, this market will resolve solely based on the results as reported by the Kazakh government.",
+  "market_opened": "2026-07-14",
+  "today": "2026-07-26",
+  "scheduled_end": "2026-08-23"
+ },
+ {
+  "qid": "Q019",
+  "question": "Will annual inflation be 3.6% in July?",
+  "resolution_rules": "This is a market about inflation over the 12-month period ending July 2026, before seasonal adjustment, as reported by the Bureau of Labor Statistics.\n\nThis market will resolve to the percentage change in the Consumer Price Index (CPI) over the 12-month period ending in July 2026 according to the monthly Bureau of Labor Statistics (BLS) report.\n\nThe resolution source for this market will be the BLS Consumer Price Index report released for July 2026 (https://www.bls.gov/bls/news-release/cpi.htm), currently scheduled to be released on August 12, 2026, at 8:30 AM ET. Resolution of this market will take place upon release of the aforementioned data.\n\nNote: the resolution source for this market will be the official monthly BLS CPI news release, which reports inflation over 12-month periods to only one decimal point (e.g., 2.9%). Thus, this is the level of precision that will be used when resolving the market.\n\nIf the BLS does not release the relevant figures on the scheduled date, this market may remain open up until the scheduled release time of the next CPI report (https://www.bls.gov/schedule). If the information is not released by that time, this market will resolve according to the figures of the most recent previous month with available data.",
+  "market_opened": "2026-07-14",
+  "today": "2026-07-23",
+  "scheduled_end": "2026-08-12"
+ },
+ {
+  "qid": "Q027",
+  "question": "Will the price of Bitcoin be above $76,000 on August 26?",
+  "resolution_rules": "This market will resolve to \"Yes\" if the Binance 1 minute candle for BTC/USDT 12:00 in the ET timezone (noon) on the date specified in the title has a final \"Close\" price higher than the price specified in the title. Otherwise, this market will resolve to \"No\".\n\nThe resolution source for this market is Binance, specifically the BTC/USDT \"Close\" prices currently available at https://www.binance.com/en/trade/BTC_USDT with \"1m\" and \"Candles\" selected on the top bar.\n\nPlease note that this market is about the price according to Binance BTC/USDT, not according to other exchanges or trading pairs.\n\nPrice precision is determined by the number of decimal places in the source.",
+  "market_opened": "2026-08-19",
+  "today": "2026-08-21",
+  "scheduled_end": "2026-08-26"
+ },
+ {
+  "qid": "Q035",
+  "question": "Will Coca-Cola (KO) beat quarterly earnings?",
+  "resolution_rules": "As of market creation, Coca-Cola is estimated to release earnings on July 28, 2026. The Street consensus estimate for Coca-Cola\u2019s non-GAAP EPS for the relevant quarter is $0.93 as of market creation. This market will resolve to \"Yes\" if Coca-Cola reports non-GAAP EPS greater than $0.93 for the relevant quarter in its next quarterly earnings release. Otherwise, it will resolve to \"No.\" The resolution source will be the non-GAAP EPS listed in the company\u2019s official earnings documents. \n\nIf Coca-Cola releases earnings without non-GAAP EPS, then the market will resolve according to the non-GAAP EPS figure reported by SeekingAlpha. If no such figure is published within 96h of market close (4:00:00pm ET) on the day earnings are announced, the market will resolve according to the GAAP EPS listed in the company\u2019s official earnings documents; or, if not published there, according to the GAAP EPS provided by SeekingAlpha. If no GAAP EPS number is available from either source at that time, the market will resolve to \u201cNo.\u201d (For the purposes of this market, GAAP EPS refers to diluted GAAP EPS, unless it is not published, in which case it refers to basic GAAP EPS.)\n\nIf the company does not release earnings within 45 calendar days of the estimated earnings date, this market will resolve to \u201cNo.\u201d \n\nNote: Subsequent restatements, corrections, or revisions made to the initially announced non-GAAP EPS figure will not qualify for resolution, except in the case of obvious and immediate mistakes (",
+  "market_opened": "2026-07-16",
+  "today": "2026-07-19",
+  "scheduled_end": "2026-07-28"
+ },
+ {
+  "qid": "Q043",
+  "question": "Will Anthropic extend Claude Fable 5 paid-plan access again by July 19?",
+  "resolution_rules": "On July 12, 2026, Anthropic announced that it was extending access to Claude Fable 5 on all paid plans through July 19, 2026, ahead of the previously scheduled cutoff after which the model would move to usage-credit-only billing (https://x.com/claudeai/status/2076351399999557669).\n\nThis market will resolve to \"Yes\" if Anthropic announces a qualifying extension of access to \"Claude Fable 5\" beyond July 19, 2026, by the listed date, 11:59 PM ET. Otherwise, this market will resolve to \"No.\"\n\nA qualifying extension requires Fable 5 to remain included in standard usage limits, without requiring usage credits for baseline access, on at least one of the Pro, Max, or Team plans. An extension covering only the Enterprise plan does not qualify. The percentage cap itself is irrelevant to qualification (higher, lower, unchanged, or removed all count), so long as some portion of the included allowance can be spent on Fable without drawing from a usage-credit balance.\n\nThe primary resolution source for this market will be official information from Anthropic; however, a consensus of credible reporting will also be used.",
+  "market_opened": "2026-07-12",
+  "today": "2026-07-15",
+  "scheduled_end": "2026-07-19"
+ },
+ {
+  "qid": "Q051",
+  "question": "Will Trump say \"Transgender\" during cabinet meeting?",
+  "resolution_rules": "Trump is scheduled to hold a cabinet meeting on July 31, 2026 (https://www.youtube.com/watch?v=8ytbAVpDBXs&t=62s). \n\nThis market will resolve to \"Yes\" if Trump says the listed term during the cabinet meeting scheduled for July 31, 2026. Otherwise, the market will resolve to \"No\".\n\nThis market is explicitly about Trump's cabinet meeting, scheduled for July 31, 2026. Speeches, events, or comments that occur outside of the named, scheduled event will not qualify toward this market's resolution.\n\nIf this event is definitively cancelled, or otherwise is not aired by August 1, 2026, 11:59 PM ET, \"-No Qualifying Event-\" will resolve to \"Yes\" and all other brackets will resolve to \"No\". \n\nThe resolution source will be audio/video of the event.\n\nFor full rules, see: https://polymarket-upload.s3.us-east-2.amazonaws.com/market_products/Event+Mentions+Contract+DeFi.pdf",
+  "market_opened": "2026-07-28",
+  "today": "2026-07-29",
+  "scheduled_end": "2026-07-31"
+ },
+ {
+  "qid": "Q059",
+  "question": "Will there be fewer than 1 North Korea test in September 2026?",
+  "resolution_rules": "This market will resolve to the number of calendar days on which North Korea (DPRK) conducts a missile launch during September 2026, Pyongyang Time.\n\nIf a single test event spans multiple calendar days, it will count only for the day on which it began.\n\nOnly test launches of ballistic missiles, cruise missiles, and anti-ship missiles will qualify.\n\nTest launches of other systems, including surface-to-air missiles (SAMs), multiple launch rocket systems (MLRS)/rocket artillery, torpedoes, or similar systems, will not qualify.\n\nResolution will be based on publicly available information from reliable sources such as official government statements, reports from international monitoring bodies like the United Nations, or reports from reputable international media.",
+  "market_opened": "2026-08-21",
+  "today": "2026-09-02",
+  "scheduled_end": "2026-09-30"
+ },
+ {
+  "qid": "Q067",
+  "question": "Will GPT-6 be released by September 15, 2026?",
+  "resolution_rules": "This market will resolve to \"Yes\" if OpenAI's GPT-6 model is made available to the general public by September 15, 2026, 11:59 PM ET. Otherwise, this market will resolve to \"No.\"\n\nFor this market to resolve to \"Yes,\" GPT-6 must be launched and publicly accessible, including via open beta or open rolling waitlist signups. A closed beta or any form of private access will not suffice. The release must be clearly defined and publicly announced by OpenAI as being accessible to the general public.\n\nGPT-6 refers to a product explicitly named GPT-6 (e.g. ChatGPT-6o would count), or one that is recognized as a successor to GPT-5, similar to the progression from GPT-3 to GPT-4. Products labeled as GPT-5.5 or similar will not count for this market's resolution.\n\nThe primary resolution source for this market will be official information from OpenAI, with additional verification from a consensus of credible reporting.",
+  "market_opened": "2026-08-14",
+  "today": "2026-08-24",
+  "scheduled_end": "2026-09-16"
+ },
+ {
+  "qid": "Q075",
+  "question": "Hormuz Island no longer under Iranian control by August 31?",
+  "resolution_rules": "This market will resolve to \"Yes\" if Hormuz Island is no longer under Iranian control by the specified date, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\n\"No longer under the control of Iran\" means that Iran no longer exercises primary governmental or military control over Hormuz Island, and another state, occupying force, or internationally backed authority has established control over the island.\n\nTemporary raids, isolated landings, special operations, bombardment, sabotage, naval presence offshore, or temporary disruption of Iranian activity will not qualify on their own.\n\nAn announcement, threat, or claim that Iran has lost control will not qualify without actual control being established.\n\nIf control changes pursuant to a negotiated settlement, ceasefire term, surrender, or transfer agreement, this will qualify only once actual control has been established on the island.\n\nIf control over Hormuz Island is contested, unclear, disputed, or not sufficiently established by the resolution date, this will not qualify, and the market will resolve to \"No\".\n\nThe primary resolution source will be official statements from the relevant governments and militaries, along with a consensus of credible reporting.",
+  "market_opened": "2026-07-21",
+  "today": "2026-08-02",
+  "scheduled_end": "2026-09-01"
+ },
+ {
+  "qid": "Q083",
+  "question": "Will MrBeast's next video get between 90 and 100 million views on week 1?",
+  "resolution_rules": "This market will resolve according to the number of views the next YouTube video posted by MrBeast after this market's creation gets in the first 7 days after being posted.\n\nIf MrBeast does not post a YouTube video by October 31, 2026, 11:59 PM ET, this market will resolve to the lowest range bracket.\n\nIf the reported value falls exactly between two brackets, this market will resolve to the higher range bracket.\n\nIf the resolution source is not available at the end of the specified duration, this market will resolve according to most recent number of views available before the end of the specified duration.\n\nThe resolution source for this is MrBeast's YouTube channel (https://www.youtube.com/@MrBeast), specifically the 'views' counter for the described video.\n\nNote: This market refers to MrBeast's next video posted. Shorts, previews, or other videos released other than the referenced video will not be considered.",
+  "market_opened": "2026-09-17",
+  "today": "2026-09-20",
+  "scheduled_end": "2026-09-26"
+ },
+ {
+  "qid": "Q091",
+  "question": "Trump endorses China's claim to Taiwan by end of summit?",
+  "resolution_rules": "Xi Jinping is scheduled to begin a state visit to the United States around September 24, 2026, where he will be received by Donald Trump at the White House.\n\nThis market will resolve to \u201cYes\u201d if Donald Trump publicly endorses the People's Republic of China's claim of sovereignty over Taiwan by the end of this summit. Otherwise, this market will resolve to \"No\".\n\nTo qualify, Trump must make an explicit public statement affirming that Taiwan is part of China, that China has sovereignty over Taiwan, or that the United States supports China's claim to Taiwan.\n\nRestating the long-standing United States \"One China policy\", acknowledging that China holds such a position, noting that the United States does not support Taiwanese independence, or declining to say whether the United States would defend Taiwan will not qualify, as none of these constitutes an endorsement of China's claim.\n\nAny written, verbal, or recorded public statement by Trump qualifies. A statement issued jointly by the United States and China will qualify if Trump personally endorses it.\n\nThe summit will be considered to have ended at the end of the calendar day (ET) on which Xi Jinping physically departs from United States territory. No meetings, events, or statements which occur after this time will be considered.\n\nIf Xi Jinping does not physically enter the terrestrial or maritime territory of the United States by October 7, 2026, 11:59 PM ET, this market will resolve to \u201cNo\u201d.\n\nThe resolution source will be a co",
+  "market_opened": "2026-09-16",
+  "today": "2026-09-23",
+  "scheduled_end": "2026-10-08"
+ },
+ {
+  "qid": "Q099",
+  "question": "Sweden Parliamentary Election: \u00d6rebropartiet Win Seats?",
+  "resolution_rules": "Parliamentary elections are scheduled to be held in Sweden on September 13, 2026.\n\nThis market will resolve to \u201cYes\u201d if \u00d6rebropartiet receives at least one seat in the Swedish Riksdag as a result of the 2026 Swedish parliamentary elections. Otherwise this market will resolve to \u201cNo\u201d.\n\nSeats will be counted only where the Swedish Election Authority attributes them to \u00d6rebropartiet. Seats attributed to another party or electoral designation will not count, regardless of electoral cooperation, endorsements, coalition agreements, or subsequent parliamentary-group arrangements. If \u00d6rebropartiet formally merges into a successor party before the election and does not contest separately, seats officially attributed to that successor party will count.\n\nIf the results of this election are not definitively known by December 31, 2026, 11:59 PM ET, this market will resolve to \u201cNo\u201d.\n\nThis market's resolution will be based solely on the number of seats won by \u00d6rebropartiet in this election.\n\nThis market will resolve based on the results of this election as indicated by a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the Swedish government, specifically the Swedish Election Authority (Valmyndigheten) (https://www.val.se/).",
+  "market_opened": "2026-08-25",
+  "today": "2026-08-31",
+  "scheduled_end": "2026-09-13"
+ },
+ {
+  "qid": "Q107",
+  "question": "Will Kai and Speed finish their Minecraft marathon by August 21?",
+  "resolution_rules": "Kai Cenat and IShowSpeed are scheduled to stream a hardcore Minecraft marathon beginning on August 7, 2026, at 5:00 PM ET.\n\nThis market will resolve to \"Yes\" if Kai Cenat ends his Twitch broadcast of the marathon between market creation and the specified date, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nThis market will resolve based on the time (ET) that Kai Cenat's Twitch channel stops broadcasting a livestream of the marathon. To qualify, Kai Cenat must not resume the marathon broadcast within 12 hours of ending it. This market will stay open for 12 hours after the stream ends to confirm the finality of the marathon. \n\nIf Kai Cenat begins broadcasting again within 12 hours after ending his previous stream, the marathon will be treated as continuing, regardless of the content of the new stream.\n\nCompletion of any Minecraft challenge will not be considered for resolution. Time spent broadcasting after the challenge has been completed or abandoned, including time spent on activities unrelated to Minecraft, will count toward the marathon.\n\nThe resolution source for this market will be Kai Cenat's official broadcast on Twitch (https://www.twitch.tv/kaicenat).",
+  "market_opened": "2026-08-09",
+  "today": "2026-08-12",
+  "scheduled_end": "2026-08-21"
+ },
+ {
+  "qid": "Q115",
+  "question": "Will fewer than 25 ships transit the Strait of Hormuz between August 17-August 23?",
+  "resolution_rules": "This market will resolve according to the total number of transit calls that IMF Portwatch reports for the Strait of Hormuz for all days from August 17, 2026, through August 23, 2026, inclusive.\n\nTransit calls include container, dry bulk, roll-on/roll-off, general cargo, and tanker ships. Ships not reported by IMF Portwatch will not be considered.\n\nThis market will resolve as soon as all relevant data has been published. If the relevant data is not published within 14 calendar days of the specified date, this market will resolve based on the most recent data published up to that point.\n\nIn case of obvious data integrity issues (i.e., erroneous data), the market may remain open until the end of the third calendar day (ET) after the date on which such data is first released to allow for corrections. Data integrity issues refer only to clerical or other similar errors in the underlying data, and do not include cases where IMF Portwatch differs from alternative sources.\n\nOnly revisions to previously published data points made before all relevant data has been published will be considered.\n\nThe resolution source for this market will be IMF Portwatch, specifically the transit calls data published for the Strait of Hormuz at https://portwatch.imf.org/pages/cb5856222a5b4105adc6ee7e880a1730, both in the chart and through downloadable files.",
+  "market_opened": "2026-08-14",
+  "today": "2026-08-17",
+  "scheduled_end": "2026-08-23"
+ },
+ {
+  "qid": "Q123",
+  "question": "Will \"Spider-Man: Brand New Day\" 2nd Weekend Box Office be between 160m and 170m?",
+  "resolution_rules": "This market will resolve according to how much \"Spider-Man: Brand New Day\" Weekend Box Office will gross domestically on its second weekend. The \"Daily Box Office Performance\" figures found on the \u201cBox Office\u201d tab on this movie's The Numbers (https://www.the-numbers.com/) page will be used to resolve this market once the values for the 3-day weekend (August 7 - 9) are final (i.e., not studio estimates).\n\nIf the reported value falls exactly between two brackets, then this market will resolve to the higher range bracket.\n\nPlease note, this market will resolve according to the The Numbers figures provided under Weekend Box Office Performance for the 3-day weekend (which typically includes Thursday's previews), regardless of whether domestic refers to only the USA, or to USA and Canada, etc.\n\nIf there is ambiguity as to whether the resolution source's figures are final, this market will remain open until both https://www.boxofficemojo.com/ and https://www.the-numbers.com/ have confirmed their finalized figures.\n\nIf there is no final data available by August 14, 2026, 11:59 PM ET, another credible resolution source will be chosen.",
+  "market_opened": "2026-08-06",
+  "today": "2026-08-07",
+  "scheduled_end": "2026-08-09"
+ },
+ {
+  "qid": "Q131",
+  "question": "Will David Crowley win Waukesha County in the Wisconsin Democratic Governor primary?",
+  "resolution_rules": "This market will resolve according to the candidate who receives the most valid votes from Waukesha County in the Democratic Primary for Governor of Wisconsin, which is scheduled to be held on August 11, 2026.\n\nThe named candidates will be primarily ranked by the number of valid votes received in the specified election. If two or more candidates are tied on valid votes, ties will be broken by alphabetical order of the candidates' last names. This market will resolve to the candidate that occupies the highest finishing position after applying this ranking.\n\nIf the Waukesha County results of this election are not definitively known by December 31, 2026, this market will resolve to \u201cOther.\u201d\n\nThis market will resolve based on a consensus of credible reporting. If there is ambiguity, this market will resolve based solely on the official results as reported by the government of Wisconsin including the Wisconsin Elections Commission and the government of Waukesha County.",
+  "market_opened": "2026-08-07",
+  "today": "2026-08-08",
+  "scheduled_end": "2026-08-11"
+ },
+ {
+  "qid": "Q139",
+  "question": "Will Google be the second-best Math AI lab at the end of August 2026?",
+  "resolution_rules": "This market will resolve according to the second-highest ranked Company based on the arena.ai Text Arena (Math) when the table under the \"Leaderboard\" tab filtered for \"Labs\" is checked on August 31, 2026, 12:00 PM ET.\n\nResults from the \"Lab Rank\" column under the \"Text Arena | Math\" Leaderboard tab at https://arena.ai/leaderboard/text/math-no-style-control?rankBy=labs with style control off (Adjustments: None) and filtered for \"Labs\" will be used to resolve this market.\n\nAI companies will be ordered primarily by their Lab Rank at the market\u2019s check time. If the results based on the lab ranking are ambiguous or unavailable, the relevant AI companies will be ordered according to their highest-ranking AI model in the leaderboard\u2019s \u201cModels\u201d view. If two or more models are tied on rank, they will be ordered by their Arena score, including any underlying, unrounded, granular values reflected in the data below the leaderboard. If a tie still remains, alphabetical order of AI lab/company names as listed in this market group will be used as a final tiebreaker (e.g., if the two models are tied by exact arena score, \u201cGoogle\u201d would be ranked ahead of \u201cSpaceXAI\u201d). This market will resolve based on the company that occupies second place under this ranking.\n\nThe resolution source for this market is the arena.ai Text Arena (Math). If this resolution source is unavailable at check time, this market will remain open until the leaderboard comes back online and will resolve based on the first c",
+  "market_opened": "2026-07-21",
+  "today": "2026-08-02",
+  "scheduled_end": "2026-09-01"
+ },
+ {
+  "qid": "Q147",
+  "question": "Will MrBeast's next video get between 50 and 60 million views on week 1?",
+  "resolution_rules": "This market will resolve according to the number of views the next YouTube video posted by MrBeast after this market's creation gets in the first 7 days after being posted.\n\nIf MrBeast does not post a YouTube video by September 30, 2026, 11:59 PM ET, this market will resolve to the lowest range bracket.\n\nIf the reported value falls exactly between two brackets, this market will resolve to the higher range bracket.\n\nThe resolution source for this is MrBeast's YouTube channel (https://www.youtube.com/@MrBeast), specifically the 'views' counter for the described video.\n\nNote: This market refers to MrBeast's next video posted. Shorts, previews, or other videos released other than the referenced video will not be considered.",
+  "market_opened": "2026-08-19",
+  "today": "2026-08-22",
+  "scheduled_end": "2026-08-29"
+ },
+ {
+  "qid": "Q155",
+  "question": "Iran leadership change by August 22?",
+  "resolution_rules": "This market will resolve to \"Yes\" if the Supreme Leader of Iran, Mojtaba Khamenei, ceases to be the de facto leader of Iran at any point between market creation and the listed date (ET). Otherwise, this market will resolve to \"No\".\n\nMojtaba Khamenei will be considered to no longer be the de facto leader of Iran if he is removed from power, is detained, or otherwise loses his position or is prevented from acting as the de facto leader of Iran within this market's timeframe.\n\nAn official announcement of Mojtaba Khamenei\u2019s resignation or removal will qualify for a \"Yes\" resolution regardless of when the announced departure goes into effect.\n\nThe primary resolution source for this market will be a consensus of credible reporting.",
+  "market_opened": "2026-08-07",
+  "today": "2026-08-12",
+  "scheduled_end": "2026-08-23"
+ },
+ {
+  "qid": "Q163",
+  "question": "Will David Harbour \u2013 \u201cDTF St. Louis\u201d win Emmys 2026: Outstanding supporting actor in a limited or anthology series or movie?",
+  "resolution_rules": "The 78th Primetime Emmy Awards, given by the Academy of Television Arts & Sciences, honor the best in American prime time television programming aired between June 1, 2025, until May 31, 2026. The awards ceremony is scheduled for September 14, 2026, at the Peacock Theater in Downtown Los Angeles, California\n\nThis market will resolve according to the person who wins the 2026 Emmy award for \u201cOutstanding supporting actor in a limited or anthology series or movie\u201d.\n\nIf for any reason no winner is declared by October 31, 2026, 11:59 PM ET, or in case of overall cancellation or a tie for winner, this market will resolve in favor of the nominee which comes first in alphabetical order.\n\nThe primary resolution source for this market will be official information from the Academy of Television Arts & Sciences and the Emmys, including data from their websites (e.g. https://theemmys.tv/, https://www.televisionacademy.com/) and the live broadcast of the award ceremony, however a consensus of credible reporting may also be used.",
+  "market_opened": "2026-07-10",
+  "today": "2026-07-30",
+  "scheduled_end": "2026-09-14"
+ },
+ {
+  "qid": "Q171",
+  "question": "Will Iran target Ukraine by August 31, 2026?",
+  "resolution_rules": "This market will resolve to \u201cYes\u201d if Iran targets Ukraine through a qualifying military action between market creation and the specified date, Kyiv time. Otherwise, this market will resolve to \u201cNo.\u201d\n\nA qualifying military action refers to an air strike or a surface-to-surface missile strike, initiated by Iran, directed at Ukraine. An air strike includes bombs, air-to-surface missiles, and air-launched drones. A surface-to-surface missile strike includes one-way attack drones and surface-to-surface missiles such as cruise or ballistic missiles.\n\nThe following actions do not constitute a qualifying military action:\nSurface-to-air missile strikes;\nSmall-arms fire;\nGround incursions;\nCyber operations;\nNaval gunfire and artillery fire;\nHowitzers, artillery pieces, mortars, and rocket artillery (e.g. MLRS systems);\nMinor surface-to-surface strikes, including short range loitering munitions, FPV drones, and ATGM strikes;\nAny threat, authorization, or announcement of force that has not been executed.\n\nMilitary action that consists primarily or exclusively of munitions that are intercepted before impact will still qualify if they constitute a qualifying military action during the specified timeframe; whether the munitions were intercepted, where the munitions landed, and whether damage resulted will not be considered.\n\nA military action will be considered directed at Ukraine if it is directed at the terrestrial territory of Ukraine, including any internal waters.\n\nOnly military action",
+  "market_opened": "2026-07-28",
+  "today": "2026-08-07",
+  "scheduled_end": "2026-08-31"
+ },
+ {
+  "qid": "Q179",
+  "question": "Will 75-99 ships transit the Strait of Hormuz between July 20-July 26?",
+  "resolution_rules": "This market will resolve according to the total number of transit calls that IMF Portwatch reports for the Strait of Hormuz for all days from July 20, 2026, through July 26, 2026, inclusive.\n\nTransit calls include container, dry bulk, roll-on/roll-off, general cargo, and tanker ships. Ships not reported by IMF Portwatch will not be considered.\n\nThis market will resolve as soon as all relevant data has been published. If the relevant data is not published within 14 calendar days of the specified date, this market will resolve based on the most recent data published up to that point.\n\nIn case of obvious data integrity issues (i.e., erroneous data), the market may remain open until the end of the third calendar day (ET) after the date on which such data is first released to allow for corrections. Data integrity issues refer only to clerical or other similar errors in the underlying data, and do not include cases where IMF Portwatch differs from alternative sources.\n\nOnly revisions to previously published data points made before all relevant data has been published will be considered.\n\nThe resolution source for this market will be IMF Portwatch, specifically the transit calls data published for the Strait of Hormuz at https://portwatch.imf.org/pages/cb5856222a5b4105adc6ee7e880a1730, both in the chart and through downloadable files.",
+  "market_opened": "2026-07-17",
+  "today": "2026-07-20",
+  "scheduled_end": "2026-07-26"
+ },
+ {
+  "qid": "Q187",
+  "question": "Total Internet Blackout in Iran by July 31, 2026?",
+  "resolution_rules": "This market will resolve to \u201cYes\u201d if a total internet blackout occurs in Iran by the specified date, 11:59 PM UTC. Otherwise, this market will resolve to \u201cNo\u201d.\n\nFor the purposes of this market, a \u201ctotal internet blackout\u201d occurring means that, according to Cloudflare Radar data for Iran, total bytes transferred have fallen to 1.0% or less of the last 4 weeks\u2019 Max for at least six consecutive hourly data points, as shown in the Traffic trends \u2192 Bytes transferred (Total bytes) chart for the last 4 weeks (https://radar.cloudflare.com/traffic/ir?dateRange=28d). \n\nThe relevant figures for each hourly data point are listed in this chart as \u201c__% of Max\u201d. The Max for each data point will be the Max figure used in the chart by Cloudflare.\n\nOnly the first of the relevant consecutive hourly data points must fall before this market\u2019s resolution time. If required, to confirm the full sequence, the market will remain open until both relevant data points are observed.\n\nThe primary resolution source for this market will be Cloudflare Radar data for Iran, specifically the Iran Traffic trends chart for the last 4 weeks found at https://radar.cloudflare.com/traffic/ir?dateRange=28d. If this resolution source becomes permanently unavailable, a consensus of credible reporting may also be used.",
+  "market_opened": "2026-07-20",
+  "today": "2026-07-24",
+  "scheduled_end": "2026-07-31"
+ },
+ {
+  "qid": "Q195",
+  "question": "Will the price of Bitcoin be above $72,000 on September 18?",
+  "resolution_rules": "This market will resolve to \"Yes\" if the Binance 1 minute candle for BTC/USDT 12:00 in the ET timezone (noon) on the date specified in the title has a final \"Close\" price higher than the price specified in the title. Otherwise, this market will resolve to \"No\".\n\nThe resolution source for this market is Binance, specifically the BTC/USDT \"Close\" prices currently available at https://www.binance.com/en/trade/BTC_USDT with \"1m\" and \"Candles\" selected on the top bar.\n\nPlease note that this market is about the price according to Binance BTC/USDT, not according to other exchanges or trading pairs.\n\nPrice precision is determined by the number of decimal places in the source.",
+  "market_opened": "2026-09-11",
+  "today": "2026-09-13",
+  "scheduled_end": "2026-09-18"
+ },
+ {
+  "qid": "Q203",
+  "question": "Will Core CPI MoM be 0.2% in August?",
+  "resolution_rules": "This is a market about the one-month percent change in the Consumer Price Index for All Urban Consumers excluding food and energy in August 2026 as reported by the Bureau of Labor Statistics.\n\nThis market will resolve to the one-month percentage change in the Consumer Price Index for All Urban Consumers excluding food and energy (Core CPI-U) in August 2026 according to the monthly Bureau of Labor Statistics (BLS) report (seasonally adjusted change from the preceding month).\n\nThe resolution source for this market will be the BLS Consumer Price Index report released for August 2026 (https://www.bls.gov/bls/news-release/cpi.htm), currently scheduled to be released on September 11, 2026, at 8:30 AM ET. Resolution of this market will take place upon release of the aforementioned data.\n\nNote: the resolution source for this market will be the official monthly BLS CPI news release, which reports core inflation (all items less food and energy) over 1-month periods to only one decimal point (e.g., 0.3%). Thus, this is the level of precision that will be used when resolving the market. For the avoidance of doubt, this market resolves on the core CPI figure \u2014 the all items index excluding food and energy \u2014 not the headline all items CPI figure.\n\nIf the BLS does not release the relevant figures on the scheduled date, this market may remain open up until the scheduled release time of the next CPI report (https://www.bls.gov/schedule). If the information is not released by that time, this m",
+  "market_opened": "2026-08-12",
+  "today": "2026-08-21",
+  "scheduled_end": "2026-09-11"
+ },
+ {
+  "qid": "Q211",
+  "question": "Will Elon Musk post 140-159 tweets from August 14 to August 21, 2026?",
+  "resolution_rules": "This market will resolve according to the number of times Elon Musk (@elonmusk), posts on X from August 14 12:00 PM ET to August 21, 2026 12:00 PM ET.\n\nFor the purposes of this market, only main feed posts, quote posts and reposts will count.\n\nReplies will NOT count towards the total - however, replies on the main feed such as https://x.com/elonmusk/status/1786073478711353576 will be counted by the tracker.\n\nDeleted posts will count as long as they remain available long enough to be captured by the tracker (~5 minutes).\n\nCommunity reposts which are not counted by the tracker not count toward the total.\n\nThe resolution source for this market is the 'Post Counter' figure for posts found at https://xtracker.polymarket.com. Individual posts can be viewed by clicking \"Export Data\". If the tracker does not update correctly in accordance with the rules, X itself may be used as a secondary resolution source.",
+  "market_opened": "2026-08-11",
+  "today": "2026-08-14",
+  "scheduled_end": "2026-08-21"
+ },
+ {
+  "qid": "Q219",
+  "question": "Will claude-opus-5-max be the best AI model on August 24, 2026?",
+  "resolution_rules": "This market will resolve according to the model that has the highest arena rank based on the arena.ai Text Arena (Overall) when the table under the \"Leaderboard\" tab is checked on the specified date, 12:00 PM ET.\n\nResults from the \"Rank\" column under the \"Text Arena | Overall\" Leaderboard tab at https://arena.ai/leaderboard/text/overall-no-style-control with style control off (Adjustments: None) and filtered for \"Models\" will be used to resolve this market.\n\nNo new model will be added to this market after market creation. Any model not explicitly listed in this market will be encompassed under the \"Other\" option.\n\nModels will be ordered primarily by their leaderboard rank at the market\u2019s check time. If two or more models are tied on rank, they will be ordered by their Arena score, including any underlying, unrounded, granular values reflected in the data below the leaderboard. If a tie still remains, alphabetical order of model names as listed in this market group (full string, including suffixes such as \u201c-thinking\u201d) will be used as a final tiebreaker (e.g., if two models remain tied, \u201cclaude-opus-4-6\u201d would be ranked ahead of \u201cclaude-opus-4-6-thinking\u201d). This market will resolve to the model that comes first according to this order.\n\nThe resolution source for this market is the arena.ai Text Arena (Overall). If this resolution source is unavailable at check time, this market will remain open until the leaderboard comes back online and will resolve based on the first check af",
+  "market_opened": "2026-08-08",
+  "today": "2026-08-13",
+  "scheduled_end": "2026-08-24"
+ },
+ {
+  "qid": "Q227",
+  "question": "Will the Netherlands send warships through the Strait of Hormuz by August 31, 2026?",
+  "resolution_rules": "This market will resolve to \"Yes\" if a national government, its military, or a broad consensus of credible reporting confirms that the listed country's warships transited through the Strait of Hormuz between market creation and August 31, 2026, 11:59 PM ET. Otherwise, this market will resolve to \u201cNo\u201d.\n\nA \"warship transit\" is defined as a military vessel passing through the Strait of Hormuz. Military cargo or support vessels will be considered \u201cwarships\u201d; however, commercial or civilian vessels will not qualify.\n\nFor the purposes of this market, only transits through the Strait of Hormuz will be considered, defined as passage through the narrowest portion of the waterway between Iran and Oman. Operations solely in the Persian Gulf, Gulf of Oman, or Arabian Sea without passage through this narrowest section will not qualify.\n\nOfficial confirmation by a national government or its military that its vessels transited through the Strait of Hormuz during the specified timeframe will resolve this market immediately. An overwhelming consensus of credible reporting confirming that such a transit occurred during the specified timeframe will also suffice.\n\nQualifying confirmations must be made within this markets above specified timeframe and include official announcements that a country has deployed naval vessels to transit or escort shipping through the Strait of Hormuz.\n\nConfirmations referring only to naval presence in the broader region, including the Persian Gulf, Gulf of Oman, or ",
+  "market_opened": "2026-07-31",
+  "today": "2026-08-10",
+  "scheduled_end": "2026-09-01"
+ },
+ {
+  "qid": "Q235",
+  "question": "Will Bitcoin dip to $68,000 September 14-20?",
+  "resolution_rules": "This market will immediately resolve to \"Yes\" if any Binance 1 minute candle for Bitcoin (BTC/USDT) during the date range specified in the title (from 12:00 AM ET on the first date to 11:59 PM ET on the last) has a final \"Low\" price equal to or lower than the price specified in the title. Otherwise, this market will resolve to \"No.\"\n\nThe resolution source for this market is Binance, specifically the BTC/USDT \"Low\" prices available at https://www.binance.com/en/trade/BTC_USDT, with the chart settings on \"1m\" candles selected on the top bar.\n\nPlease note that the outcome of this market depends solely on the price data from the Binance BTC/USDT trading pair. Prices from other exchanges, different trading pairs, or spot markets will not be considered for the resolution of this market.",
+  "market_opened": "2026-09-14",
+  "today": "2026-09-16",
+  "scheduled_end": "2026-09-21"
+ },
+ {
+  "qid": "Q243",
+  "question": "Israel agrees to Board of Peace Gaza plan by August 7?",
+  "resolution_rules": "On July 30, 2026, the Board of Peace announced \"A Roadmap for Completing the Implementation of President Trump's Comprehensive Peace Plan in Gaza\" (the \"Board of Peace roadmap\"), setting out a phased process for disarmament in and Israeli withdrawal from the Gaza Strip.\n\nThis market will resolve to \"Yes\" if Israel announces that it has accepted or does accept this roadmap by the specified date, 11:59 PM ET. Otherwise, this market will resolve to \"No\".\n\nIsrael's acceptance of a plan described by a consensus of credible reporting as a revised or successor agreement to the initial roadmap (e.g., the implementation mechanism described in the roadmap) will qualify.\n\nA qualifying announcement must be a declarative statement of Israel's acceptance of or commitment to this roadmap or a qualifying successor agreement.\n\nA qualifying announcement must clearly and unambiguously identify the Board of Peace roadmap or a successor agreement. Statements that merely allude to, reference, or describe the roadmap or a successor agreement, without clearly communicating acceptance of it, do not qualify. The announcement need not use specific terminology or reference the roadmap by name, provided the substantive policy of accepting the roadmap is clearly and unambiguously communicated.\n\nA qualifying announcement must be made through official channels, by an individual acting in an official capacity. Statements made incidentally or informally in a context not intended for official communication do ",
+  "market_opened": "2026-07-31",
+  "today": "2026-08-03",
+  "scheduled_end": "2026-08-07"
+ },
+ {
+  "qid": "Q251",
+  "question": "Will Ralph Norman be the new Republican nominee for Senate in South Carolina?",
+  "resolution_rules": "This market will resolve according to the winner of the special Republican Primary for United States Senator from South Carolina, including any potential runoff.\n\nIf no 2026 special South Carolina Republican Senate Primary takes place by November 2, 2026, 11:59 PM ET, this market will resolve according to the candidate who is the official Republican nominee to contest the November 3, 2026 South Carolina U.S. Senate election.\n\nIf the results of the special primary are not definitively known, or if there is no Republican nominee to contest the November 3, 2026 South Carolina U.S. Senate election, by November 2, 2026, 11:59 PM ET, this market will resolve to \"Other\".\n\nThe resolution source for this market will be the first announcement of the results from the South Carolina Republican party, however an overwhelming consensus of credible reporting may suffice.",
+  "market_opened": "2026-07-12",
+  "today": "2026-07-25",
+  "scheduled_end": "2026-08-25"
+ },
+ {
+  "qid": "Q259",
+  "question": "Will \"A Toxic Love Story\" be the top US Netflix movie this week?",
+  "resolution_rules": "Netflix is expected to update its Top 10 movies list on top10.netflix.com on Tuesday, July 28, 2026, 3:00 PM ET, reflecting viewership from the previous week (Monday to Sunday).\n\nThis market will resolve based on which movie this update ranks as the #1 US Netflix movie.\n\nThe ranking is based on total views in the United States, as reported by Netflix for US Top 10 Movies.\n\nIf the top10.netflix.com update does not occur by July 31, 2026, 11:59 PM ET, this market will resolve to \"Other\".",
+  "market_opened": "2026-07-23",
+  "today": "2026-07-24",
+  "scheduled_end": "2026-07-28"
+ },
+ {
+  "qid": "Q267",
+  "question": "Will Natural Gas (NG) hit (LOW) $2.60 in August?",
+  "resolution_rules": "This market will resolve to \"Yes\" if, at any point after market creation and during a trading session of August 2026, any 1-minute candle for the Active Month of Natural Gas futures has a final \"High\" or \"Low\" price equal to or beyond (above for \u2191 High Prices, below for \u2193 Low Prices) the listed price. Otherwise, this market will resolve to \"No\".\n\nPrices will be used exactly as published by Pyth, without rounding.\n\nIf the Active Month contract does not trade at all during the listed time frame, this market will resolve to \"No\".\n\nOnly prices achieved during an applicable trading session of the specified timeframe's business days will be considered. The trading session for a given business day typically begins at 6:00 PM ET on the prior calendar date. Under the standard schedule, trading is open from 6:00:00 PM ET Sunday through 5:00:00 PM ET Friday, with a daily break from 5:00:00 PM ET to 6:00:00 PM ET, except where modified by holiday or special-session hours.\n\nThe active month changes at the start of the second trading session prior to that contract's last trading session, at which point the next listed contract becomes the active month (i.e., for the final three trading sessions of the nearest listed contract, the contract for the next month is the active month).\n\nPer CME contract specifications for Natural Gas (NG) futures, the last trading day is defined as the third last business day of the month preceding the contract's delivery month.\n\nFor example, if the last business",
+  "market_opened": "2026-07-25",
+  "today": "2026-08-05",
+  "scheduled_end": "2026-09-01"
+ },
+ {
+  "qid": "Q275",
+  "question": "Next Grok Model (4.7+) released by September 18, 2026?",
+  "resolution_rules": "This market will resolve to \"Yes\" if SpaceXAI's next Grok model (4.7+) is made available to the general public between market creation and the specified date (ET). Otherwise, this market will resolve to \"No\".\n\nA qualifying model must have a name or model identifier that includes \"Grok\" and be designated as version 4.7 or higher, regardless of capitalization or surrounding prefixes, suffixes, dates, or descriptors. For example, a version 4.7 or higher named in the same manner as Grok 4.5, Grok 4.6, or grok-4.6-high would qualify, including reasoning, Fast, Heavy, or similar variants carrying a 4.7 or higher designation and a new whole-number generation such as Grok 5, while models whose name does not include \"Grok\" or which retain a version designation below 4.7, such as Grok 4.6 (released August 12, 2026), including any rollout, promotion, or snapshot of it, will not qualify. Separately numbered product lines that do not carry the core Grok version designation, such as Grok Code Fast or Grok Imagine, will not qualify, and version numbers of the Grok app, website, or other products that do not correspond to a new underlying model will not qualify.\n\nA qualifying model must be launched and publicly accessible, including via open beta or open rolling waitlist signups. A closed beta or any form of private access will not suffice. The release must either be clearly defined and publicly announced by SpaceXAI as accessible to the general public, or otherwise be made publicly accessib",
+  "market_opened": "2026-09-04",
+  "today": "2026-09-17",
+  "scheduled_end": "2026-10-18"
+ },
+ {
+  "qid": "Q283",
+  "question": "Will WTI Crude Oil (WTI) hit (LOW) $100 Week of September 14 2026?",
+  "resolution_rules": "This market will resolve to \"Yes\" if, at any point after market creation and during a trading session of the week of September 14 2026, any 1-minute candle for the Active Month of WTI Crude Oil futures has a final \"High\" or \"Low\" price equal to or beyond (above for \u2191 High Prices, below for \u2193 Low Prices) the listed price. Otherwise, this market will resolve to \"No\".\n\nPrices will be used exactly as published by Pyth, without rounding.\n\nIf the Active Month contract does not trade at all during the listed time frame, this market will resolve to \"No\".\n\nOnly prices achieved during an applicable trading session of the specified timeframe's business days will be considered. The trading session for a given business day typically begins at 6:00 PM ET on the prior calendar date. Under the standard schedule, trading is open from 6:00:00 PM ET Sunday through 5:00:00 PM ET Friday, with a daily break from 5:00:00 PM ET to 6:00:00 PM ET, except where modified by holiday or special-session hours.\n\nThe active month changes at the start of the second trading session prior to the nearest listed contract's last trading session. At that point, the next listed contract becomes the active month (i.e., for the final three trading sessions of the nearest listed contract, the contract for the next month is the active month).\n\nPer CME contract specifications for WTI Crude Oil (CL) futures, a contract's last trading day is three business days prior to the 25th calendar day of the month preceding the cont",
+  "market_opened": "2026-09-14",
+  "today": "2026-09-15",
+  "scheduled_end": "2026-09-18"
+ }
+]

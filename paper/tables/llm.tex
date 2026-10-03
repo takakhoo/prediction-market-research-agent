@@ -1,0 +1,20 @@
+\begin{table}[t]
+\caption{Language-model forecasts on 282 questions opened after the models' training cutoffs.}
+\label{tab:llm}
+\centering\footnotesize\setlength{\tabcolsep}{4pt}
+\resizebox{\linewidth}{!}{\begin{tabular}{llrrrrrr}
+\toprule
+Model & Sees & Brier & vs market & 95\% CI & Corr. with price & Weight given price & 95\% CI \\
+\midrule
+Claude Haiku 4.5 & question only & 0.246 & +0.0933 & (+0.0618, +0.1255) & 0.26 & +0.24 & (-0.10, +0.61) \\
+Claude Haiku 4.5 & question and price & 0.152 & -0.0003 & (-0.0013, +0.0008) & 1.00 & +0.59 & (-1.71, +1.76) \\
+Claude Sonnet & question only & 0.235 & +0.0822 & (+0.0522, +0.1140) & 0.55 & +0.10 & (-0.20, +0.41) \\
+Claude Sonnet & question and price & 0.155 & +0.0021 & (-0.0008, +0.0053) & 1.00 & +0.54 & (-0.68, +1.69) \\
+Claude Fable 5.1 & question only & 0.236 & +0.0831 & (+0.0538, +0.1131) & 0.63 & +0.08 & (-0.24, +0.41) \\
+Claude Fable 5.1 & question and price & 0.154 & +0.0014 & (-0.0006, +0.0035) & 1.00 & +0.92 & (-0.68, +2.09) \\
+\bottomrule
+\end{tabular}}
+
+\smallskip
+\begin{minipage}{0.96\linewidth}\footnotesize Market Brier 0.153; a constant forecast at the base rate scores 0.243. The weight is the coefficient on the model's log-odds in a logistic regression of the outcome on the log-odds of the price and of the model. Intervals resample questions, one per event.\end{minipage}
+\end{table}

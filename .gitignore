@@ -28,3 +28,16 @@ logs/*
 !data/normalized/.gitkeep
 !data/derived/.gitkeep
 !logs/.gitkeep
+
+# Research raw pulls (rebuild with research/collect)
+research/data/raw/
+research/data/derived/*
+!research/data/derived/stock_contracts.parquet
+results/logs/
+paper/template/
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.bbl
+paper/*.blg
+paper/*.toc

@@ -1,0 +1,104 @@
+{
+ "n_questions": 282,
+ "base_rate": 0.4148936170212766,
+ "market_brier": 0.15261044680851063,
+ "always_base_rate_brier": 0.24275690357627885,
+ "models": {
+  "fable_A": {
+   "brier": 0.23566808510638296,
+   "brier_minus_market": 0.08305763829787235,
+   "ci": [
+    0.0537995280141844,
+    0.11314695319148936
+   ],
+   "p_worse_than_market": 1.0,
+   "corr_with_market": 0.6326300668010824,
+   "mean_abs_move_from_market": 0.1920141843971631,
+   "weight_on_llm_given_market": 0.07813866040454992,
+   "weight_ci": [
+    -0.2381016228303594,
+    0.40531176499909966
+   ]
+  },
+  "fable_B": {
+   "brier": 0.15400786879432626,
+   "brier_minus_market": 0.0013974219858156034,
+   "ci": [
+    -0.00060652358156028,
+    0.0034960380319148878
+   ],
+   "p_worse_than_market": 0.91175,
+   "corr_with_market": 0.9988038533715882,
+   "mean_abs_move_from_market": 0.014670212765957449,
+   "weight_on_llm_given_market": 0.9247601138767879,
+   "weight_ci": [
+    -0.6844533217177714,
+    2.088505568420146
+   ]
+  },
+  "haiku_A": {
+   "brier": 0.24593758865248228,
+   "brier_minus_market": 0.09332714184397164,
+   "ci": [
+    0.061849267375886516,
+    0.1254967940602837
+   ],
+   "p_worse_than_market": 1.0,
+   "corr_with_market": 0.2560691029405167,
+   "mean_abs_move_from_market": 0.2550141843971631,
+   "weight_on_llm_given_market": 0.23815375652198656,
+   "weight_ci": [
+    -0.10416005180239273,
+    0.605484356114771
+   ]
+  },
+  "haiku_B": {
+   "brier": 0.15234893617021278,
+   "brier_minus_market": -0.0002615106382978711,
+   "ci": [
+    -0.0013259876773049645,
+    0.0007851917553191508
+   ],
+   "p_worse_than_market": 0.31575,
+   "corr_with_market": 0.9991104835326471,
+   "mean_abs_move_from_market": 0.008482269503546101,
+   "weight_on_llm_given_market": 0.586642843467234,
+   "weight_ci": [
+    -1.7126086176909026,
+    1.7591317569643101
+   ]
+  },
+  "sonnet_A": {
+   "brier": 0.23484503546099295,
+   "brier_minus_market": 0.08223458865248227,
+   "ci": [
+    0.05217956019503545,
+    0.11396859140070924
+   ],
+   "p_worse_than_market": 1.0,
+   "corr_with_market": 0.5546982218314548,
+   "mean_abs_move_from_market": 0.20464539007092197,
+   "weight_on_llm_given_market": 0.09702428914878718,
+   "weight_ci": [
+    -0.19536308144235207,
+    0.40768514524792704
+   ]
+  },
+  "sonnet_B": {
+   "brier": 0.1547461879432624,
+   "brier_minus_market": 0.0021357411347517736,
+   "ci": [
+    -0.0008210967198581539,
+    0.005261006028368798
+   ],
+   "p_worse_than_market": 0.92225,
+   "corr_with_market": 0.995344760135315,
+   "mean_abs_move_from_market": 0.0190886524822695,
+   "weight_on_llm_given_market": 0.5387897838676565,
+   "weight_ci": [
+    -0.6820294459042654,
+    1.6878358103036517
+   ]
+  }
+ }
+}

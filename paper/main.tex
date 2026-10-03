@@ -1,0 +1,233 @@
+\documentclass[format=acmsmall, review=false]{acmart}
+\usepackage{acm-ec-26}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\setcitestyle{authoryear}
+\input{numbers}
+
+\title[The Shrinking Edge]{The Shrinking Edge: What Survives a Real Fill in a \$\volumeB{} Billion Prediction Market}
+
+\author{Taka Khoo}
+\email{takakhoo@gmail.com}
+
+\begin{abstract}
+A prediction-market price is meant to be a probability, and every gap between the two looks like money on the table. Studies of Polymarket and Kalshi keep finding such gaps: longshots that lose, a tilt toward Yes, forecasters and models that beat the price. We ask a narrower question. How much of that could a trader have collected? We assemble \nMarkets{} resolved Polymarket markets (\$\volumeB{} billion traded), reconstruct \tapeFills{} taker fills on \tapeMarkets{} of them, and send each claimed edge down a ladder of controls: prices someone actually paid, estimators that average zero when prices are fair, stale information, a capital limit, fees, and a confirmation period fixed in advance. Three measurement problems account for most of what looked like mispricing. Quote midpoints in dormant books sit near 0.5 and manufacture a Yes bias of \dormantGap{} points where nobody could trade. Pooling fills and taking the first fill in a price band give opposite signs for the favorite--longshot bias on the same tape. Recalibration methods that fit one period lose to the raw price in the next. Two effects survive. A textbook digital-option formula, fed only public spot data, carries as much information as the fill price on crypto threshold contracts, and the fills it endorsed returned \backedOne{} after fees; the edge falls to \backedFifteen{} when the formula's spot input is fifteen minutes old, and to a level we cannot distinguish from zero in the two most recent quarters. The first print of a contract inside a high price band overshoots the outcome by about eleven points, and fading it at the next real fill returned \fadeMid{}, on fills with a median stake of \$\fadeFillUsd{}. A walk-forward residual model improves the Brier score of the last traded price by \skillResFullAll{}. Language models with no retrieval add nothing on \llmN{} questions opened after their training cutoffs.
+\end{abstract}
+
+\begin{document}
+
+\maketitle
+% The EC style prints a "submitted for review" footer. This draft has not been submitted, so say what it is.
+\fancypagestyle{firstpagestyle}{\fancyhf{}\renewcommand{\headrulewidth}{0pt}\fancyfoot[L]{\footnotesize{\emph{Working draft, 2 October 2026. Formatted with the ACM EC style; not yet submitted.}}}}
+\thispagestyle{firstpagestyle}
+
+\section{Introduction}
+
+On the evening of January 23, 2025, a contract on Polymarket asked whether Bitcoin would be above \$103,000 at noon the next day. Bitcoin was trading at \$105,434. A textbook formula for a cash-or-nothing option, given that spot price, the strike, twenty-one hours to go, and the volatility of the previous week, valued Yes at 71 cents. A trader bought 8,680 shares of Yes at 57 cents. Twenty-one hours later Bitcoin closed above the strike and the trader collected \$3,700. Over the following hours, as the market priced Yes at 78 cents and the formula said 65, a second group of traders bought No, and the same formula would have told them to. They lost \$53,000.
+
+Both episodes are in the public record, fill by fill, and that record is the subject of this paper. Prediction markets have grown from a curiosity into venues that traded \$\volumeB{} billion on Polymarket alone, and the question of whether their prices can be trusted as probabilities has moved from seminar rooms to newspapers, central banks, and courtrooms. Economists have studied that question for twenty years and have an answer: the prices are approximately right, with systematic exceptions \citep{wolfers2004prediction,page2013prediction}. What has changed is that the exceptions now arrive in a stream. Recent work reports a favorite--longshot bias on Kalshi \citep{burgi2026makers,becker2026microstructure}, political prices compressed toward one half \citep{le2026decomposing}, a small set of accounts that drive price discovery \citep{gomezcram2026prediction}, tens of millions of dollars of arbitrage \citep{saguillo2025unravelling}, and language models that approach the crowd forecast or price \citep{halawi2024approaching,yang2026prophet}. Each of these is also a trading rule. If five-cent contracts win three percent of the time, selling them makes money. If a forecaster is better calibrated than the price, following the forecaster makes money.
+
+We ask a narrower question than whether the prices are right: how much of each reported gap could a trader have collected? The question matters for an investor, who wants to know whether an edge is real before paying for it, and it matters for the literature, because an apparent gap that no trade could have exploited tells us about the measurement rather than the market. Three features of Polymarket make the question answerable. Every public price history is a quote midpoint, which exists whether or not anyone could trade near it. A complete record of taker fills, with prices, sizes, and wallet addresses, is public for every market. And the fee schedule changed the economics of most contracts during 2026, which gives a natural confirmation period. An apparent edge can therefore be walked down a ladder: from displayed prices to prices that traded, from pooled averages to estimators that are fair under the null, from current information to stale information, from unlimited size to a capital limit, from the whole sample to a period chosen before looking. We run that ladder for each family of claims and report every rung.
+
+The headline is that most of the mispricing goes away on the first rungs, and what remains is small, specific, and shrinking. Among quote snapshots in markets we hold fills for, \dormantShare{} had no trade in the preceding day; their midpoints sit near 0.5 and resolve Yes \dormantGap{} points less often than displayed. On the same fills, a share-weighted pool says that Yes prices between 0.8 and 0.9 are too low by \pooledHighMag{} points, while a one-bet-per-market rule says they are too high by \ftHighMag{} points. Platt and isotonic recalibration, fitted walk-forward, score worse than the raw price. Two things do survive. On \thrMarkets{} crypto threshold contracts, a driftless lognormal digital-option formula with trailing realized volatility ties the fill price in Brier score and receives a weight of \encModel{} next to the price in a regression of the outcome on both; the fills it endorsed by at least ten cents returned \backedOne{} to the taker after fees, falling to \backedFifteen{} when its spot input is fifteen minutes old and to roughly zero after a seven-percent taker fee reached every crypto contract. And the first fill of a market inside a high price band overshoots the outcome by about eleven points, which a later real fill can fade for \fadeMid{}, on fills that have a median stake of \$\fadeFillUsd{}.
+
+This paper makes three contributions. First, a dataset and a method. We collect every resolved Polymarket market with its rules and fee schedule, quote paths for \quoteMarketsK{} thousand of them, and \tapeFills{} taker fills (\$\tapeUsdB{} billion staked) on a stratified sample of \tapeMarkets{} markets, joined to one-minute crypto spot, an implied-volatility index, and hourly equity bars, all from public endpoints. We evaluate every claim at fills, with sampling rules and estimators whose expectation is zero when fill prices are fair, and with inference that resamples events or expiry dates. Second, three measurement results: dormant midpoints manufacture a Yes bias; the sign of the favorite--longshot bias depends on whether fills are pooled or sampled once per market; and the average of per-market return ratios is biased upward under the null. Each is a mechanism rather than a correction, and each explains why published estimates on the same venue disagree. Third, an economic result about where edge lives. Polymarket lists tens of thousands of contracts that are digital options on crypto and single-stock closes, and a formula that fits nothing is as informative as the price. The edge that formula identifies decays with the age of its inputs and disappeared when fees arrived, which is the signature of a race against transaction costs rather than of risk compensation; the implied volatility backed out of Polymarket fills matches what was realized to within a few percent, so no volatility premium is being paid. Learned models, wallet records, and language models without retrieval add little or nothing.
+
+Section~\ref{sec:related} places the paper in three literatures. Section~\ref{sec:data} describes the platform, the data, and the sample. Section~\ref{sec:method} defines an edge at a fill and the estimators. Section~\ref{sec:pitfalls} presents the three measurement results. Sections~\ref{sec:calibration} to \ref{sec:models} cover calibration, option pricing, and challengers to the price. Section~\ref{sec:survives} reports what survives a capital-constrained replay, and Section~\ref{sec:discussion} interprets it.
+
+\subsection{Related work}\label{sec:related}
+
+\paragraph{Prices as probabilities.} \citet{wolfers2004prediction} survey the case for reading prediction-market prices as forecasts and document their accuracy. \citet{manski2006interpreting} shows that with heterogeneous beliefs the equilibrium price need not equal the mean belief, and \citet{wolfers2006interpreting} reply that under broad conditions the price remains a useful, if sometimes biased, estimate. \citet{page2013prediction} find prices well calibrated near expiry and biased far from it. \citet{snowberg2010explaining} and \citet{ottaviani2015price} supply the two leading explanations of the favorite--longshot bias, misperception and informational, the second derived for prediction markets. On Kalshi, \citet{burgi2026makers} report that contracts under ten cents lose most of their stake and that makers earn more than takers, and \citet{becker2026microstructure} reports a symmetric maker--taker transfer across 72 million trades. On Polymarket, \citet{le2026decomposing} estimate recalibration slopes above one in political markets, \citet{walker2026price}, in a senior thesis, reports a slope near 1.1 over 188 thousand markets, \citet{reichenbach2025exploring} study accuracy and trader skill, and \citet{cardozo2026favorite} show that the longshot loss changes sign when contracts are grouped by event. We add the distinction between quotes and fills, and between sampling rules, and show that it accounts for the disagreement.
+
+\paragraph{Who is informed.} \citet{gomezcram2026prediction} attribute price discovery to about three percent of accounts whose skill persists out of sample. \citet{sirolly2025network} estimate that wash trading reached nearly sixty percent of Polymarket volume at its December 2024 peak, and \citet{mitts2026iran} document informed trading ahead of geopolitical, corporate, and entertainment events. We test persistence of realized wallet returns on a sample of markets and use wallet records as model features; our null on persistence is weaker evidence than the full-chain result, and we say so.
+
+\paragraph{Language models as forecasters.} \citet{halawi2024approaching} build a retrieval-and-reasoning system that approaches the crowd aggregate; \citet{schoenegger2024wisdom} find a crowd of twelve models indistinguishable from a human crowd; \citet{karger2025forecastbench} benchmark models against expert forecasters; \citet{yang2026prophet} score models against live market prices and find positive returns in some settings with slower aggregation than markets near resolution. \citet{paleka2026pitfalls} and \citet{lopezlira2025memorization} document temporal leakage, including through training data. Our test uses only markets that opened after every model's cutoff, gives no retrieval, and scores each forecast against the price at the same instant.
+
+\paragraph{Event contracts and derivatives.} \citet{breeden1978prices} show that option prices identify a state-price density. \citet{diercks2026kalshi} compare Kalshi macro contracts with fed funds futures, option-implied distributions, inflation swaps, and surveys. \citet{portnaya2026prediction} compares three Polymarket Bitcoin contracts with option-implied values. We price \thrMarkets{} crypto threshold contracts and \stockMarkets{} single-stock contracts at every fill.
+
+\paragraph{Inference for backtests.} We follow \citet{bailey2014deflated}, \citet{harvey2016cross}, and \citet{white2000reality} in discounting for the number of variants examined, and score forecasts with proper rules \citep{brier1950verification,gneiting2007strictly}, decomposed after \citet{murphy1973new}.
+
+\section{Setting and data}\label{sec:data}
+
+\subsection{How Polymarket works}
+
+A Polymarket market is a question with a resolution rule and two tokens, Yes and No, each of which pays one dollar if its side resolves true. Tokens trade on a central limit order book in increments of a tenth of a cent. A taker whose order crosses the spread pays, since late 2025 for most categories, a fee of $\rho\,c(1-c)$ dollars per share, where $c$ is the price paid and $\rho$ is a category rate between 0.03 and 0.07; a 50-cent crypto contract carries a fee of 1.75 cents. Makers pay nothing and in some categories receive a rebate. Outcomes are proposed and, if unchallenged, settled through an optimistic oracle, typically within hours of the event. Many questions are tied to a traded underlying: whether Bitcoin's one-minute Binance candle at noon Eastern closes above a strike, whether NVIDIA's official close on a given day is above a level, whether the price moves up or down over a five-minute window. These contracts are cash-or-nothing options, and their settlement rules name the data source and the instant.
+
+\subsection{Data}
+
+\paragraph{Markets.} From the public Gamma API we pull every closed market with at least \$1,000 of lifetime volume: \nMarkets{} markets ending between 2020 and October 2026, carrying the question, the resolution rules, the scheduled end, the close time, the final payout, tags, and the taker-fee schedule. We keep markets that paid 0 or 1 and assign one of twelve categories from tags and question text (Table~\ref{tab:summary}).
+
+\paragraph{Quotes.} The public price-history endpoint returns a midpoint series for each outcome token. We fetch it for every market outside sports, crypto up/down, and weather, and for a uniform random sample of the rest, \quoteMarketsK{} thousand markets in all, at one-minute to twelve-hour resolution depending on the market's lifetime.
+
+\paragraph{Fills.} The public trade feed returns every taker fill with price, size, side, outcome token, timestamp, and wallet. We queue markets in four interleaved strata, crypto threshold contracts since 2025, finance, other non-sports categories, and a uniform random draw of everything, and stop at a fixed time. The sample holds \tapeMarkets{} markets and \tapeFills{} fills before each market's close, with \$\tapeUsdB{} billion of taker stake. Each fill is reduced to a Yes price, a direction, and a cost (Section~\ref{sec:method}).
+
+\paragraph{Underlyings.} One-minute Binance candles for BTC, ETH, SOL, and XRP from 2024; the Deribit DVOL implied-volatility index; daily and hourly bars for the equities named in stock-linked contracts.
+
+\paragraph{Validation.} We parse each price-linked question into option terms and replay its settlement rule on the underlying data. The API's end time is date-only, or an hour off, for about three percent of crypto threshold contracts, so we read the settlement instant from the rules themselves; the replay then reproduces the official outcome for 99.97\% of Binance-settled threshold contracts (99.71\% with the API's end time) and 99.9\% of single-stock contracts. Contracts settled on Chainlink streams or futures replay less exactly and are analysed separately or excluded.
+
+\subsection{Sample}
+
+Table~\ref{tab:summary} summarizes the universe and the fill sample. Sports and five-to-fifteen-minute crypto contracts are three quarters of the count; politics is the second-largest category by dollars. The fill sample over-represents price-linked and long-tail categories by design, which is why every statistic below is reported within category or with one weight per market.
+
+\input{tables/summary}
+
+\section{Measuring an edge at a fill}\label{sec:method}
+
+Every fill in the feed is a taker buying one token. A purchase of No at $q$ is the same position as a sale of Yes at $1-q$, so we write each fill as a Yes price $p$, a direction $d=+1$ if the taker ends long Yes and $-1$ otherwise, and a cost per share for the side bought,
+\begin{equation}\label{eq:cost}
+c = \begin{cases} p & d=+1,\\ 1-p & d=-1,\end{cases}
+\end{equation}
+with the maker holding the other side at $1-c$. With outcome $y\in\{0,1\}$ the taker's side wins $w=y$ if $d=+1$ and $1-y$ otherwise, and the fee is $f=\rho\,c(1-c)$ from the market's own schedule. The return on a set of fills $F$ with sizes $n_i$ is dollars won over dollars staked,
+\begin{equation}\label{eq:return}
+R(F)=\frac{\sum_{i\in F} n_i\,(w_i-c_i-f_i)}{\sum_{i\in F} n_i\,c_i}.
+\end{equation}
+
+The null hypothesis throughout is that fill prices are fair: $\mathbb{E}[y-p\mid \mathcal{F}_t]=0$ for a fill at time $t$, where $\mathcal{F}_t$ is public information at $t$. Under the null, any rule for selecting fills that uses only $\mathcal{F}_t$ yields $R=0$ in expectation before fees, and any forecast $\hat p_t$ built from $\mathcal{F}_t$ can do no better than $p_t$. Our tests are of two kinds. Scoring tests compare $\hat p$ with $p$ at the same fills by Brier score $(\hat p-y)^2$ with one weight per market. Return tests apply an explicit selection rule and report $R$.
+
+Two sampling rules recur. The pooled rule takes every fill in a set, weighted by shares. The first-touch rule takes one fill per market, the first to satisfy a condition, which makes it a stopping time. Both are adapted to $\mathcal{F}_t$ and both have expectation zero under the null. A third rule, the average over markets of each market's own return ratio, does not: when a market's early favorite loses, the market also collects winning fills after the other side becomes the favorite, so the ratio is diluted toward zero on losses and not on wins. We do not use it.
+
+For model evaluation we sample each market at times fixed by its published schedule, eleven fractions of scheduled life and six fixed horizons before the scheduled end, and record the last traded price and features computable from fills up to that time. Confidence intervals resample events (groups of markets resolving on one question) or, for price-linked contracts, expiry dates, by a Poisson bootstrap; one weight is assigned per market.
+
+\section{Three ways to find an edge that is not there}\label{sec:pitfalls}
+
+\subsection{Dormant midpoints}
+
+A midpoint exists whenever a book has two quotes, however far apart. A book quoted at one cent and 99 cents has a midpoint of fifty. Among quote snapshots in markets for which we hold the fill history, \dormantShare{} had no trade in the preceding 24 hours. Dormant midpoints fall between 0.4 and 0.6 in \dormantZone{} of cases, against \activeZone{} for active snapshots. In Yes/No markets outside sports, crypto, and weather, dormant midpoints in that zone resolve Yes \dormantGap{} points less often than their level; active midpoints in the same zone are off by \activeGap{} points (Figure~\ref{fig:pitfalls}, left). Any calibration curve built on the price-history endpoint carries this Yes bias, and no trade could have collected it.
+
+The same artifact inflates model comparisons. Scored at displayed midpoints, the option-model rule of Section~\ref{sec:options} returns \displayedRule{}. Scored at fills, the same rule returns \backedOne{}.
+
+\subsection{Pooling versus stopping}
+
+Figure~\ref{fig:pitfalls} (right) and Table~\ref{tab:firsttouch} show the surprise $y-p$ by Yes-price band on the same fills under the two rules. Pooled, Yes prices between 0.8 and 0.9 are too low by \pooledHighMag{} points. One bet per market at the first fill inside the band, they are too high by \ftHighMag{} points across \ftMarkets{} markets; below ten cents, the first-touch surprise is \ftLow{}.
+
+Both numbers are real. The pooled rule weights a market by how much it trades inside the band, and volume concentrates where a contract is on its way to resolution. The first-touch rule weights each market once, at the moment its price first enters the band, and \spikeShare{} of those moments are a single order sweeping a thin book: the next five fills undo the move, and the taker paid \spikeGapMag{} points too much. Where the move is sustained over the next five fills, the level it settles at still exceeds the outcome frequency by \sustainedGapMag{} points. The favorite--longshot bias on this venue has the sign the sampling rule gives it. One bet per market on the favorite at its first fill between 0.70 and 0.85 returns \firstEntryMid{} before fees over \firstEntryMidN{} markets, and \firstEntryHigh{} between 0.85 and 0.95.
+
+\input{tables/firsttouch}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.37\linewidth]{../results/figures/midpoint_artifact.png}\hfill
+\includegraphics[width=0.61\linewidth]{../results/figures/estimators.png}
+\caption{Left: reliability of displayed midpoints in long-tail Yes/No markets, split by whether the market traded in the prior day. Right: outcome minus price by Yes-price band on the same fills under two sampling rules. Whiskers are 95\% intervals from an event-level bootstrap.}
+\label{fig:pitfalls}
+\end{figure}
+
+\section{Calibration, and who wins}\label{sec:calibration}
+
+At scheduled snapshots, last traded prices have a Brier score of \brierOverall{}. We summarize calibration by the slope $b$ in $\Pr(y=1)=\sigma(a+b\,\mathrm{logit}\,p)$, where $b>1$ means prices are not extreme enough and $b<1$ means they are too extreme. Table~\ref{tab:calibration} reports slopes below one in most categories (sports \slopeSports{}, politics \slopePolitics{}, weather \slopeWeather{}) and a slope that rises from \slopeEarly{} in the first 15\% of a market's life to \slopeLate{} in the last quarter. Early prints are noisy, and the noise looks like overconfidence. This is the opposite of the compression toward one half reported from pooled political trades, and the previous section says why: a pooled tape and a clock-sampled tape weight different moments.
+
+\input{tables/calibration}
+
+Table~\ref{tab:takers} asks who wins. Takers as a group earn \takerNet{} after fees: we find no measurable maker--taker transfer in aggregate, in contrast with Kalshi. The exception is the five- and fifteen-minute crypto up/down contracts, where takers lose \updownTakerLoss{} and pay \updownFee{} of stake in fees; there the loss is the fee.
+
+\input{tables/takers}
+
+\section{Event contracts as digital options}\label{sec:options}
+
+A contract that pays one dollar if Bitcoin closes above $K$ at time $T$ is a cash-or-nothing call. With spot $S_t$, remaining time $\tau$, and volatility $\sigma$, a driftless lognormal model values it at
+\begin{equation}\label{eq:digital}
+\hat p_t=\Phi\!\left(\frac{\ln(S_t/K)-\tfrac12\sigma^2\tau}{\sigma\sqrt{\tau}}\right),
+\end{equation}
+where $\Phi$ is the standard normal distribution function. Range contracts are differences of two such terms, and one-touch contracts follow from the reflection principle. We set $\sigma$ to realized volatility over a trailing window of about four times the remaining horizon, use the last one-minute candle that closed before the fill, and fit nothing. For single stocks the clock runs in trading time: with twenty-day close-to-close volatility, each remaining overnight gap carries a quarter of a day's variance and each session the rest.
+
+\subsection{Does the formula know anything the price does not?}
+
+Table~\ref{tab:options} scores the fill price and the formula at the same fills. Across \thrMarkets{} threshold contracts they are tied at every horizon from five minutes to a week. In a logistic regression of the outcome on the log-odds of both forecasts, the price receives weight \encPrice{} and the formula \encModel{}. Had the price already contained the formula, the second weight would be zero. On short-dated up/down contracts, by contrast, the weight on the formula is \encUpdown{}: that market already knows everything the formula does.
+
+\input{tables/options}
+
+Inverting Equation~\ref{eq:digital} at each fill gives the volatility Polymarket is pricing. Its ratio to the volatility realized between the fill and expiry lies between \ivRatioLow{} and \ivRatioHigh{} at every horizon (Figure~\ref{fig:options}, right). Listed options usually price volatility above what is realized; these contracts do not, which is one piece of evidence that what follows is not risk compensation.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.56\linewidth]{../results/figures/options_brier.png}\hfill
+\includegraphics[width=0.40\linewidth]{../results/figures/implied_vol.png}
+\caption{Left: Brier score of the fill price and of the option model at the same fills, by time to expiry. Right: volatility implied by Polymarket fills, volatility realized from the fill to expiry, and Deribit DVOL.}
+\label{fig:options}
+\end{figure}
+
+\subsection{Fills the formula endorses}
+
+Call a fill endorsed when the formula values the side the taker bought at least ten cents above the price paid plus the fee, and opposed in the mirror case. Table~\ref{tab:endorsed} reports taker returns on both sets by the age of the formula's spot input. With a one-minute-old candle, endorsed fills in \backedMarkets{} markets (\$\backedStakeM{} million staked) returned \backedOne{} after fees and opposed fills \opposedOne{}. With spot data that is five, fifteen, and sixty minutes old, endorsed fills return \backedFive{}, \backedFifteen{}, and \backedSixty{}. Most of the edge is a race to react to spot. At five and fifteen minutes the point estimates stay positive with intervals that reach zero; at an hour nothing is left.
+
+\input{tables/endorsed}
+
+The same construction on \stockMarkets{} contracts on the closes of large U.S. equities, with hourly bars, gives the formula a weight of \stockEncModel{}. Takers who trade against it by ten cents lose \stockOpposedLoss{}, and still lose \stockOpposedStaleLoss{} when the formula's bar is four hours older. Figure~\ref{fig:decay} shows both decays, by data age and by calendar quarter.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.66\linewidth]{../results/figures/edge_decay.png}
+\caption{Taker return after fees on crypto threshold fills that the option model endorses or opposes by at least ten cents. Left: by age of the model's spot input. Right: endorsed fills by settlement quarter, with the stake they represent.}
+\label{fig:decay}
+\end{figure}
+
+\section{Can anything else beat the price?}\label{sec:models}
+
+\paragraph{Protocol.} Every challenger is evaluated walk-forward on the snapshot panel. Test blocks are two calendar months, and a model tested in a block trains only on snapshots from markets that had resolved before the block began, so every training label was public when the forecast is made. The baseline is the last traded price. Table~\ref{tab:models} reports Brier skill relative to it over \modelTestMarkets{} test markets, separately for the last five months (May to September 2026), and on price-linked contracts. No feature or setting was chosen on the last five months. They are not a pristine holdout, because we saw scores for the same configurations on those months on an earlier tape half the size; afterwards we changed only the block length and the number of boosting rounds, to save compute.
+
+\input{tables/models}
+
+\paragraph{Recalibration.} Platt scaling of the price, isotonic regression, and category-specific slopes all score at or below the raw price out of time. The miscalibration they fit in one period is absent in the next.
+
+\paragraph{Learned residuals.} A gradient-boosted model of the residual $y-p$ returns the price when its features carry no signal. With price-path, order-flow, and wallet-record features it improves on the price by \skillResFlowAll{} overall and \skillResFlowHold{} in the last five months. Adding the option value gives \skillResFullAll{} and \skillResFullHold{}. A two-parameter logistic blend of price and option value, which leaves every other contract at the price, gives \skillBlendAll{} and \skillBlendHold{}. On price-linked contracts the blend improves on the last trade by \plSkillBlend{}, and on the quote midpoint at the same instant by \plMidBlend{}; the bare formula beats the displayed quote by \plMidFair{}. Read as a forecast, the formula is better than the screen. By category the full model improves on the price in crypto thresholds, finance, culture, geopolitics, and mentions markets, matches it in sports, politics, economics, technology, and weather, and is worse on crypto up/down contracts.
+
+\paragraph{Wallet records.} For each fill we compute the taker wallet's realized return on markets that had resolved before the fill. Fills by wallets with no resolved history return \firstTimers{} after fees and fills by seasoned wallets \seasoned{}. Within seasoned wallets, sorting by past return does not sort future return. Our tape covers a sample of markets, so each wallet's record is partial; this null is weaker evidence than the full-chain result of \citet{gomezcram2026prediction}.
+
+\paragraph{Language models.} We select \llmN{} Yes/No markets that opened after 10 July 2026, one per event, across ten categories, and fix the forecast date at 30\% of each market's scheduled life. Three models (Claude Fable 5.1, Claude Sonnet, Claude Haiku 4.5) receive the question, the resolution rules, and the date, with no tools and no retrieval; Appendix~\ref{app:llm} gives the prompts and the protocol. Table~\ref{tab:llm} reports the results. Blind, the models score \llmBlindFable{}, \llmBlindSonnet{}, and \llmBlindHaiku{}, against \llmMarket{} for the market and \llmBase{} for a constant forecast at the base rate. Shown the market price, they return it almost unchanged, and their weight next to the price in a regression that includes both is indistinguishable from zero. Without news access a language model knows the base rate and nothing the market does not.
+
+\input{tables/llm}
+
+\section{What survives}\label{sec:survives}
+
+\subsection{A capital-constrained replay}
+
+Table~\ref{tab:replay} replays the option-model rule on real fills with a \$200 cap per fill and profit booked at expiry. The ten-cent bar was chosen on contracts that expired before April 2026; later contracts form a confirmation period. With fifteen-minute-old spot, the crypto rule returns \replayAll{} on stake over the whole sample with at most \$\replayCapitalK{} thousand deployed, an annualized Sharpe ratio of \replaySharpe{} on daily returns ($t=\replayT$), and a deflated Sharpe probability of \replayDSR{} after discounting for the 24 variants we examined. The pooled fill-level interval excludes zero; the daily series does not. In the confirmation period the rule returns \replayConfirm{} ($t=\replayConfirmT$). Two things changed in that period: a seven-percent taker fee rate reached every crypto contract in the second quarter of 2026, and the stake clearing a ten-cent bar fell by a factor of five or more. In \lastQuarter{}, endorsed fills return \lastQuarterEndorsed{}. The single-stock rule is smaller and cleaner: \stockReplayAll{} on stake with at most \$\stockReplayCapitalK{} thousand deployed, a Sharpe ratio of \stockReplaySharpe{}, a deflated Sharpe probability of \stockReplayDSR{}, \stockReplaySelect{} before April 2026 and \stockReplayConfirm{} after.
+
+\input{tables/replay}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.60\linewidth]{../results/figures/ladder.png}
+\caption{Return of one rule, ``follow the option model when it disagrees with the price by ten cents,'' under successive controls.}
+\label{fig:ladder}
+\end{figure}
+
+\subsection{First touch}
+
+The overshoot of Section~\ref{sec:pitfalls} can only be traded at prices that exist later. After the first fill of a market inside a Yes-price band, we buy No at the next fill in which a taker bought No at least sixty seconds later, provided the Yes price is still within five cents of the band. The median wait is \fadeWait{} minutes. Net of fees the fade returns \fadeMid{} on stake for the band 0.6 to 0.8 (\fadeMidN{} markets) and \fadeHigh{} for 0.8 to 0.98 (\fadeHighN{} markets); from April 2026 onward, \fadeMidLate{} and \fadeHighLate{}. Dropping the trigger and taking each market's first No-buying fill in the same range returns \fadeMidBase{} and \fadeHighBase{}, so the result does not depend on reacting to the first print. Its limit is size: the fills copied have a median stake of \$\fadeFillUsd{} and total \$\fadeTotalK{} thousand across both bands. This is a pattern in thin books early in a market's life, and it has almost no capacity.
+
+\section{Discussion}\label{sec:discussion}
+
+\paragraph{What kind of mispricing is it?} Three explanations are usually on offer for a gap between a price and an outcome frequency: compensation for risk, information not yet in the price, and limits to arbitrage. The option-model results discriminate between them. Risk compensation would show up as a volatility premium, and the implied volatility in Polymarket fills matches realized volatility to within a few percent. Information not yet in the price would not decay with the age of the formula's inputs, and it does, from \backedOne{} at one minute to nothing at an hour. What remains is a race: traders who could price the contract from spot faster than the book updated collected a few points per fill, and a fee of under two cents a share was enough to close most of it. The first-touch overshoot points the same way. It is a transfer from takers who sweep thin books to the makers resting there, it is largest at the first print, and the fills that carry it are tiny. Neither effect looks like a belief that is wrong; both look like liquidity that is expensive at particular moments.
+
+\paragraph{Magnitudes.} The endorsed-fill stake in our sample is \$\backedStakeM{} million over roughly eighteen months, and the sample holds about a third of the threshold contracts listed in that period, so the platform-wide stake that cleared a ten-cent bar was on the order of twenty million dollars, and the profit on it, at \backedOne{}, a few million dollars in total, or a few hundred thousand dollars a month before fees arrived. The capped replay never deployed more than \$\replayCapitalK{} thousand. These are the amounts available to the fastest participant, not to a fund.
+
+\paragraph{Limitations.} Fills are a stratified sample, so wallet histories are partial and the wallet results are weak. The trade feed reports the taker side only, and we observe fills rather than order books, so the capacity of each rule is bounded above by the sizes that traded and the fill a rule ``takes'' was in fact taken by someone else. Spot inputs for stock contracts are hourly and blind to extended-hours trading. Contracts settled on Chainlink streams are modeled with Binance prices. The confirmation period is six months, and the daily-series inference for the replay is underpowered at that length. The trailing-volatility rule in Equation~\ref{eq:digital} is crude and lags after a spike; the contract that opens this paper is a case where it cost the rule \$53,000, and nothing about it was tuned. For the first-touch result to be a measurement artifact, the trade feed would have to misassign the Yes and No tokens on roughly one fill in ten in a way correlated with outcomes, which the settlement replay rules out for price-linked contracts and for which we have no mechanism elsewhere. Literature values quoted in Section~\ref{sec:related} are as reported by their authors.
+
+\paragraph{Conclusion.} Most of the mispricing measured on the largest prediction market is produced by how it is measured: dormant quotes, pooled tapes, and ratios that cannot average to zero. What remains is concentrated where a public model of the underlying exists and where thin books let one order move the price, and both remainders are shrinking. A reader who wants to know whether a prediction-market price is a probability can take it as one, with the proviso that the number on the screen is a probability only where someone has recently been willing to trade at it.
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{refs}
+
+\appendix
+
+\section{Language-model protocol}\label{app:llm}
+
+\paragraph{Questions.} All Yes/No markets that opened on or after 10 July 2026 and closed by 30 September 2026, with at least \$20,000 of volume and a scheduled life of at least three days, one market per event, stratified over ten categories; 481 were selected and 282 had at least five fills before the forecast instant and are scored. The forecast instant is 30\% of the way through each market's scheduled life; the market price at that instant is the size-weighted mean of the last ten fills within twelve hours.
+
+\paragraph{Models and sampling.} Claude Fable 5.1 (\texttt{claude-fable-5-1}), Claude Sonnet (the current Sonnet model, version not pinned by the interface), and Claude Haiku 4.5 (\texttt{claude-haiku-4-5-20251001}), each called once per batch of about 35 questions through an agent interface with default sampling settings and no tools beyond reading the question file and writing the answer file. Every run was checked to have made exactly those file operations. One sample per question; no prompt-wording robustness was run.
+
+\paragraph{Prompt, condition A.} ``You are a forecaster in a controlled experiment. Read the JSON file [path]. It holds binary prediction-market questions. For each item, `today' is the date you are forecasting on. Estimate the probability that the question resolves YES under its resolution rules. Strict rules: use NO tools except one Read of that file and one Write of your answers. Do not search the web, fetch pages, run shell commands, or open any other file. Use only your own knowledge and reasoning (base rates, time remaining until scheduled\_end, the exact resolution rules). Write a JSON list to [path] with one object per question: \{``qid'': ..., ``p'': probability of YES between 0.01 and 0.99\}. Include every qid exactly once.'' Each item carried the question, the resolution rules, the opening date, the forecast date, and the scheduled end.
+
+\paragraph{Prompt, condition B.} Identical, with each item also carrying \texttt{current\_market\_price\_of\_yes} and the sentence ``You may rely on the market price as much or as little as you judge best; your goal is the most accurate probability.''
+
+\section{Fee schedule and categories}
+
+Taker fees per share are $\rho\,c(1-c)$ with $\rho$ read from each market's schedule: 0.07 for crypto, 0.05 for sports, economics, culture, and weather, 0.04 for politics, finance, mentions, and technology, 0.03 for an earlier sports schedule, and zero for geopolitics and for markets listed before fees were introduced. Categories are assigned from Polymarket's tags in a fixed priority order (weather, mentions, crypto, sports, economics, finance, politics, geopolitics, technology, culture), with ``crypto up/down'' for markets whose outcomes are Up and Down.
+
+\section{Disclosure}
+
+The data pipeline, experiments, figures, and this draft were produced with the assistance of an AI coding agent operated by the author, who directed the work and is responsible for its content. The language-model forecasts in Section~\ref{sec:models} were generated by that agent's models under the protocol in Appendix~\ref{app:llm}.
+
+\end{document}
